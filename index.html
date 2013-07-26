@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Tiny LRU : Tiny LRU cache for Client or Server" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Tiny LRU</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/avoidwork/tiny-lru">View on GitHub</a>
+
+          <h1 id="project_title">Tiny LRU</h1>
+          <h2 id="project_tagline">Tiny LRU cache for Client or Server</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/avoidwork/tiny-lru/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/avoidwork/tiny-lru/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="tiny-lru" class="anchor" href="#tiny-lru"><span class="octicon octicon-link"></span></a>Tiny LRU</h1>
+
+<p>Least Recently Used cache for Client or Server.</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">cache</span> <span class="o">=</span> <span class="nx">lru</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+</pre></div>
+
+<h2>
+<a name="evict" class="anchor" href="#evict"><span class="octicon octicon-link"></span></a>evict</h2>
+
+<h3>
+<a name="method" class="anchor" href="#method"><span class="octicon octicon-link"></span></a>Method</h3>
+
+<p>Evicts the least recently used item from cache</p>
+
+<pre><code>@return {Object} LRU instance
+</code></pre>
+
+<p><strong>Example</strong></p>
+
+<div class="highlight"><pre><span class="nx">cache</span><span class="p">.</span><span class="nx">evict</span><span class="p">();</span>
+</pre></div>
+
+<h2>
+<a name="first" class="anchor" href="#first"><span class="octicon octicon-link"></span></a>first</h2>
+
+<h3>
+<a name="property" class="anchor" href="#property"><span class="octicon octicon-link"></span></a>Property</h3>
+
+<p>Item in "first" or "top" position</p>
+
+<p><strong>Example</strong></p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">cache</span> <span class="o">=</span> <span class="nx">lru</span><span class="p">();</span>
+
+<span class="nx">cache</span><span class="p">.</span><span class="nx">first</span><span class="p">;</span> <span class="c1">// null - it's a new cache!</span>
+</pre></div>
+
+<h2>
+<a name="get" class="anchor" href="#get"><span class="octicon octicon-link"></span></a>get</h2>
+
+<h3>
+<a name="method-1" class="anchor" href="#method-1"><span class="octicon octicon-link"></span></a>Method</h3>
+
+<p>Gets cached item and moves it to the front</p>
+
+<pre><code>@param  {String} key Item key
+@return {Mixed}      Undefined or Item value
+</code></pre>
+
+<p><strong>Example</strong></p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">item</span> <span class="o">=</span> <span class="nx">cache</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">"myKey"</span><span class="p">);</span>
+</pre></div>
+
+<h2>
+<a name="items" class="anchor" href="#items"><span class="octicon octicon-link"></span></a>items</h2>
+
+<h3>
+<a name="property-1" class="anchor" href="#property-1"><span class="octicon octicon-link"></span></a>Property</h3>
+
+<p>Hash of cache items</p>
+
+<p><strong>Example</strong></p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">cache</span> <span class="o">=</span> <span class="nx">lru</span><span class="p">();</span>
+
+<span class="nx">cache</span><span class="p">.</span><span class="nx">items</span><span class="p">;</span> <span class="c1">// {}</span>
+</pre></div>
+
+<h2>
+<a name="max" class="anchor" href="#max"><span class="octicon octicon-link"></span></a>max</h2>
+
+<h3>
+<a name="property-2" class="anchor" href="#property-2"><span class="octicon octicon-link"></span></a>Property</h3>
+
+<p>Max items to hold in cache (1000)</p>
+
+<p><strong>Example</strong></p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">cache</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">lru</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+
+<span class="nx">cache</span><span class="p">.</span><span class="nx">max</span><span class="p">;</span> <span class="c1">// 500</span>
+</pre></div>
+
+<h2>
+<a name="last" class="anchor" href="#last"><span class="octicon octicon-link"></span></a>last</h2>
+
+<h3>
+<a name="property-3" class="anchor" href="#property-3"><span class="octicon octicon-link"></span></a>Property</h3>
+
+<p>Item in "last" or "bottom" position</p>
+
+<p><strong>Example</strong></p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">cache</span> <span class="o">=</span> <span class="nx">lru</span><span class="p">();</span>
+
+<span class="nx">cache</span><span class="p">.</span><span class="nx">last</span><span class="p">;</span> <span class="c1">// null - it's a new cache!</span>
+</pre></div>
+
+<h2>
+<a name="length" class="anchor" href="#length"><span class="octicon octicon-link"></span></a>length</h2>
+
+<h3>
+<a name="property-4" class="anchor" href="#property-4"><span class="octicon octicon-link"></span></a>Property</h3>
+
+<p>Number of items in cache</p>
+
+<p><strong>Example</strong></p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">cache</span> <span class="o">=</span> <span class="nx">lru</span><span class="p">();</span>
+
+<span class="nx">cache</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="c1">// 0 - it's a new cache!</span>
+</pre></div>
+
+<h2>
+<a name="remove" class="anchor" href="#remove"><span class="octicon octicon-link"></span></a>remove</h2>
+
+<h3>
+<a name="method-2" class="anchor" href="#method-2"><span class="octicon octicon-link"></span></a>Method</h3>
+
+<p>Removes item from cache</p>
+
+<pre><code>@param  {String} key Item key
+@return {Object}     Item
+</code></pre>
+
+<p><strong>Example</strong></p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">staleItem</span> <span class="o">=</span> <span class="nx">cache</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="s2">"myKey"</span><span class="p">);</span>
+</pre></div>
+
+<h2>
+<a name="set" class="anchor" href="#set"><span class="octicon octicon-link"></span></a>set</h2>
+
+<h3>
+<a name="method-3" class="anchor" href="#method-3"><span class="octicon octicon-link"></span></a>Method</h3>
+
+<p>Sets item in cache as <code>first</code></p>
+
+<pre><code>@param  {String} key   Item key
+@param  {Mixed}  value Item value
+@return {Object}       LRU instance
+</code></pre>
+
+<p><strong>Example</strong></p>
+
+<div class="highlight"><pre><span class="nx">cache</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s2">"myKey"</span><span class="p">,</span> <span class="p">{</span><span class="nx">prop</span><span class="o">:</span> <span class="kc">true</span><span class="p">});</span>
+</pre></div>
+
+<h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>abaaso is licensed under BSD-3 <a href="https://raw.github.com/avoidwork/tiny-lru/master/LICENSE">https://raw.github.com/avoidwork/tiny-lru/master/LICENSE</a></p>
+
+<h3>
+<a name="copyright" class="anchor" href="#copyright"><span class="octicon octicon-link"></span></a>Copyright</h3>
+
+<p>Copyright (c) 2013, Jason Mulligan <a href="mailto:jason.mulligan@avoidwork.com">jason.mulligan@avoidwork.com</a></p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Tiny LRU maintained by <a href="https://github.com/avoidwork">avoidwork</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
