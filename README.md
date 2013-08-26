@@ -1,6 +1,8 @@
-[![build status](https://secure.travis-ci.org/avoidwork/tiny-lru.png)](http://travis-ci.org/avoidwork/tiny-lru)
 # Tiny LRU
+
 Least Recently Used cache for Client or Server.
+
+[![build status](https://secure.travis-ci.org/avoidwork/tiny-lru.png)](http://travis-ci.org/avoidwork/tiny-lru)
 
 ```javascript
 var cache = lru(500);
@@ -11,7 +13,7 @@ var cache = lru(500);
 
 Evicts the least recently used item from cache
 
-	@return {Object} LRU instance
+	return {Object} LRU instance
 
 **Example**
 
@@ -37,8 +39,8 @@ cache.first; // null - it's a new cache!
 
 Gets cached item and moves it to the front
 
-	@param  {String} key Item key
-	@return {Mixed}      Undefined or Item value
+	param  {String} key Item key
+	return {Mixed}      Undefined or Item value
 
 **Example**
 
@@ -103,8 +105,8 @@ cache.length; // 0 - it's a new cache!
 
 Removes item from cache
 
-	@param  {String} key Item key
-	@return {Object}     Item
+	param  {String} key Item key
+	return {Object}     Item
 
 **Example**
 
@@ -117,9 +119,9 @@ var staleItem = cache.remove("myKey");
 
 Sets item in cache as `first`
 
-	@param  {String} key   Item key
-	@param  {Mixed}  value Item value
-	@return {Object}       LRU instance
+	param  {String} key   Item key
+	param  {Mixed}  value Item value
+	return {Object}       LRU instance
 
 **Example**
 
@@ -128,9 +130,5 @@ cache.set("myKey", {prop: true});
 ```
 
 ## License
-
-abaaso is licensed under BSD-3 https://raw.github.com/avoidwork/tiny-lru/master/LICENSE
-
-### Copyright
-
-Copyright (c) 2013, Jason Mulligan <jason.mulligan@avoidwork.com>
+Copyright (c) 2013 Jason Mulligan  
+Licensed under the BSD-3 license.

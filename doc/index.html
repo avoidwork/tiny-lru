@@ -1,0 +1,138 @@
+<!DOCTYPE html><html lang="en"><head><title>index</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content=""><meta name="groc-document-path" content="index"><meta name="groc-project-path" content="README.md"><link rel="stylesheet" type="text/css" media="all" href="assets/style.css"><script type="text/javascript" src="assets/behavior.js"></script><body><div id="meta"><div class="file-path">README.md</div></div><div id="document"><div class="segment"><div class="comments "><div class="wrapper"><h1 id="tiny-lru">Tiny LRU</h1>
+
+<p>Least Recently Used cache for Client or Server.</p>
+
+<p><a href="http://travis-ci.org/avoidwork/tiny-lru"><img src="https://secure.travis-ci.org/avoidwork/tiny-lru.png" alt="build status" title="" /></a></p>
+
+<pre><code class="javascript">var cache = lru(500);
+</code></pre>
+
+<h2 id="evict">evict</h2>
+
+<h3 id="method">Method</h3>
+
+<p>Evicts the least recently used item from cache</p>
+
+<pre><code>return {Object} LRU instance
+</code></pre>
+
+<p><strong>Example</strong></p>
+
+<pre><code class="javascript">cache.evict();
+</code></pre>
+
+<h2 id="first">first</h2>
+
+<h3 id="property">Property</h3>
+
+<p>Item in "first" or "top" position</p>
+
+<p><strong>Example</strong></p>
+
+<pre><code class="javascript">var cache = lru();
+
+cache.first; // null - it's a new cache!
+</code></pre>
+
+<h2 id="get">get</h2>
+
+<h3 id="method">Method</h3>
+
+<p>Gets cached item and moves it to the front</p>
+
+<pre><code>param  {String} key Item key
+return {Mixed}      Undefined or Item value
+</code></pre>
+
+<p><strong>Example</strong></p>
+
+<pre><code class="javascript">var item = cache.get("myKey");
+</code></pre>
+
+<h2 id="items">items</h2>
+
+<h3 id="property">Property</h3>
+
+<p>Hash of cache items</p>
+
+<p><strong>Example</strong></p>
+
+<pre><code class="javascript">var cache = lru();
+
+cache.items; // {}
+</code></pre>
+
+<h2 id="max">max</h2>
+
+<h3 id="property">Property</h3>
+
+<p>Max items to hold in cache (1000)</p>
+
+<p><strong>Example</strong></p>
+
+<pre><code class="javascript">var cache = lru(500);
+
+cache.max; // 500
+</code></pre>
+
+<h2 id="last">last</h2>
+
+<h3 id="property">Property</h3>
+
+<p>Item in "last" or "bottom" position</p>
+
+<p><strong>Example</strong></p>
+
+<pre><code class="javascript">var cache = lru();
+
+cache.last; // null - it's a new cache!
+</code></pre>
+
+<h2 id="length">length</h2>
+
+<h3 id="property">Property</h3>
+
+<p>Number of items in cache</p>
+
+<p><strong>Example</strong></p>
+
+<pre><code class="javascript">var cache = lru();
+
+cache.length; // 0 - it's a new cache!
+</code></pre>
+
+<h2 id="remove">remove</h2>
+
+<h3 id="method">Method</h3>
+
+<p>Removes item from cache</p>
+
+<pre><code>param  {String} key Item key
+return {Object}     Item
+</code></pre>
+
+<p><strong>Example</strong></p>
+
+<pre><code class="javascript">var staleItem = cache.remove("myKey");
+</code></pre>
+
+<h2 id="set">set</h2>
+
+<h3 id="method">Method</h3>
+
+<p>Sets item in cache as <code>first</code></p>
+
+<pre><code>param  {String} key   Item key
+param  {Mixed}  value Item value
+return {Object}       LRU instance
+</code></pre>
+
+<p><strong>Example</strong></p>
+
+<pre><code class="javascript">cache.set("myKey", {prop: true});
+</code></pre>
+
+<h2 id="license">License</h2>
+
+<p>Copyright (c) 2013 Jason Mulligan <br />
+Licensed under the BSD-3 license.</p></div></div></div></div></body></html>
