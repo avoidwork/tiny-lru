@@ -34,6 +34,12 @@ function LRU () {
 LRU.prototype.constructor = LRU;
 
 /**
+ * alias for remove
+ * NOTE have to wrap in quotes for closure-compiler
+ */
+LRU.prototype['delete'] = LRU.prototype.remove;
+
+/**
  * Evicts the least recently used item from cache
  *
  * @method evict
@@ -64,6 +70,16 @@ LRU.prototype.get = function ( key ) {
 	this.set( key, item.value );
 
 	return item.value;
+};
+
+/**
+ * Checks to see if key exists in the cache
+ *
+ * @param  {String} key Item key
+ * @return {Boolean}
+ */
+LRU.prototype.has = function ( key ) {
+	return !( this.cache[key] === undefined );
 };
 
 /**
