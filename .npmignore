@@ -1,11 +1,11 @@
-/doc/
+/.idea/
 /node_modules/
 /lib/tiny-lru.min.js
-/lib/tiny-lru.map
+/lib/tiny-lru.min.js.map
 /test/
 /src/
 .git
 .gitignore
-.jshintrc
+.eslintrc
 .travis.yml
 Gruntfile.js

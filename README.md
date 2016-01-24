@@ -2,7 +2,7 @@
 
 Least Recently Used cache for Client or Server.
 
-[![build status](https://secure.travis-ci.org/avoidwork/tiny-lru.png)](http://travis-ci.org/avoidwork/tiny-lru)
+[![build status](https://secure.travis-ci.org/avoidwork/tiny-lru.svg)](http://travis-ci.org/avoidwork/tiny-lru)
 
 ```javascript
 var cache = lru(500);
@@ -138,5 +138,5 @@ memoized.cache.max = 10;
 See the [lodash docs](https://lodash.com/docs#memoize) for more on `memoize`.
 
 ## License
-Copyright (c) 2013 Jason Mulligan  
+Copyright (c) 2016 Jason Mulligan
 Licensed under the BSD-3 license.

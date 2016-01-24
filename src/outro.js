@@ -1,13 +1,14 @@
-// CommonJS, AMD, script tag
-if ( typeof exports !== "undefined" ) {
-	module.exports = lru;
+function factory (max = 1000) {
+	return new LRU(max);
 }
-else if ( typeof define === "function" ) {
-	define( function () {
-		return lru;
+
+// Node, AMD & window supported
+if (typeof exports !== "undefined") {
+	module.exports = factory;
+} else if (typeof define === "function" && define.amd) {
+	define(function () {
+		return factory;
 	});
-}
-else {
-	global.lru = lru;
-}
-})( this );
+} else {
+	global.lru = factory;
+}}(typeof window !== "undefined" ? window : global));
