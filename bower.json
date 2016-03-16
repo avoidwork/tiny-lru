@@ -1,0 +1,32 @@
+{
+  "name": "tiny-lru",
+  "description": "Tiny LRU cache for Client or Server",
+  "main": "lib/tiny-lru",
+  "authors": [
+    "Jason Mulligan <jason.mulligan@avoidwork.com>"
+  ],
+  "license": "BSD-3-Clause",
+  "keywords": [
+    "LRU",
+    "cache",
+    "tiny",
+    "client",
+    "server",
+    "least",
+    "recently",
+    "used"
+  ],
+  "homepage": "https://github.com/avoidwork/tiny-lru",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
