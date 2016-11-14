@@ -51,6 +51,16 @@ class LRU {
 		return this.cache[key] !== undefined;
 	}
 
+	merge (arg = "{}") {
+		let obj = typeof arg === "string" ? JSON.parse(arg) : this.clone(arg);
+
+		Object.keys(obj).forEach(i => {
+			this[i] = obj[i];
+		});
+
+		return this;
+	}
+
 	remove (key) {
 		let cached = this.cache[key];
 

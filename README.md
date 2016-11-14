@@ -102,6 +102,20 @@ var cache = lru(500);
 cache.max; // 500
 ```
 
+## merge
+### Method
+
+Merges a dump of another cache into this cache
+
+	param  {Mixed}  JSON string or Object
+	return {Object} LRU instance
+
+**Example**
+
+```javascript
+cache2.merge(cache1.dump());
+```
+
 ## last
 ### Property
 
