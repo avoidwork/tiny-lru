@@ -8,6 +8,34 @@ Least Recently Used cache for Client or Server.
 var cache = lru(500);
 ```
 
+## clone
+### Method
+
+Clones a value; called when setting cache value
+
+	return {Mixed} Clone of input
+
+**Example**
+
+```javascript
+cache.clone({abc: true});
+```
+
+## dump
+### Method
+
+Produces a dump of the cache as JSON or a clone
+
+	param  {String} string Defaults to `true`
+	return {Mixed}  String or Object
+
+**Example**
+
+```javascript
+cache.dump();      // JSON
+cache.dump(false); // Object
+```
+
 ## evict
 ### Method
 
