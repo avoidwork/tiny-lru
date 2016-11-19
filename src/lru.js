@@ -7,6 +7,13 @@
 			this.max = max;
 			this.notify = false;
 			this.onchange = () => {};
+			this.update = arg => {
+				let obj = JSON.parse(arg);
+
+				Object.keys(obj).forEach(i => {
+					this.cache[i] = obj[i];
+				});
+			};
 		}
 
 		delete (key) {
