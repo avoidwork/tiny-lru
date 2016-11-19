@@ -8,6 +8,16 @@ Least Recently Used cache for Client or Server.
 const cache = lru(500);
 ```
 
+Lodash provides a `memoize` function with a cache that can be swapped out as long as it implements the right interface.
+See the [lodash docs](https://lodash.com/docs#memoize) for more on `memoize`.
+
+#### Example
+```javascript
+_.memoize.Cache = lru().constructor;
+const memoized = _.memoize(myFunc);
+memoized.cache.max = 10;
+```
+
 ## evict
 ### Method
 
@@ -160,14 +170,6 @@ Sets item in cache as `first`
 ```javascript
 cache.set("myKey", {prop: true});
 ```
-
-Lodash provides a `memoize` function with a cache that can be swapped out as long as it implements the right interface. Sample usage with lodash:
-```javascript
-_.memoize.Cache = lru().constructor;
-const memoized = _.memoize(myFunc);
-memoized.cache.max = 10;
-```
-See the [lodash docs](https://lodash.com/docs#memoize) for more on `memoize`.
 
 ## License
 Copyright (c) 2016 Jason Mulligan
