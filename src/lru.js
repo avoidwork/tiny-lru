@@ -1,94 +1,120 @@
-class LRU {
-	constructor (max) {
-		this.cache = {};
-		this.max = max;
-		this.first = null;
-		this.last = null;
-		this.length = 0;
-	}
-
-	delete (key) {
-		return this.remove(key);
-	}
-
-	evict () {
-		if (this.last !== null) {
-			this.remove(this.last);
+	class LRU {
+		constructor (max) {
+			this.cache = {};
+			this.first = null;
+			this.last = null;
+			this.length = 0;
+			this.max = max;
+			this.notify = false;
+			this.onchange = () => {};
 		}
 
-		return this;
-	}
-
-	get (key) {
-		let cached = this.cache[key],
-			output;
-
-		if (cached) {
-			output = cached.value;
-			this.set(key, cached.value);
+		delete (key) {
+			return this.remove(key);
 		}
 
-		return output;
-	}
+		dump () {
+			return JSON.stringify(this, null, 0);
+		}
 
-	has (key) {
-		return this.cache[key] !== undefined;
-	}
-
-	remove (key) {
-		let cached = this.cache[key];
-
-		if (cached) {
-			delete this.cache[key];
-			this.length--;
-
-			if (cached.previous !== null) {
-				this.cache[cached.previous].next = cached.next;
+		evict () {
+			if (this.last !== null) {
+				this.remove(this.last, true);
 			}
 
-			if (cached.next !== null) {
-				this.cache[cached.next].previous = cached.previous;
+			if (this.notify) {
+				next(this.onchange("evict", this.dump()));
 			}
 
-			if (this.first === key) {
-				this.first = cached.previous;
-			}
-
-			if (this.last === key) {
-				this.last = cached.next;
-			}
+			return this;
 		}
 
-		return cached;
+		get (key) {
+			let cached = this.cache[key],
+				output;
+
+			if (cached) {
+				output = cached.value;
+				this.set(key, cached.value);
+			}
+
+			if (this.notify) {
+				next(this.onchange("get", this.dump()));
+			}
+
+			return output;
+		}
+
+		has (key) {
+			return this.cache[key] !== undefined;
+		}
+
+		remove (key, silent = false) {
+			let cached = this.cache[key];
+
+			if (cached) {
+				delete this.cache[key];
+				this.length--;
+
+				if (cached.previous !== null) {
+					this.cache[cached.previous].next = cached.next;
+				}
+
+				if (cached.next !== null) {
+					this.cache[cached.next].previous = cached.previous;
+				}
+
+				if (this.first === key) {
+					this.first = cached.previous;
+				}
+
+				if (this.last === key) {
+					this.last = cached.next;
+				}
+			}
+
+			if (!silent && this.notify) {
+				next(this.onchange("remove", this.dump()));
+			}
+
+			return cached;
+		}
+
+		set (key, value) {
+			let obj = this.remove(key, true);
+
+			if (!obj) {
+				obj = {
+					next: null,
+					previous: null,
+					value: value
+				};
+			} else {
+				obj.value = value;
+			}
+
+			obj.next = null;
+			obj.previous = this.first;
+			this.cache[key] = obj;
+
+			if (this.first) {
+				this.cache[this.first].next = key;
+			}
+
+			this.first = key;
+
+			if (!this.last) {
+				this.last = key;
+			}
+
+			if (++this.length > this.max) {
+				this.evict();
+			}
+
+			if (this.notify) {
+				next(this.onchange("set", this.dump()));
+			}
+
+			return this;
+		}
 	}
-
-	set (key, value) {
-		let obj = this.remove(key);
-
-		if (!obj) {
-			obj = new LRUItem(value);
-		} else {
-			obj.value = value;
-		}
-
-		obj.next = null;
-		obj.previous = this.first;
-		this.cache[key] = obj;
-
-		if (this.first) {
-			this.cache[this.first].next = key;
-		}
-
-		this.first = key;
-
-		if (!this.last) {
-			this.last = key;
-		}
-
-		if (++this.length > this.max) {
-			this.evict();
-		}
-
-		return this;
-	}
-}

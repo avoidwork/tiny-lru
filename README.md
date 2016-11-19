@@ -5,7 +5,7 @@ Least Recently Used cache for Client or Server.
 [![build status](https://secure.travis-ci.org/avoidwork/tiny-lru.svg)](http://travis-ci.org/avoidwork/tiny-lru)
 
 ```javascript
-var cache = lru(500);
+const cache = lru(500);
 ```
 
 ## evict
@@ -29,7 +29,7 @@ Item in "first" or "top" position
 **Example**
 
 ```javascript
-var cache = lru();
+const cache = lru();
 
 cache.first; // null - it's a new cache!
 ```
@@ -45,7 +45,7 @@ Gets cached item and moves it to the front
 **Example**
 
 ```javascript
-var item = cache.get("myKey");
+const item = cache.get("myKey");
 ```
 
 ## items
@@ -56,7 +56,7 @@ Hash of cache items
 **Example**
 
 ```javascript
-var cache = lru();
+const cache = lru();
 
 cache.items; // {}
 ```
@@ -69,10 +69,42 @@ Max items to hold in cache (1000)
 **Example**
 
 ```javascript
-var cache = lru(500);
+const cache = lru(500);
 
 cache.max; // 500
 ```
+
+## notify
+### Property
+
+Executes `onchange(eventName, serializedCache)` on the next tick when the cache changes
+
+**Example**
+
+```javascript
+const cache = lru();
+
+cache.notify = true;
+cache.onchange = (event, serializedCache) => {
+	console.log(event, serializedCache);
+};
+```
+
+## onchange
+### Method
+
+Accepts `eventName` & `serializedCache` arguments
+
+**Example**
+
+```javascript
+const cache = lru();
+
+cache.notify = true;
+cache.onchange = (event, serializedCache) => {
+	console.log(event, serializedCache);
+};
+````
 
 ## last
 ### Property
@@ -82,7 +114,7 @@ Item in "last" or "bottom" position
 **Example**
 
 ```javascript
-var cache = lru();
+const cache = lru();
 
 cache.last; // null - it's a new cache!
 ```
@@ -95,7 +127,7 @@ Number of items in cache
 **Example**
 
 ```javascript
-var cache = lru();
+const cache = lru();
 
 cache.length; // 0 - it's a new cache!
 ```
@@ -111,7 +143,7 @@ Removes item from cache
 **Example**
 
 ```javascript
-var staleItem = cache.remove("myKey");
+const staleItem = cache.remove("myKey");
 ```
 
 ## set
@@ -132,7 +164,7 @@ cache.set("myKey", {prop: true});
 Lodash provides a `memoize` function with a cache that can be swapped out as long as it implements the right interface. Sample usage with lodash:
 ```javascript
 _.memoize.Cache = lru().constructor;
-var memoized = _.memoize(myFunc);
+const memoized = _.memoize(myFunc);
 memoized.cache.max = 10;
 ```
 See the [lodash docs](https://lodash.com/docs#memoize) for more on `memoize`.

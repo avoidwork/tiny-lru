@@ -16,7 +16,6 @@ module.exports = function (grunt) {
 			dist : {
 				src : [
 					"src/intro.js",
-					"src/item.js",
 					"src/lru.js",
 					"src/outro.js"
 				],
@@ -35,7 +34,11 @@ module.exports = function (grunt) {
 			}
 		},
 		eslint: {
-			target: ["lib/<%= pkg.name %>.es6.js"]
+			target: [
+				"index.js",
+				"lib/<%= pkg.name %>.es6.js",
+				"test/*.js"
+			]
 		},
 		nodeunit : {
 			all : ["test/*.js"]
