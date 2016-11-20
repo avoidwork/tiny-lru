@@ -11,7 +11,7 @@
 				let obj = JSON.parse(arg);
 
 				Object.keys(obj).forEach(i => {
-					this.cache[i] = obj[i];
+					this[i] = obj[i];
 				});
 			};
 		}
