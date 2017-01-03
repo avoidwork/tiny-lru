@@ -18,6 +18,19 @@ const memoized = _.memoize(myFunc);
 memoized.cache.max = 10;
 ```
 
+## clear
+### Method
+
+Clears the contents of the cache
+
+	return {Object} LRU instance
+
+**Example**
+
+```javascript
+cache.clear();
+```
+
 ## evict
 ### Method
 

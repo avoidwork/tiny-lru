@@ -16,6 +16,17 @@
 			};
 		}
 
+		clear (silent = false) {
+			this.cache = {};
+			this.first = null;
+			this.last = null;
+			this.length = 0;
+
+			if (!silent && this.notify) {
+				next(this.onchange("clear", this.dump()));
+			}
+		}
+
 		delete (key) {
 			return this.remove(key);
 		}
