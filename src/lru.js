@@ -25,6 +25,8 @@
 			if (!silent && this.notify) {
 				next(this.onchange("clear", this.dump()));
 			}
+
+			return this;
 		}
 
 		delete (key) {

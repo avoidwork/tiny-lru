@@ -1,10 +1,2 @@
 node_modules/*
 .idea/*
-lib/tiny-lru.min.js
-lib/tiny-lru.min.js.map
-src/*
-test/*
-.eslintrc
-.gitignore
-.travis.yml
-bower.json
