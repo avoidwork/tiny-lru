@@ -29,8 +29,8 @@
 			return this;
 		}
 
-		delete (key) {
-			return this.remove(key);
+		delete (key, silent = false) {
+			return this.remove(key, silent);
 		}
 
 		dump () {
@@ -50,23 +50,22 @@
 		}
 
 		get (key) {
-			let cached = this.cache[key],
-				output;
+			let output;
 
-			if (cached) {
-				output = cached.value;
-				this.set(key, cached.value);
-			}
+			if (this.has(key)) {
+				output = this.cache[key].value;
+				this.set(key, output);
 
-			if (this.notify) {
-				next(this.onchange("get", this.dump()));
+				if (this.notify) {
+					next(this.onchange("get", this.dump()));
+				}
 			}
 
 			return output;
 		}
 
 		has (key) {
-			return this.cache[key] !== undefined;
+			return key in this.cache;
 		}
 
 		remove (key, silent = false) {
@@ -91,45 +90,44 @@
 				if (this.last === key) {
 					this.last = cached.next;
 				}
-			}
 
-			if (!silent && this.notify) {
-				next(this.onchange("remove", this.dump()));
+				if (!silent && this.notify) {
+					next(this.onchange("remove", this.dump()));
+				}
 			}
 
 			return cached;
 		}
 
 		set (key, value) {
-			let obj = this.remove(key, true);
+			let item;
 
-			if (!obj) {
-				obj = {
+			if (this.has(key)) {
+				item = this.cache[key];
+				item.value = value;
+				item.next = null;
+				item.previous = this.first;
+			} else {
+				if (++this.length > this.max) {
+					this.remove(this.last, true);
+				}
+
+				if (this.length === 1) {
+					this.last = key;
+				}
+
+				this.cache[key] = {
 					next: null,
-					previous: null,
+					previous: this.first,
 					value: value
 				};
-			} else {
-				obj.value = value;
 			}
-
-			obj.next = null;
-			obj.previous = this.first;
-			this.cache[key] = obj;
 
 			if (this.first) {
 				this.cache[this.first].next = key;
 			}
 
 			this.first = key;
-
-			if (!this.last) {
-				this.last = key;
-			}
-
-			if (++this.length > this.max) {
-				this.evict();
-			}
 
 			if (this.notify) {
 				next(this.onchange("set", this.dump()));
