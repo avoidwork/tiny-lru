@@ -75,11 +75,11 @@
 				delete this.cache[key];
 				this.length--;
 
-				if (cached.previous !== null) {
+				if (this.has(cached.previous)) {
 					this.cache[cached.previous].next = cached.next;
 				}
 
-				if (cached.next !== null) {
+				if (this.has(cached.next)) {
 					this.cache[cached.next].previous = cached.previous;
 				}
 
