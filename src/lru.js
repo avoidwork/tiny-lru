@@ -38,7 +38,7 @@
 		}
 
 		evict () {
-			if (this.last !== null) {
+			if (this.has(this.last)) {
 				this.remove(this.last, true);
 			}
 
