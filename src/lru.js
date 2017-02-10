@@ -77,23 +77,35 @@
 
 				if (this.has(cached.previous)) {
 					this.cache[cached.previous].next = cached.next;
+
+					if (this.first === key) {
+						this.first = cached.previous;
+					}
+				} else if (this.first === key) {
+					this.first = null;
 				}
 
 				if (this.has(cached.next)) {
 					this.cache[cached.next].previous = cached.previous;
-				}
 
+					if (this.last === key) {
+						this.last = cached.next;
+					}
+				} else if (this.last === key) {
+					this.last = null;
+				}
+			} else {
 				if (this.first === key) {
-					this.first = cached.previous;
+					this.first = null;
 				}
 
 				if (this.last === key) {
-					this.last = cached.next;
+					this.last = null;
 				}
+			}
 
-				if (!silent && this.notify) {
-					next(this.onchange("remove", this.dump()));
-				}
+			if (!silent && this.notify) {
+				next(this.onchange("remove", this.dump()));
 			}
 
 			return cached;
