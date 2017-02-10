@@ -135,7 +135,7 @@
 				};
 			}
 
-			if (this.first) {
+			if (this.has(this.first)) {
 				this.cache[this.first].next = key;
 			}
 
