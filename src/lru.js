@@ -120,6 +120,10 @@
 				item.value = value;
 				item.next = null;
 				item.previous = this.first;
+
+				if (this.last === key) {
+					this.last = item.previous;
+				}
 			} else {
 				if (++this.length > this.max) {
 					this.remove(this.last, true);
