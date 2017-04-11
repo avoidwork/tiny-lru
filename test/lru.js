@@ -7,7 +7,7 @@ exports.suite = {
 		done();
 	},
 	direct: function (test) {
-		test.expect(25);
+		test.expect(26);
 		test.equal(this.cache.length, 0, "Should be '0'");
 		test.equal(this.cache.max, 2, "Should be '2'");
 		test.equal(this.cache.set("test1", {prop: true}).length, 1, "Should be '1'");
@@ -33,6 +33,19 @@ exports.suite = {
 		test.equal(this.cache.set("test4", null).length, 1, "Should be '1'");
 		test.equal(this.cache.delete("test4").prop, null, "Should be 'null'");
 		test.equal(this.cache.delete("test4"), undefined, "Should be 'undefined'");
+		test.equal(this.cache.length, 0, "Should be '0'");
+		this.cache.clear();
+		test.done();
+	},
+	realistic: function (test) {
+		test.expect(6);
+		test.equal(this.cache.set("1", "a").length, 1, "Should be '1'");
+		test.equal(this.cache.set("2", "b").length, 2, "Should be '2'");
+		test.equal(this.cache.set("1", "c").length, 2, "Should be '2'");
+		this.cache.delete(1);
+		test.equal(this.cache.length, 1, "Should be '1'");
+		test.equal(this.cache.first, "2", "Should be '2'");
+		test.equal(this.cache.last, "2", "Should be '2'");
 		test.done();
 	}
 };
