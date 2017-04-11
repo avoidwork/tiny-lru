@@ -113,7 +113,7 @@
 		}
 
 		set (key, value) {
-			let item;
+			let first, item;
 
 			if (this.has(key)) {
 				item = this.cache[key];
@@ -141,7 +141,12 @@
 			}
 
 			if (this.first) {
-				this.cache[this.first].next = key;
+				first = this.cache[this.first];
+				first.next = key;
+
+				if (first.previous === key) {
+					first.previous = null;
+				}
 			}
 
 			this.first = key;
