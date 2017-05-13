@@ -140,7 +140,7 @@
 				};
 			}
 
-			if (this.first) {
+			if (this.first && this.has(this.first)) {
 				first = this.cache[this.first];
 				first.next = key;
 
