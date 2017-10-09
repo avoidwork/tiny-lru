@@ -12,7 +12,7 @@
     "url": "https://github.com/avoidwork/tiny-lru/issues"
   },
   "license": "BSD-3-Clause",
-  "main": "index",
+  "main": "lib/tiny-lru.js",
   "engines": {
     "node": ">=0.8.0"
   },
