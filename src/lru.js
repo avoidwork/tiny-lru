@@ -1,26 +1,13 @@
 	class LRU {
 		constructor (max) {
-			this.cache = {};
-			this.first = null;
-			this.last = null;
-			this.length = 0;
 			this.max = max;
 			this.notify = false;
-			this.onchange = () => {};
-			this.update = arg => {
-				let obj = JSON.parse(arg);
 
-				Object.keys(obj).forEach(i => {
-					this[i] = obj[i];
-				});
-			};
+			return this.reset();
 		}
 
 		clear (silent = false) {
-			this.cache = {};
-			this.first = null;
-			this.last = null;
-			this.length = 0;
+			this.reset();
 
 			if (!silent && this.notify) {
 				next(this.onchange("clear", this.dump()));
@@ -68,6 +55,8 @@
 			return key in this.cache;
 		}
 
+		onchange () {}
+
 		remove (k, silent = false) {
 			let key = typeof k !== "string" ? k.toString() : k,
 				cached = this.cache[key];
@@ -110,6 +99,15 @@
 			}
 
 			return cached;
+		}
+
+		reset () {
+			this.cache = Object.create(null);
+			this.first = null;
+			this.last = null;
+			this.length = 0;
+
+			return this;
 		}
 
 		set (key, value) {
@@ -156,5 +154,13 @@
 			}
 
 			return this;
+		}
+
+		update (arg) {
+			const obj = JSON.parse(arg);
+
+			keys(obj).forEach(i => {
+				this[i] = obj[i];
+			});
 		}
 	}

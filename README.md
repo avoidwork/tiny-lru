@@ -169,6 +169,19 @@ Removes item from cache
 const staleItem = cache.remove("myKey");
 ```
 
+## reset
+### Method
+
+Resets the cache to it's original state
+
+	return {Object} LRU instance
+
+**Example**
+
+```javascript
+cache.reset();
+```
+
 ## set
 ### Method
 
