@@ -159,7 +159,7 @@
 		update (arg) {
 			const obj = JSON.parse(arg);
 
-			keys(obj).forEach(i => {
+			Object.keys(obj).forEach(i => {
 				this[i] = obj[i];
 			});
 		}
