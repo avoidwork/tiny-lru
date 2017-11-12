@@ -117,7 +117,10 @@
 				item = this.cache[key];
 				item.value = value;
 				item.next = null;
-				item.previous = this.first !== key ? this.first : null;
+
+				if (this.first !== key) {
+					item.previous = this.first !== key ? this.first : null;
+				}
 
 				if (this.last === key && item.previous !== null) {
 					this.last = item.previous;

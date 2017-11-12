@@ -38,7 +38,7 @@ exports.suite = {
 		test.done();
 	},
 	realistic: function (test) {
-		test.expect(18);
+		test.expect(19);
 		test.equal(this.cache.set("1", "a").length, 1, "Should be '1'");
 		test.equal(this.cache.set("2", "b").length, 2, "Should be '2'");
 		test.equal(this.cache.set("1", "c").length, 2, "Should be '2'");
