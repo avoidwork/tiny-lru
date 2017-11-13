@@ -119,7 +119,7 @@
 				item.next = null;
 
 				if (this.first !== key) {
-					item.previous = this.first !== key ? this.first : null;
+					item.previous = this.first;
 				}
 
 				if (this.last === key && item.previous !== null) {
