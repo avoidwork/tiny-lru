@@ -1,7 +1,8 @@
 	class LRU {
-		constructor (max) {
+		constructor (max, notify, ttl) {
 			this.max = max;
-			this.notify = false;
+			this.notify = notify;
+			this.ttl = ttl;
 
 			return this.reset();
 		}
@@ -16,12 +17,25 @@
 			return this;
 		}
 
+		clearTimer (key) {
+			if (this.has(key, "timers")) {
+				clearTimeout(this.timers[key]);
+				delete this.timers[key];
+			}
+
+			return this;
+		}
+
 		delete (key, silent = false) {
 			return this.remove(key, silent);
 		}
 
 		dump () {
-			return JSON.stringify(this, null, 0);
+			const obj = JSON.parse(JSON.stringify(this));
+
+			delete obj.timers;
+
+			return JSON.stringify(obj);
 		}
 
 		evict () {
@@ -46,13 +60,17 @@
 				if (this.notify) {
 					next(this.onchange("get", this.dump()));
 				}
+
+				if (this.ttl > 0) {
+					this.clearTimer(key).setTimer(key);
+				}
 			}
 
 			return output;
 		}
 
-		has (key) {
-			return key in this.cache;
+		has (key, type = "cache") {
+			return key in this[type];
 		}
 
 		onchange () {}
@@ -64,6 +82,10 @@
 			if (cached) {
 				delete this.cache[key];
 				this.length--;
+
+				if (this.ttl > 0) {
+					this.clearTimer(key);
+				}
 
 				if (this.has(cached.previous)) {
 					this.cache[cached.previous].next = cached.next;
@@ -102,10 +124,15 @@
 		}
 
 		reset () {
-			this.cache = Object.create(null);
+			if (this.timers !== void 0) {
+				Object.keys(this.timers).forEach(i => this.clearTimer(i));
+			}
+
+			this.cache = {};
 			this.first = null;
 			this.last = null;
 			this.length = 0;
+			this.timers = {};
 
 			return this;
 		}
@@ -156,7 +183,15 @@
 				next(this.onchange("set", this.dump()));
 			}
 
+			if (this.ttl > 0) {
+				this.clearTimer(key).setTimer(key);
+			}
+
 			return this;
+		}
+
+		setTimer (key) {
+			this.timers[key] = setTimeout(() => this.remove(key), this.ttl);
 		}
 
 		update (arg) {

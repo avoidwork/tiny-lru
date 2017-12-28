@@ -5,7 +5,7 @@ Least Recently Used cache for Client or Server.
 [![build status](https://secure.travis-ci.org/avoidwork/tiny-lru.svg)](http://travis-ci.org/avoidwork/tiny-lru)
 
 ```javascript
-const cache = lru(500);
+const cache = lru(max [, notify = false, ttl = 0]);
 ```
 
 Lodash provides a `memoize` function with a cache that can be swapped out as long as it implements the right interface.
@@ -195,6 +195,19 @@ Sets item in cache as `first`
 
 ```javascript
 cache.set("myKey", {prop: true});
+```
+
+## ttl
+### Property
+
+Milliseconds an item will remain in cache
+
+**Example**
+
+```javascript
+const cache = lru();
+
+cache.ttl = 3e4;
 ```
 
 ## License
