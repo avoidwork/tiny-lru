@@ -1,5 +1,5 @@
 var path = require("path"),
-	lru = require(path.join("..", "lib", "tiny-lru.js"));
+	lru = require(path.join("..", "lib", "tiny-lru.es6.js"));
 
 exports.suite = {
 	setUp: function (done) {
@@ -70,7 +70,7 @@ exports.suite = {
 		test.done();
 	},
 	ttl: function (test) {
-		var cache = this.cache;
+		const cache = this.cache;
 
 		cache.ttl = 25;
 		test.expect(2);
