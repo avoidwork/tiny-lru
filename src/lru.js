@@ -94,7 +94,7 @@
 						this.first = cached.previous;
 					}
 				} else if (this.first === key) {
-					this.first = null;
+					this.first = empty;
 				}
 
 				if (this.has(cached.next)) {
@@ -104,15 +104,15 @@
 						this.last = cached.next;
 					}
 				} else if (this.last === key) {
-					this.last = null;
+					this.last = empty;
 				}
 			} else {
 				if (this.first === key) {
-					this.first = null;
+					this.first = empty;
 				}
 
 				if (this.last === key) {
-					this.last = null;
+					this.last = empty;
 				}
 			}
 
@@ -129,8 +129,8 @@
 			}
 
 			this.cache = {};
-			this.first = null;
-			this.last = null;
+			this.first = empty;
+			this.last = empty;
 			this.length = 0;
 			this.timers = {};
 
@@ -143,13 +143,13 @@
 			if (this.has(key)) {
 				item = this.cache[key];
 				item.value = value;
-				item.next = null;
+				item.next = empty;
 
 				if (this.first !== key) {
 					item.previous = this.first;
 				}
 
-				if (this.last === key && item.previous !== null) {
+				if (this.last === key && item.previous !== empty) {
 					this.last = item.previous;
 				}
 			} else {
@@ -162,7 +162,7 @@
 				}
 
 				this.cache[key] = {
-					next: null,
+					next: empty,
 					previous: this.first,
 					value: value
 				};
@@ -173,7 +173,7 @@
 				first.next = key;
 
 				if (first.previous === key) {
-					first.previous = null;
+					first.previous = empty;
 				}
 			}
 

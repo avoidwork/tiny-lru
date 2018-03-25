@@ -27,10 +27,10 @@ exports.suite = {
 		test.equal(this.cache.last, "test3", "Should be 'test3'");
 		test.equal(this.cache.delete("test3").value.prop, true, "Should be 'true'");
 		test.equal(this.cache.length, 0, "Should be '0'");
-		test.equal(this.cache.first, null, "Should be 'null'");
-		test.equal(this.cache.last, null, "Should be 'null'");
+		test.equal(this.cache.first, "", "Should be ''");
+		test.equal(this.cache.last, "", "Should be ''");
 		test.equal(this.cache.delete("test4"), undefined, "Should be 'undefined'");
-		test.equal(this.cache.set("test4", null).length, 1, "Should be '1'");
+		test.equal(this.cache.set("test4", "").length, 1, "Should be '1'");
 		test.equal(this.cache.delete("test4").prop, null, "Should be 'null'");
 		test.equal(this.cache.delete("test4"), undefined, "Should be 'undefined'");
 		test.equal(this.cache.length, 0, "Should be '0'");
@@ -43,10 +43,10 @@ exports.suite = {
 		test.equal(this.cache.set("2", "b").length, 2, "Should be '2'");
 		test.equal(this.cache.set("1", "c").length, 2, "Should be '2'");
 		test.equal(this.cache.cache["2"].next, "1", "Should be '1'");
-		test.equal(this.cache.cache["2"].previous, null, "Should be 'null'");
+		test.equal(this.cache.cache["2"].previous, "", "Should be ''");
 		this.cache.delete(1);
-		test.equal(this.cache.cache["2"].next, null, "Should be 'null'");
-		test.equal(this.cache.cache["2"].previous, null, "Should be 'null'");
+		test.equal(this.cache.cache["2"].next, "", "Should be ''");
+		test.equal(this.cache.cache["2"].previous, "", "Should be ''");
 		test.equal(this.cache.length, 1, "Should be '1'");
 		test.equal(this.cache.first, "2", "Should be '2'");
 		test.equal(this.cache.last, "2", "Should be '2'");
