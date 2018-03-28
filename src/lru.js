@@ -77,9 +77,11 @@
 
 		remove (k, silent = false) {
 			let key = typeof k !== "string" ? k.toString() : k,
-				cached = this.cache[key];
+				result;
 
-			if (cached) {
+			if (this.has(key)) {
+				const cached = this.cache[key];
+
 				delete this.cache[key];
 				this.length--;
 
@@ -106,6 +108,8 @@
 				} else if (this.last === key) {
 					this.last = empty;
 				}
+
+				result = cached;
 			} else {
 				if (this.first === key) {
 					this.first = empty;
@@ -120,7 +124,7 @@
 				next(this.onchange("remove", this.dump()));
 			}
 
-			return cached;
+			return result;
 		}
 
 		reset () {
