@@ -1,5 +1,6 @@
 	class LRU {
-		constructor (max, notify, ttl) {
+		constructor (max, notify, ttl, expire) {
+			this.expire = expire;
 			this.max = max;
 			this.notify = notify;
 			this.ttl = ttl;
@@ -133,6 +134,7 @@
 			}
 
 			this.cache = {};
+			this.expires = {};
 			this.first = empty;
 			this.last = empty;
 			this.length = 0;
@@ -191,7 +193,20 @@
 				this.clearTimer(key).setTimer(key);
 			}
 
+			if (this.expire > 0) {
+				this.setExpire(key);
+			}
+
 			return this;
+		}
+
+		setExpire (key) {
+			if (key in this.expires === false) {
+				this.expires[key] = setTimeout(() => {
+					delete this.expires[key];
+					this.clearTimer(key).remove(key);
+				}, this.expire);
+			}
 		}
 
 		setTimer (key) {

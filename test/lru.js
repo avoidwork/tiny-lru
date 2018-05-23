@@ -73,8 +73,27 @@ exports.suite = {
 		const cache = this.cache;
 
 		cache.ttl = 25;
-		test.expect(2);
+		test.expect(3);
 		test.equal(cache.set("1", "a").length, 1, "Should be '1'");
+		setTimeout(function () {
+			test.equal(cache.length, 1, "Should be '1'");
+			cache.get("1");
+			setTimeout(function () {
+				test.equal(cache.length, 0, "Should be '0'");
+				test.done();
+			}, 25);
+		}, 10);
+	},
+	expire: function (test) {
+		const cache = this.cache;
+
+		cache.expire = 25;
+		test.expect(3);
+		test.equal(cache.set("1", "a").length, 1, "Should be '1'");
+		setTimeout(function () {
+			cache.get("1");
+			test.equal(cache.length, 1, "Should be '1'");
+		}, 20);
 		setTimeout(function () {
 			test.equal(cache.length, 0, "Should be '0'");
 			test.done();
