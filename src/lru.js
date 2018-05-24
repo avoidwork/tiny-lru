@@ -18,10 +18,10 @@
 			return this;
 		}
 
-		clearTimer (key) {
-			if (this.has(key, "timers")) {
-				clearTimeout(this.timers[key]);
-				delete this.timers[key];
+		clearTimer (key, col = "timers") {
+			if (this.has(key, col)) {
+				clearTimeout(this[col][key]);
+				delete this[col][key];
 			}
 
 			return this;
@@ -90,6 +90,10 @@
 					this.clearTimer(key);
 				}
 
+				if (silent === false && this.expire > 0) {
+					this.clearTimer(key, "expires");
+				}
+
 				if (this.has(cached.previous)) {
 					this.cache[cached.previous].next = cached.next;
 
@@ -129,6 +133,10 @@
 		}
 
 		reset () {
+			if (this.expires !== void 0) {
+				Object.keys(this.expires).forEach(i => this.clearTimer(i, "expires"));
+			}
+
 			if (this.timers !== void 0) {
 				Object.keys(this.timers).forEach(i => this.clearTimer(i));
 			}
@@ -193,7 +201,7 @@
 				this.clearTimer(key).setTimer(key);
 			}
 
-			if (this.expire > 0) {
+			if (this.expire > 0 && this.has(key, "expires") === false) {
 				this.setExpire(key);
 			}
 
@@ -201,12 +209,7 @@
 		}
 
 		setExpire (key) {
-			if (key in this.expires === false) {
-				this.expires[key] = setTimeout(() => {
-					delete this.expires[key];
-					this.clearTimer(key).remove(key);
-				}, this.expire);
-			}
+			this.expires[key] = setTimeout(() => this.clearTimer(key, "expires").clearTimer(key).remove(key), this.expire);
 		}
 
 		setTimer (key) {
