@@ -50,7 +50,7 @@ module.exports = function (grunt) {
 				sourceMap: true,
 				sourceMapIncludeSources: true,
 				mangle: {
-					except: [
+					reserved: [
 						"LRU",
 						"LRUItem"
 					]
