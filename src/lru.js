@@ -114,14 +114,6 @@
 				}
 
 				result = cached;
-			} else {
-				if (this.first === key) {
-					this.first = empty;
-				}
-
-				if (this.last === key) {
-					this.last = empty;
-				}
 			}
 
 			if (!silent && this.notify) {
