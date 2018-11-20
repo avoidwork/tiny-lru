@@ -76,9 +76,8 @@
 
 		onchange () {}
 
-		remove (k, silent = false) {
-			let key = typeof k !== "string" ? k.toString() : k,
-				result;
+		remove (key, silent = false) {
+			let result;
 
 			if (this.has(key)) {
 				const cached = this.cache[key];
