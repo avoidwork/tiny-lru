@@ -40,9 +40,7 @@
 		}
 
 		evict () {
-			if (this.has(this.last)) {
-				this.remove(this.last, true);
-			}
+			this.remove(this.last, true);
 
 			if (this.notify) {
 				next(this.onchange("evict", this.dump()));
@@ -159,7 +157,7 @@
 				}
 			} else {
 				if (++this.length > this.max) {
-					this.remove(this.last, true);
+					this.evict();
 				}
 
 				if (this.length === 1) {
