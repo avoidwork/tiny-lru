@@ -1,5 +1,5 @@
 var path = require("path"),
-	lru = require(path.join("..", "lib", "tiny-lru.es6.js"));
+	lru = require(path.join("..", "lib", "tiny-lru.js"));
 
 exports.suite = {
 	setUp: function (done) {

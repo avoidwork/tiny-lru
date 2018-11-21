@@ -19,48 +19,19 @@ module.exports = function (grunt) {
 					"src/lru.js",
 					"src/outro.js"
 				],
-				dest: "lib/<%= pkg.name %>.es6.js"
-			}
-		},
-		babel: {
-			options: {
-				sourceMap: false,
-				presets: ["env"]
-			},
-			dist: {
-				files: {
-					"lib/<%= pkg.name %>.js": "lib/<%= pkg.name %>.es6.js"
-				}
+				dest: "lib/<%= pkg.name %>.js"
 			}
 		},
 		eslint: {
 			target: [
 				"index.js",
 				"Gruntfile.js",
-				"lib/<%= pkg.name %>.es6.js",
+				"lib/<%= pkg.name %>.js",
 				"test/*.js"
 			]
 		},
 		nodeunit: {
 			all: ["test/*.js"]
-		},
-		uglify: {
-			options: {
-				banner: '/* <%= grunt.template.today("yyyy") %> <%= pkg.author %> */\n',
-				sourceMap: true,
-				sourceMapIncludeSources: true,
-				mangle: {
-					reserved: [
-						"LRU",
-						"LRUItem"
-					]
-				}
-			},
-			target: {
-				files: {
-					"lib/<%= pkg.name %>.min.js": ["lib/<%= pkg.name %>.js"]
-				}
-			}
 		},
 		watch: {
 			js: {
@@ -78,12 +49,30 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks("grunt-contrib-concat");
 	grunt.loadNpmTasks("grunt-contrib-nodeunit");
 	grunt.loadNpmTasks("grunt-contrib-watch");
-	grunt.loadNpmTasks("grunt-contrib-uglify");
-	grunt.loadNpmTasks("grunt-babel");
 	grunt.loadNpmTasks("grunt-eslint");
+
+	grunt.task.registerTask("babili", "Minifies ES2016+ code", function () {
+		const fs = require("fs"),
+			path = require("path"),
+			data = fs.readFileSync(path.join(__dirname, "lib", "tiny-lru.js"), "utf8").replace("\"use strict\";", ""), // Stripping "use strict"; because it's injected
+			pkg = require(path.join(__dirname, "package.json")),
+			banner = "/*\n " + new Date().getFullYear() + " " + pkg.author + "\n @version " + pkg.version + "\n*/\n\"use strict\";";
+
+		try {
+			const minified = require("babel-core").transform(data, {sourceFileName: "tiny-lru.js", sourceMaps: true, presets: ["minify"]});
+
+			fs.writeFileSync(path.join(__dirname, "lib", "tiny-lru.min.js"), banner + minified.code + "\n//# sourceMappingURL=tiny-lru.min.js.map", "utf8");
+			grunt.log.ok("1 file created.");
+			fs.writeFileSync(path.join(__dirname, "lib", "tiny-lru.min.js.map"), JSON.stringify(minified.map), "utf8");
+			grunt.log.ok("1 sourcemap created.");
+		} catch (e) {
+			console.error(e.stack || e.message || e);
+			throw e;
+		}
+	});
 
 	// aliases
 	grunt.registerTask("test", ["eslint", "nodeunit"]);
-	grunt.registerTask("build", ["concat", "babel", "uglify"]);
-	grunt.registerTask("default", ["build", "test"]);
+	grunt.registerTask("build", ["concat"]);
+	grunt.registerTask("default", ["build", "test", "babili"]);
 };

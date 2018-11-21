@@ -157,7 +157,7 @@
 				}
 			} else {
 				if (++this.length > this.max) {
-					this.evict();
+					this.remove(this.last, true);
 				}
 
 				if (this.length === 1) {
