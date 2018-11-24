@@ -61,12 +61,12 @@
 				output = this.cache[key].value;
 				this.set(key, output);
 
-				if (this.notify) {
-					next(this.onchange("get", this.dump()));
-				}
-
 				if (this.ttl > 0) {
 					this.clearTimer(key).setTimer(key);
+				}
+
+				if (this.notify) {
+					next(this.onchange("get", this.dump()));
 				}
 			}
 
