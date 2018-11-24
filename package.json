@@ -18,6 +18,7 @@
   },
   "engineStrict": true,
   "scripts": {
+    "benchmark": "node benchmark.js",
     "test": "grunt test"
   },
   "dependencies": {},
@@ -29,7 +30,8 @@
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-nodeunit": "^2.0.0",
     "grunt-contrib-watch": "^1.1.0",
-    "grunt-eslint": "^21.0.0"
+    "grunt-eslint": "^21.0.0",
+    "precise": "^1.1.0"
   },
   "keywords": [
     "LRU",

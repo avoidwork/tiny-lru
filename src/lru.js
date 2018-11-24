@@ -11,7 +11,7 @@
 		clear (silent = false) {
 			this.reset();
 
-			if (!silent && this.notify) {
+			if (silent === false && this.notify === true) {
 				next(this.onchange("clear", this.dump()));
 			}
 
@@ -19,7 +19,7 @@
 		}
 
 		clearTimer (key, col = "timers") {
-			if (this.has(key, col)) {
+			if (this.has(key, col) === true) {
 				clearTimeout(this[col][key]);
 				delete this[col][key];
 			}
@@ -47,7 +47,7 @@
 		evict () {
 			this.remove(this.last, true);
 
-			if (this.notify) {
+			if (this.notify === true) {
 				next(this.onchange("evict", this.dump()));
 			}
 
@@ -57,7 +57,7 @@
 		get (key) {
 			let output;
 
-			if (this.has(key)) {
+			if (this.has(key) === true) {
 				output = this.cache[key].value;
 				this.set(key, output);
 
@@ -65,7 +65,7 @@
 					this.clearTimer(key).setTimer(key);
 				}
 
-				if (this.notify) {
+				if (this.notify === true) {
 					next(this.onchange("get", this.dump()));
 				}
 			}
@@ -82,7 +82,7 @@
 		remove (key, silent = false) {
 			let result;
 
-			if (this.has(key)) {
+			if (this.has(key) === true) {
 				const cached = this.cache[key];
 
 				delete this.cache[key];
@@ -96,7 +96,7 @@
 					this.clearTimer(key, "expires");
 				}
 
-				if (this.has(cached.previous)) {
+				if (this.has(cached.previous) === true) {
 					this.cache[cached.previous].next = cached.next;
 
 					if (this.first === key) {
@@ -106,7 +106,7 @@
 					this.first = empty;
 				}
 
-				if (this.has(cached.next)) {
+				if (this.has(cached.next) === true) {
 					this.cache[cached.next].previous = cached.previous;
 
 					if (this.last === key) {
@@ -117,10 +117,10 @@
 				}
 
 				result = cached;
-			}
 
-			if (!silent && this.notify) {
-				next(this.onchange("remove", this.dump()));
+				if (silent === false && this.notify === true) {
+					next(this.onchange("remove", this.dump()));
+				}
 			}
 
 			return result;
@@ -148,7 +148,7 @@
 		set (key, value) {
 			let first, item;
 
-			if (this.has(key)) {
+			if (this.has(key) === true) {
 				item = this.cache[key];
 				item.value = value;
 				item.next = empty;
@@ -161,9 +161,11 @@
 					this.last = item.previous;
 				}
 			} else {
-				if (++this.length > this.max) {
-					this.remove(this.last, true);
+				if (this.length === this.max) {
+					this.evict();
 				}
+
+				this.length++;
 
 				if (this.length === 1) {
 					this.last = key;
@@ -176,7 +178,7 @@
 				};
 			}
 
-			if (this.first !== key && this.has(this.first)) {
+			if (this.first !== key && this.has(this.first) === true) {
 				first = this.cache[this.first];
 				first.next = key;
 
@@ -187,7 +189,7 @@
 
 			this.first = key;
 
-			if (this.notify) {
+			if (this.notify === true) {
 				next(this.onchange("set", this.dump()));
 			}
 
