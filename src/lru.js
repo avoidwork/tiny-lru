@@ -51,7 +51,12 @@
 
 				if (item.expiry === -1 || item.expiry <= Date.now()) {
 					output = item.value;
-					//this.link(key, "first");
+
+					if (this.first !== empty) {
+						this.cache[this.first].next = key;
+					}
+
+					this.first = key;
 
 					if (this.notify === true) {
 						next(this.onchange("get", this.dump()));
@@ -68,25 +73,6 @@
 			return key in this.cache;
 		}
 
-		link (key, pos = "first") {
-			if (this[pos] !== key) {
-				if (pos === "first") {
-					const item = this.cache[key];
-
-					item.next = empty;
-
-					if (this.last === key && item.previous !== empty) {
-						this.last = item.previous;
-					}
-
-					item.previous = this.first;
-					this.first = key;
-				}/* else {
-
-				}*/
-			}
-		}
-
 		onchange () {}
 
 		remove (key, silent = false) {
@@ -97,6 +83,26 @@
 
 				delete this.cache[key];
 				this.length--;
+
+				if (result.previous !== empty) {
+					this.cache[result.previous].next = result.next;
+
+					if (this.first === key) {
+						this.first = result.previous;
+					}
+				} else if (this.first === key) {
+					this.first = empty;
+				}
+
+				if (result.next !== empty) {
+					this.cache[result.next].previous = result.previous;
+
+					if (this.last === key) {
+						this.last = result.next;
+					}
+				} else if (this.last === key) {
+					this.last = empty;
+				}
 
 				if (silent === false && this.notify === true) {
 					next(this.onchange("remove", this.dump()));
@@ -121,6 +127,14 @@
 
 				item.value = value;
 				item.next = empty;
+
+				if (this.first !== key) {
+					item.previous = this.first;
+				}
+
+				if (this.last === key && item.previous !== empty) {
+					this.last = item.previous;
+				}
 			} else {
 				if (this.length === this.max) {
 					this.evict();
@@ -133,7 +147,23 @@
 					previous: this.first,
 					value: value
 				};
+
+				if (this.length === 1) {
+					this.last = key;
+				}
 			}
+
+			if (this.first !== empty && this.first !== key) {
+				const first = this.cache[this.first];
+
+				first.next = key;
+
+				if (first.previous === key) {
+					first.previous = empty;
+				}
+			}
+
+			this.first = key;
 
 			if (this.notify === true) {
 				next(this.onchange("set", this.dump()));
