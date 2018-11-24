@@ -49,7 +49,7 @@
 			if (this.has(key) === true) {
 				const item = this.cache[key];
 
-				if (item.expiry === -1 || item.expiry <= Date.now()) {
+				if (item.expiry === -1 || item.expiry > Date.now()) {
 					output = item.value;
 
 					if (this.first !== empty) {

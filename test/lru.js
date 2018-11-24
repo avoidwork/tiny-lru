@@ -78,7 +78,7 @@ exports.suite = {
 		test.equal(cache.set("1", "a").length, 1, "Should be '1'");
 		setTimeout(function () {
 			cache.get("1");
-			test.equal(cache.length, 1, "Should be '1'");
+			test.equal(cache.length, 0, "Should be '0'");
 			test.done();
 		}, 30);
 	},
