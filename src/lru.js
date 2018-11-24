@@ -51,6 +51,7 @@
 
 				if (item.expiry === -1 || item.expiry <= Date.now()) {
 					output = this.cache[key].value;
+					//this.link(key, "first");
 
 					if (this.notify === true) {
 						next(this.onchange("get", this.dump()));
@@ -63,8 +64,8 @@
 			return output;
 		}
 
-		has (key, type = "cache") {
-			return key in this[type];
+		has (key) {
+			return key in this.cache;
 		}
 
 		link (key, pos = "first") {
