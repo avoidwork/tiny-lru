@@ -32,11 +32,16 @@
 		}
 
 		dump () {
-			const obj = JSON.parse(JSON.stringify(this));
-
-			delete obj.timers;
-
-			return JSON.stringify(obj);
+			return JSON.stringify({
+				cache: this.cache,
+				expire: this.expire,
+				first: this.first,
+				last: this.last,
+				length: this.length,
+				max: this.max,
+				notify: this.notify,
+				ttl: this.ttl
+			});
 		}
 
 		evict () {
