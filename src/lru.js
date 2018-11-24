@@ -50,7 +50,7 @@
 				const item = this.cache[key];
 
 				if (item.expiry === -1 || item.expiry <= Date.now()) {
-					output = this.cache[key].value;
+					output = item.value;
 					//this.link(key, "first");
 
 					if (this.notify === true) {
