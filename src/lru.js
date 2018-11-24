@@ -1,6 +1,5 @@
 	class LRU {
-		constructor (max, notify, ttl, expire) {
-			this.expire = expire;
+		constructor (max, notify, ttl) {
 			this.max = max;
 			this.notify = notify;
 			this.ttl = ttl;
@@ -18,15 +17,6 @@
 			return this;
 		}
 
-		clearTimer (key, col = "timers") {
-			if (this.has(key, col) === true) {
-				clearTimeout(this[col][key]);
-				delete this[col][key];
-			}
-
-			return this;
-		}
-
 		delete (key, silent = false) {
 			return this.remove(key, silent);
 		}
@@ -34,7 +24,6 @@
 		dump () {
 			return JSON.stringify({
 				cache: this.cache,
-				expire: this.expire,
 				first: this.first,
 				last: this.last,
 				length: this.length,
@@ -58,23 +47,30 @@
 			let output;
 
 			if (this.has(key) === true) {
-				output = this.cache[key].value;
-				this.set(key, output);
+				const item = this.cache[key];
 
-				if (this.ttl > 0) {
-					this.clearTimer(key).setTimer(key);
-				}
+				if (item.expiry === -1 || item.expiry <= Date.now()) {
+					output = item.value;
 
-				if (this.notify === true) {
-					next(this.onchange("get", this.dump()));
+					if (this.first !== empty) {
+						this.cache[this.first].next = key;
+					}
+
+					this.first = key;
+
+					if (this.notify === true) {
+						next(this.onchange("get", this.dump()));
+					}
+				} else {
+					this.remove(key);
 				}
 			}
 
 			return output;
 		}
 
-		has (key, type = "cache") {
-			return key in this[type];
+		has (key) {
+			return key in this.cache;
 		}
 
 		onchange () {}
@@ -83,40 +79,30 @@
 			let result;
 
 			if (this.has(key) === true) {
-				const cached = this.cache[key];
+				result = this.cache[key];
 
 				delete this.cache[key];
 				this.length--;
 
-				if (this.ttl > 0) {
-					this.clearTimer(key);
-				}
-
-				if (this.expire > 0) {
-					this.clearTimer(key, "expires");
-				}
-
-				if (this.has(cached.previous) === true) {
-					this.cache[cached.previous].next = cached.next;
+				if (result.previous !== empty) {
+					this.cache[result.previous].next = result.next;
 
 					if (this.first === key) {
-						this.first = cached.previous;
+						this.first = result.previous;
 					}
 				} else if (this.first === key) {
 					this.first = empty;
 				}
 
-				if (this.has(cached.next) === true) {
-					this.cache[cached.next].previous = cached.previous;
+				if (result.next !== empty) {
+					this.cache[result.next].previous = result.previous;
 
 					if (this.last === key) {
-						this.last = cached.next;
+						this.last = result.next;
 					}
 				} else if (this.last === key) {
 					this.last = empty;
 				}
-
-				result = cached;
 
 				if (silent === false && this.notify === true) {
 					next(this.onchange("remove", this.dump()));
@@ -127,29 +113,18 @@
 		}
 
 		reset () {
-			if (this.expires !== void 0) {
-				Object.keys(this.expires).forEach(i => this.clearTimer(i, "expires"));
-			}
-
-			if (this.timers !== void 0) {
-				Object.keys(this.timers).forEach(i => this.clearTimer(i));
-			}
-
 			this.cache = {};
-			this.expires = {};
 			this.first = empty;
 			this.last = empty;
 			this.length = 0;
-			this.timers = {};
 
 			return this;
 		}
 
 		set (key, value) {
-			let first, item;
-
 			if (this.has(key) === true) {
-				item = this.cache[key];
+				const item = this.cache[key];
+
 				item.value = value;
 				item.next = empty;
 
@@ -166,20 +141,21 @@
 				}
 
 				this.length++;
-
-				if (this.length === 1) {
-					this.last = key;
-				}
-
 				this.cache[key] = {
+					expiry: this.ttl > 0 ? new Date().getTime() + this.ttl : -1,
 					next: empty,
 					previous: this.first,
 					value: value
 				};
+
+				if (this.length === 1) {
+					this.last = key;
+				}
 			}
 
-			if (this.first !== key && this.has(this.first) === true) {
-				first = this.cache[this.first];
+			if (this.first !== empty && this.first !== key) {
+				const first = this.cache[this.first];
+
 				first.next = key;
 
 				if (first.previous === key) {
@@ -193,23 +169,7 @@
 				next(this.onchange("set", this.dump()));
 			}
 
-			if (this.ttl > 0) {
-				this.clearTimer(key).setTimer(key);
-			}
-
-			if (this.expire > 0 && this.has(key, "expires") === false) {
-				this.setExpire(key);
-			}
-
 			return this;
-		}
-
-		setExpire (key) {
-			this.expires[key] = setTimeout(() => this.clearTimer(key, "expires").clearTimer(key).remove(key), this.expire);
-		}
-
-		setTimer (key) {
-			this.timers[key] = setTimeout(() => this.remove(key), this.ttl);
 		}
 
 		update (arg) {
