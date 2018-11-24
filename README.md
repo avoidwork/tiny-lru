@@ -187,7 +187,7 @@ cache.set("myKey", {prop: true});
 ## ttl
 ### Property
 
-Milliseconds an item will remain in cache
+Milliseconds an item will remain in cache; lazy expiration upon next `get()` of an item
 
 **Example**
 
