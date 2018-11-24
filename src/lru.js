@@ -92,7 +92,7 @@
 					this.clearTimer(key);
 				}
 
-				if (silent === false && this.expire > 0) {
+				if (this.expire > 0) {
 					this.clearTimer(key, "expires");
 				}
 
