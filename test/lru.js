@@ -39,12 +39,18 @@ exports.suite = {
 		test.done();
 	},
 	realistic: function (test) {
-		test.expect(24);
+		test.expect(30);
 		test.equal(this.cache.set("1", "a").length, 1, "Should be '1'");
 		test.equal(this.cache.set("2", "b").length, 2, "Should be '2'");
 		test.equal(this.cache.set("1", "c").length, 2, "Should be '2'");
 		test.equal(this.cache.cache["2"].next, "1", "Should be '1'");
 		test.equal(this.cache.cache["2"].previous, empty, "Should be ''");
+		test.equal(this.cache.get("2"), "b", "Should be 'b'");
+		test.equal(this.cache.cache["2"].next, empty, "Should be ''");
+		test.equal(this.cache.cache["2"].previous, "1", "Should be '1'");
+		test.equal(this.cache.get("1"), "c", "Should be 'c'");
+		test.equal(this.cache.cache["1"].next, empty, "Should be ''");
+		test.equal(this.cache.cache["1"].previous, "2", "Should be '2'");
 		this.cache.delete("1");
 		test.equal(this.cache.cache["2"].next, empty, "Should be ''");
 		test.equal(this.cache.cache["2"].previous, empty, "Should be ''");

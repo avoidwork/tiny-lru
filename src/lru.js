@@ -43,22 +43,17 @@
 			return this;
 		}
 
-		get (key) {
-			let output;
+		get (key, silent = false) {
+			let result;
 
 			if (this.has(key) === true) {
 				const item = this.cache[key];
 
 				if (item.expiry === -1 || item.expiry > Date.now()) {
-					output = item.value;
+					result = item.value;
+					this.set(key, result, true, true);
 
-					if (this.first !== empty) {
-						this.cache[this.first].next = key;
-					}
-
-					this.first = key;
-
-					if (this.notify === true) {
+					if (silent === false && this.notify === true) {
 						next(this.onchange("get", this.dump()));
 					}
 				} else {
@@ -66,7 +61,7 @@
 				}
 			}
 
-			return output;
+			return result;
 		}
 
 		has (key) {
@@ -121,8 +116,8 @@
 			return this;
 		}
 
-		set (key, value) {
-			if (this.has(key) === true) {
+		set (key, value, silent = false, bypass = false) {
+			if (bypass === true || this.has(key) === true) {
 				const item = this.cache[key];
 
 				item.value = value;
@@ -165,7 +160,7 @@
 
 			this.first = key;
 
-			if (this.notify === true) {
+			if (silent === false && this.notify === true) {
 				next(this.onchange("set", this.dump()));
 			}
 
