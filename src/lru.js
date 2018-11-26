@@ -34,7 +34,7 @@
 		}
 
 		evict () {
-			this.remove(this.last, true);
+			this.remove(this.last, true, true);
 
 			if (this.notify === true) {
 				next(this.onchange("evict", this.dump()));
@@ -70,10 +70,10 @@
 
 		onchange () {}
 
-		remove (key, silent = false) {
+		remove (key, silent = false, bypass = false) {
 			let result;
 
-			if (this.has(key) === true) {
+			if (bypass === true || this.has(key) === true) {
 				result = this.cache[key];
 
 				delete this.cache[key];
