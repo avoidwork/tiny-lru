@@ -102,7 +102,7 @@ exports.suite = {
 
 		cache.max = 2e4;
 		cache.expiry = 25;
-		test.expect(4);
+		test.expect(5);
 		test.equal(cache.length, 0, "Should be '0'");
 		populate(cache);
 		test.equal(cache.length, cache.max, `Should be '${cache.max}'`);
@@ -112,7 +112,8 @@ exports.suite = {
 		cache.remove(20006);
 		setTimeout(() => {
 			cache.remove(20007);
-			test.equal(Object.keys(cache.cache).map(i => cache.cache[i]).filter(i => i.next === i.previous).length, 0, "Should be '0'");
+			test.equal(Object.keys(cache.cache).map(i => cache.cache[i]).filter(i => i.next === null).length, 1, "Should be '1'");
+			test.equal(Object.keys(cache.cache).map(i => cache.cache[i]).filter(i => i.previous === null).length, 1, "Should be '1'");
 			test.done();
 		}, 25);
 	}
