@@ -80,7 +80,7 @@
 				this.length--;
 
 				if (result.previous !== empty) {
-					this.cache[result.previous].next = result.next;
+					this.cache[result.previous].next = result.next !== key ? result.next : empty;
 
 					if (this.first === key) {
 						this.first = result.previous;
@@ -90,7 +90,7 @@
 				}
 
 				if (result.next !== empty) {
-					this.cache[result.next].previous = result.previous;
+					this.cache[result.next].previous = result.previous !== key ? result.previous : empty;
 
 					if (this.last === key) {
 						this.last = result.next;
