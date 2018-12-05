@@ -1,7 +1,7 @@
 const path = require("path"),
 	lru = require(path.join(__dirname, "lib", "tiny-lru.js")),
 	precise = require("precise"),
-	nth = 2e5,
+	nth = 2e3,
 	cache = lru(nth),
 	data = new Array(nth);
 

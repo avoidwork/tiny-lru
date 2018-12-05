@@ -91,7 +91,7 @@
 				}
 
 				if (this.last === key) {
-					this.last = this.first;
+					this.last = result.next;
 				}
 
 				if (silent === false && this.notify === true) {
