@@ -111,6 +111,7 @@
 
 				if (this.first !== key) {
 					item.previous = this.first;
+					link(this.cache[this.first], key);
 				}
 
 				if (this.last === key && item.previous !== empty) {
@@ -132,15 +133,9 @@
 				if (this.length === 1) {
 					this.last = key;
 				}
-			}
 
-			if (this.first !== empty && this.first !== key) {
-				const first = this.cache[this.first];
-
-				first.next = key;
-
-				if (first.previous === key) {
-					first.previous = empty;
+				if (this.first !== empty && this.first !== key) {
+					link(this.cache[this.first], key);
 				}
 			}
 
