@@ -3,11 +3,12 @@
 			this.max = max;
 			this.notify = notify;
 			this.ttl = ttl;
-			reset.call(this);
+
+			return this.reset();
 		}
 
 		clear (silent = false) {
-			reset.call(this);
+			this.reset();
 
 			if (silent === false && this.notify === true) {
 				next(this.onchange("clear", this.dump()));
@@ -100,6 +101,15 @@
 			}
 
 			return result;
+		}
+
+		reset () {
+			this.cache = {};
+			this.first = empty;
+			this.last = empty;
+			this.length = 0;
+
+			return this;
 		}
 
 		set (key, value, silent = false, bypass = false) {
