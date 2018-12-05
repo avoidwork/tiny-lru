@@ -3,12 +3,11 @@
 			this.max = max;
 			this.notify = notify;
 			this.ttl = ttl;
-
-			return this.reset();
+			reset.call(this);
 		}
 
 		clear (silent = false) {
-			this.reset();
+			reset.call(this);
 
 			if (silent === false && this.notify === true) {
 				next(this.onchange("clear", this.dump()));
@@ -80,23 +79,19 @@
 				this.length--;
 
 				if (result.previous !== empty) {
-					this.cache[result.previous].next = result.next !== key ? result.next : empty;
-
-					if (this.first === key) {
-						this.first = result.previous;
-					}
-				} else if (this.first === key) {
-					this.first = empty;
+					this.cache[result.previous].next = result.next;
 				}
 
 				if (result.next !== empty) {
-					this.cache[result.next].previous = result.previous !== key ? result.previous : empty;
+					this.cache[result.next].previous = result.previous;
+				}
 
-					if (this.last === key) {
-						this.last = result.next;
-					}
-				} else if (this.last === key) {
-					this.last = empty;
+				if (this.first === key) {
+					this.first = result.previous;
+				}
+
+				if (this.last === key) {
+					this.last = this.first;
 				}
 
 				if (silent === false && this.notify === true) {
@@ -105,15 +100,6 @@
 			}
 
 			return result;
-		}
-
-		reset () {
-			this.cache = {};
-			this.first = empty;
-			this.last = empty;
-			this.length = 0;
-
-			return this;
 		}
 
 		set (key, value, silent = false, bypass = false) {
