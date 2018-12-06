@@ -4,11 +4,13 @@
 	const next = typeof process !== "undefined" ? process.nextTick : arg => setTimeout(arg, 1),
 		empty = null;
 
-	function link (item, key) {
-		item.next = key;
+	function link (item, key, dir) {
+		const other = dir === "next" ? "previous" : "next";
 
-		if (item.previous === key) {
-			item.previous = empty;
+		item[dir] = key;
+
+		if (item[other] === key) {
+			item[other] = empty;
 		}
 	}
 
