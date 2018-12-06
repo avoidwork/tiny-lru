@@ -113,15 +113,15 @@
 
 				if (this.first !== key) {
 					item.previous = this.first;
-					link(this.cache[this.first], key, "next");
+					link(this.cache[this.first], key, "next", "previous");
 				}
 
 				if (right !== empty && left !== empty && right !== item.previous) {
-					link(this.cache[right], left, "next");
+					this.cache[right].next = left;
 				}
 
 				if (left !== empty) {
-					link(this.cache[left], right, "previous");
+					this.cache[left].previous = right;
 				}
 
 				if (this.last === key && item.previous !== empty) {
@@ -145,7 +145,7 @@
 				}
 
 				if (this.first !== empty && this.first !== key) {
-					link(this.cache[this.first], key, "next");
+					link(this.cache[this.first], key, "next", "previous");
 				}
 			}
 
