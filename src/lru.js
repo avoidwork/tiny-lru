@@ -104,7 +104,9 @@
 
 		set (key, value, silent = false, bypass = false) {
 			if (bypass === true || this.has(key) === true) {
-				const item = this.cache[key];
+				const item = this.cache[key],
+					left = item.next,
+					right = item.previous;
 
 				item.value = value;
 				item.next = empty;
@@ -112,6 +114,14 @@
 				if (this.first !== key) {
 					item.previous = this.first;
 					link(this.cache[this.first], key, "next");
+				}
+
+				if (right !== empty && left !== empty && right !== item.previous) {
+					link(this.cache[right], left, "next");
+				}
+
+				if (left !== empty) {
+					link(this.cache[left], right, "previous");
 				}
 
 				if (this.last === key && item.previous !== empty) {
