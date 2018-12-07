@@ -104,28 +104,29 @@
 
 		set (key, value, silent = false, bypass = false) {
 			if (bypass === true || this.has(key) === true) {
-				const item = this.cache[key],
-					left = item.next,
-					right = item.previous;
+				const item = this.cache[key];
 
 				item.value = value;
-				item.next = empty;
 
 				if (this.first !== key) {
+					const left = item.next,
+						right = item.previous;
+
+					item.next = empty;
 					item.previous = this.first;
 					link(this.cache[this.first], key, "next", "previous");
-				}
 
-				if (right !== empty && left !== empty && right !== item.previous) {
-					this.cache[right].next = left;
-				}
+					if (left !== empty && left !== this.first) {
+						if (right !== empty) {
+							this.cache[right].next = left;
+						}
 
-				if (left !== empty) {
-					this.cache[left].previous = right;
-				}
+						this.cache[left].previous = right;
+					}
 
-				if (this.last === key && item.previous !== empty) {
-					this.last = item.previous;
+					if (this.last === key) {
+						this.last = item.previous;
+					}
 				}
 			} else {
 				if (this.length === this.max) {
