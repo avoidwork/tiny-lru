@@ -8,31 +8,43 @@ exports.suite = {
 		done();
 	},
 	realistic: function (test) {
-		test.expect(33);
+		test.expect(45);
 		test.equal(this.cache.set("1", "a").length, 1, "Should be '1'");
 		test.equal(this.cache.cache["1"].next, empty, `Should be '${empty}'`);
 		test.equal(this.cache.cache["1"].previous, empty, `Should be '${empty}'`);
+		test.equal(this.cache.first, "1", "Should be '1'");
+		test.equal(this.cache.last, "1", "Should be '1'");
 		test.equal(this.cache.set("2", "b").length, 2, "Should be '2'");
+		test.equal(this.cache.first, "2", "Should be '2'");
+		test.equal(this.cache.last, "1", "Should be '1'");
 		test.equal(this.cache.cache["1"].next, "2", "Should be '2'");
 		test.equal(this.cache.cache["1"].previous, empty, `Should be '${empty}'`);
 		test.equal(this.cache.cache["2"].next, empty, `Should be '${empty}'`);
 		test.equal(this.cache.cache["2"].previous, "1", "Should be '1'");
 		test.equal(this.cache.set("1", "c").length, 2, "Should be '2'");
+		test.equal(this.cache.first, "1", "Should be '1'");
+		test.equal(this.cache.last, "2", "Should be '2'");
 		test.equal(this.cache.cache["1"].next, empty, "Should be '2'");
 		test.equal(this.cache.cache["1"].previous, "2", `Should be '${empty}'`);
 		test.equal(this.cache.cache["2"].next, "1", `Should be '${empty}'`);
 		test.equal(this.cache.cache["2"].previous, empty, "Should be '1'");
 		test.equal(this.cache.set("1", "d").length, 2, "Should be '2'");
+		test.equal(this.cache.first, "1", "Should be '1'");
+		test.equal(this.cache.last, "2", "Should be '2'");
 		test.equal(this.cache.cache["1"].next, empty, "Should be '2'");
 		test.equal(this.cache.cache["1"].previous, "2", `Should be '${empty}'`);
 		test.equal(this.cache.cache["2"].next, "1", `Should be '${empty}'`);
 		test.equal(this.cache.cache["2"].previous, empty, "Should be '1'");
 		test.equal(this.cache.set("2", "e").length, 2, "Should be '2'");
+		test.equal(this.cache.first, "2", "Should be '2'");
+		test.equal(this.cache.last, "1", "Should be '1'");
 		test.equal(this.cache.cache["1"].next, "2", "Should be '2'");
 		test.equal(this.cache.cache["1"].previous, empty, `Should be '${empty}'`);
 		test.equal(this.cache.cache["2"].next, empty, `Should be '${empty}'`);
 		test.equal(this.cache.cache["2"].previous, "1", "Should be '1'");
 		test.equal(this.cache.set("3", "e").length, 2, "Should be '2'");
+		test.equal(this.cache.first, "3", "Should be '3'");
+		test.equal(this.cache.last, "2", "Should be '2'");
 		test.equal(this.cache.cache["2"].next, "3", `Should be '${empty}'`);
 		test.equal(this.cache.cache["2"].previous, empty, "Should be '1'");
 		test.equal(this.cache.cache["3"].next, empty, `Should be '${empty}'`);
@@ -100,5 +112,26 @@ exports.suite = {
 			test.equal(Object.keys(cache.cache).map(i => cache.cache[i]).filter(i => i.previous === null).length, 1, "Should be '1'");
 			test.done();
 		}, 25);
+	}
+};
+
+exports.simple = {
+	setUp: function (done) {
+		this.cache = lru(5);
+		this.items = ["a", "b", "c", "d", "e"];
+		done();
+	},
+	test: function (test) {
+		this.items.forEach(i => this.cache.set(i, false));
+		test.expect(6);
+		test.equal(this.cache.first, "e", "Should be 'e'");
+		test.equal(this.cache.last, "a", "Should be 'a'");
+		this.cache.set("e", true);
+		test.equal(this.cache.first, "e", "Should be 'e'");
+		test.equal(this.cache.last, "a", "Should be 'a'");
+		this.cache.set("a", true);
+		test.equal(this.cache.first, "a", "Should be 'a'");
+		test.equal(this.cache.last, "b", "Should be 'b'");
+		test.done();
 	}
 };

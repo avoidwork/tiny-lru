@@ -109,23 +109,23 @@
 				item.value = value;
 
 				if (this.first !== key) {
-					const left = item.next,
-						right = item.previous;
+					const n = item.next,
+						p = item.previous;
 
 					item.next = empty;
 					item.previous = this.first;
 					link(this.cache[this.first], key, "next", "previous");
 
-					if (left !== empty && left !== this.first) {
-						if (right !== empty) {
-							this.cache[right].next = left;
+					if (n !== empty && n !== this.first) {
+						if (p !== empty) {
+							this.cache[p].next = n;
 						}
 
-						this.cache[left].previous = right;
+						this.cache[n].previous = p;
 					}
 
 					if (this.last === key) {
-						this.last = item.previous;
+						this.last = n;
 					}
 				}
 			} else {
