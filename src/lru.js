@@ -1,30 +1,24 @@
 	class LRU {
 		constructor (max, ttl) {
+			this.cache = {};
+			this.first = empty;
+			this.last = empty;
+			this.length = 0;
 			this.max = max;
 			this.ttl = ttl;
-			reset.call(this);
 		}
 
 		clear () {
-			reset.call(this);
+			this.cache = {};
+			this.first = empty;
+			this.last = empty;
+			this.length = 0;
 
 			return this;
 		}
 
 		delete (key) {
 			return this.remove(key);
-		}
-
-		dump () {
-			return JSON.stringify({
-				cache: this.cache,
-				first: this.first,
-				last: this.last,
-				length: this.length,
-				max: this.max,
-				notify: this.notify,
-				ttl: this.ttl
-			});
 		}
 
 		evict () {
@@ -53,8 +47,6 @@
 		has (key) {
 			return key in this.cache;
 		}
-
-		onchange () {}
 
 		remove (key, bypass = false) {
 			let result;
@@ -97,7 +89,7 @@
 
 					item.next = empty;
 					item.previous = this.first;
-					link(this.cache[this.first], key, "next", "previous");
+					link(this.cache[this.first], key);
 
 					if (n !== empty && n !== this.first) {
 						if (p !== empty) {
@@ -129,7 +121,7 @@
 				}
 
 				if (this.first !== empty && this.first !== key) {
-					link(this.cache[this.first], key, "next", "previous");
+					link(this.cache[this.first], key);
 				}
 			}
 
