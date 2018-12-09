@@ -17,8 +17,8 @@
 			return this;
 		}
 
-		delete (key) {
-			return this.remove(key);
+		delete (key, bypass = false) {
+			return this.remove(key, bypass);
 		}
 
 		evict () {
@@ -84,11 +84,16 @@
 
 				if (this.first !== key) {
 					const n = item.next,
-						p = item.previous;
+						p = item.previous,
+						f = this.cache[this.first];
 
 					item.next = empty;
 					item.previous = this.first;
-					link(this.cache[this.first], key);
+					f.next = key;
+
+					if (f.previous === key) {
+						f.previous = empty;
+					}
 
 					if (n !== empty && n !== this.first) {
 						if (p !== empty) {
