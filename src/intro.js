@@ -1,8 +1,7 @@
 "use strict";
 
 (function (global) {
-	const next = typeof process !== "undefined" ? process.nextTick : arg => setTimeout(arg, 1),
-		empty = null;
+	const empty = null;
 
 	function link (item, key, a, b) {
 		item[a] = key;

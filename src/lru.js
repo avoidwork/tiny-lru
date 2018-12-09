@@ -1,23 +1,18 @@
 	class LRU {
-		constructor (max, notify, ttl) {
+		constructor (max, ttl) {
 			this.max = max;
-			this.notify = notify;
 			this.ttl = ttl;
 			reset.call(this);
 		}
 
-		clear (silent = false) {
+		clear () {
 			reset.call(this);
-
-			if (silent === false && this.notify === true) {
-				next(this.onchange("clear", this.dump()));
-			}
 
 			return this;
 		}
 
-		delete (key, silent = false) {
-			return this.remove(key, silent);
+		delete (key) {
+			return this.remove(key);
 		}
 
 		dump () {
@@ -33,16 +28,12 @@
 		}
 
 		evict () {
-			this.remove(this.last, true, true);
-
-			if (this.notify === true) {
-				next(this.onchange("evict", this.dump()));
-			}
+			this.remove(this.last, true);
 
 			return this;
 		}
 
-		get (key, silent = false) {
+		get (key) {
 			let result;
 
 			if (this.has(key) === true) {
@@ -51,10 +42,6 @@
 				if (item.expiry === -1 || item.expiry > Date.now()) {
 					result = item.value;
 					this.set(key, result, true, true);
-
-					if (silent === false && this.notify === true) {
-						next(this.onchange("get", this.dump()));
-					}
 				} else {
 					this.remove(key);
 				}
@@ -69,7 +56,7 @@
 
 		onchange () {}
 
-		remove (key, silent = false, bypass = false) {
+		remove (key, bypass = false) {
 			let result;
 
 			if (bypass === true || this.has(key) === true) {
@@ -93,16 +80,12 @@
 				if (this.last === key) {
 					this.last = result.next;
 				}
-
-				if (silent === false && this.notify === true) {
-					next(this.onchange("remove", this.dump()));
-				}
 			}
 
 			return result;
 		}
 
-		set (key, value, silent = false, bypass = false) {
+		set (key, value, bypass = false) {
 			if (bypass === true || this.has(key) === true) {
 				const item = this.cache[key];
 
@@ -152,18 +135,6 @@
 
 			this.first = key;
 
-			if (silent === false && this.notify === true) {
-				next(this.onchange("set", this.dump()));
-			}
-
 			return this;
-		}
-
-		update (arg) {
-			const obj = JSON.parse(arg);
-
-			Object.keys(obj).forEach(i => {
-				this[i] = obj[i];
-			});
 		}
 	}

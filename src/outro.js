@@ -1,5 +1,5 @@
-	function factory (max = 1000, notify = false, ttl = 0) {
-		return new LRU(max, notify, ttl);
+	function factory (max = 1000, ttl = 0) {
+		return new LRU(max, ttl);
 	}
 
 	// Node, AMD & window supported
