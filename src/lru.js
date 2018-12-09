@@ -37,7 +37,7 @@
 					result = item.value;
 					this.set(key, result, true);
 				} else {
-					this.remove(key);
+					this.remove(key, true);
 				}
 			}
 
