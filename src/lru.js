@@ -35,7 +35,7 @@
 
 				if (item.expiry === -1 || item.expiry > Date.now()) {
 					result = item.value;
-					this.set(key, result, true, true);
+					this.set(key, result, true);
 				} else {
 					this.remove(key);
 				}
@@ -53,7 +53,6 @@
 
 			if (bypass === true || this.has(key) === true) {
 				result = this.cache[key];
-
 				delete this.cache[key];
 				this.length--;
 
@@ -118,10 +117,8 @@
 
 				if (this.length === 1) {
 					this.last = key;
-				}
-
-				if (this.first !== empty && this.first !== key) {
-					link(this.cache[this.first], key);
+				} else {
+					this.cache[this.first].next = key;
 				}
 			}
 
