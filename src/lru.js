@@ -94,11 +94,11 @@
 					}
 
 					if (r !== empty) {
-						if (l !== empty) {
-							this.cache[l].right = r;
-						}
-
 						this.cache[r].left = l;
+					}
+
+					if (l !== empty) {
+						this.cache[l].right = r;
 					}
 
 					if (this.last === key) {
