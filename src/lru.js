@@ -93,7 +93,7 @@
 						f.left = l;
 					}
 
-					if (r !== empty && r !== this.first) {
+					if (r !== empty) {
 						if (l !== empty) {
 							this.cache[l].right = r;
 						}
