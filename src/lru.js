@@ -90,7 +90,7 @@
 					f.right = key;
 
 					if (f.left === key) {
-						f.left = empty;
+						f.left = l;
 					}
 
 					if (r !== empty && r !== this.first) {
