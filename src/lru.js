@@ -89,10 +89,6 @@
 					item.left = this.first;
 					f.right = key;
 
-					if (f.left === key) {
-						f.left = l;
-					}
-
 					if (r !== empty) {
 						this.cache[r].left = l;
 					}
