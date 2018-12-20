@@ -54,20 +54,20 @@
 				delete this.cache[key];
 				this.length--;
 
-				if (item.left !== empty) {
-					this.cache[item.left].right = item.right;
+				if (item.next !== empty) {
+					this.cache[item.next].prev = item.prev;
 				}
 
-				if (item.right !== empty) {
-					this.cache[item.right].left = item.left;
+				if (item.prev !== empty) {
+					this.cache[item.prev].next = item.next;
 				}
 
 				if (this.first === key) {
-					this.first = item.left;
+					this.first = item.next;
 				}
 
 				if (this.last === key) {
-					this.last = item.right;
+					this.last = item.prev;
 				}
 			}
 
@@ -81,24 +81,24 @@
 				item.value = value;
 
 				if (this.first !== key) {
-					const r = item.right,
-						l = item.left,
+					const p = item.prev,
+						n = item.next,
 						f = this.cache[this.first];
 
-					item.right = empty;
-					item.left = this.first;
-					f.right = key;
+					item.prev = empty;
+					item.next = this.first;
+					f.prev = key;
 
-					if (r !== empty) {
-						this.cache[r].left = l;
+					if (p !== empty) {
+						this.cache[p].next = n;
 					}
 
-					if (l !== empty) {
-						this.cache[l].right = r;
+					if (n !== empty) {
+						this.cache[n].prev = p;
 					}
 
 					if (this.last === key) {
-						this.last = r;
+						this.last = p;
 					}
 				}
 			} else {
@@ -109,15 +109,15 @@
 				this.length++;
 				this.cache[key] = {
 					expiry: this.ttl > 0 ? new Date().getTime() + this.ttl : -1,
-					right: empty,
-					left: this.first,
+					prev: empty,
+					next: this.first,
 					value: value
 				};
 
 				if (this.length === 1) {
 					this.last = key;
 				} else {
-					this.cache[this.first].right = key;
+					this.cache[this.first].prev = key;
 				}
 			}
 
