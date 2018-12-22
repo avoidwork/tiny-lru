@@ -10,3 +10,4 @@
 .travis.yml
 Gruntfile.js
 benchmark.js
+bower.json
