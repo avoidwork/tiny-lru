@@ -37,7 +37,7 @@ cache.clear();
 Removes item from cache
 
 	param  {String} key Item key
-	return {Object}     Item
+	return {Object}     LRU instance
 
 **Example**
 
@@ -130,7 +130,7 @@ cache.length; // 0 - it's a new cache!
 Removes item from cache
 
 	param  {String} key Item key
-	return {Object}     Item
+	return {Object}     LRU instance
 
 **Example**
 
