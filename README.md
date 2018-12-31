@@ -31,6 +31,20 @@ Clears the contents of the cache
 cache.clear();
 ```
 
+## delete
+### Method
+
+Removes item from cache
+
+	param  {String} key Item key
+	return {Object}     Item
+
+**Example**
+
+```javascript
+const staleItem = cache.delete("myKey");
+```
+
 ## evict
 ### Method
 
