@@ -42,7 +42,7 @@ Removes item from cache
 **Example**
 
 ```javascript
-const staleItem = cache.delete("myKey");
+cache.delete("myKey");
 ```
 
 ## evict
@@ -135,7 +135,7 @@ Removes item from cache
 **Example**
 
 ```javascript
-const staleItem = cache.remove("myKey");
+cache.remove("myKey");
 ```
 
 ## set
