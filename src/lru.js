@@ -15,7 +15,7 @@
 		}
 
 		delete (key, bypass = false) {
-			if (bypass === true || this.has(key) === true) {
+			if (bypass || this.has(key)) {
 				const item = this.cache[key];
 
 				delete this.cache[key];
@@ -52,7 +52,7 @@
 		get (key) {
 			let result;
 
-			if (this.has(key) === true) {
+			if (this.has(key)) {
 				const item = this.cache[key];
 
 				if (item.expiry === -1 || item.expiry > Date.now()) {
@@ -79,7 +79,7 @@
 		}
 
 		set (key, value, bypass = false) {
-			if (bypass === true || this.has(key) === true) {
+			if (bypass || this.has(key)) {
 				const item = this.cache[key];
 
 				item.value = value;
