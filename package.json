@@ -14,7 +14,7 @@
   "license": "BSD-3-Clause",
   "main": "lib/tiny-lru.js",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=6"
   },
   "engineStrict": true,
   "scripts": {
