@@ -43,7 +43,7 @@
 
 		evict () {
 			if (this.length > 0) {
-				this.remove(this.last, true);
+				this.delete(this.last, true);
 			}
 
 			return this;
@@ -59,7 +59,7 @@
 					result = item.value;
 					this.set(key, result, true);
 				} else {
-					this.remove(key, true);
+					this.delete(key, true);
 				}
 			}
 
