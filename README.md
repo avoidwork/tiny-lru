@@ -167,5 +167,5 @@ cache.ttl = 3e4;
 ```
 
 ## License
-Copyright (c) 2018 Jason Mulligan
+Copyright (c) 2019 Jason Mulligan
 Licensed under the BSD-3 license.
