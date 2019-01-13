@@ -9,7 +9,6 @@ module.exports = function (grunt) {
 				" * @author <%= pkg.author %>\n" +
 				" * @copyright <%= grunt.template.today('yyyy') %>\n" +
 				" * @license <%= pkg.license %>\n" +
-				" * @link <%= pkg.homepage %>\n" +
 				" * @version <%= pkg.version %>\n" +
 				" */\n"
 			},
@@ -54,14 +53,12 @@ module.exports = function (grunt) {
 	grunt.task.registerTask("babili", "Minifies ES2016+ code", function () {
 		const fs = require("fs"),
 			path = require("path"),
-			data = fs.readFileSync(path.join(__dirname, "lib", "tiny-lru.js"), "utf8").replace("\"use strict\";", ""), // Stripping "use strict"; because it's injected
-			pkg = require(path.join(__dirname, "package.json")),
-			banner = "/*\n " + new Date().getFullYear() + " " + pkg.author + "\n @version " + pkg.version + "\n*/\n\"use strict\";";
+			data = fs.readFileSync(path.join(__dirname, "lib", "tiny-lru.js"), "utf8").replace("\"use strict\";", ""); // Stripping "use strict"; because it's injected
 
 		try {
 			const minified = require("babel-core").transform(data, {sourceFileName: "tiny-lru.js", sourceMaps: true, presets: ["minify"]});
 
-			fs.writeFileSync(path.join(__dirname, "lib", "tiny-lru.min.js"), banner + minified.code + "\n//# sourceMappingURL=tiny-lru.min.js.map", "utf8");
+			fs.writeFileSync(path.join(__dirname, "lib", "tiny-lru.min.js"), minified.code + "\n//# sourceMappingURL=tiny-lru.min.js.map", "utf8");
 			grunt.log.ok("1 file created.");
 			fs.writeFileSync(path.join(__dirname, "lib", "tiny-lru.min.js.map"), JSON.stringify(minified.map), "utf8");
 			grunt.log.ok("1 sourcemap created.");
