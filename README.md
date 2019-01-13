@@ -85,6 +85,19 @@ Gets cached item and moves it to the front
 const item = cache.get("myKey");
 ```
 
+## keys
+### Method
+
+Returns an `Array` of cache item keys.
+
+	return {Array} Array of keys
+
+**Example**
+
+```javascript
+console.log(cache.keys());
+```
+
 ## max
 ### Property
 
@@ -127,7 +140,7 @@ cache.length; // 0 - it's a new cache!
 ## remove
 ### Method
 
-Removes item from cache
+(Deprecated) Removes item from cache
 
 	param  {String} key Item key
 	return {Object}     LRU instance

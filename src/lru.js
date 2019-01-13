@@ -15,7 +15,30 @@
 		}
 
 		delete (key, bypass = false) {
-			return this.remove(key, bypass);
+			if (bypass === true || this.has(key) === true) {
+				const item = this.cache[key];
+
+				delete this.cache[key];
+				this.length--;
+
+				if (item.next !== empty) {
+					this.cache[item.next].prev = item.prev;
+				}
+
+				if (item.prev !== empty) {
+					this.cache[item.prev].next = item.next;
+				}
+
+				if (this.first === key) {
+					this.first = item.next;
+				}
+
+				if (this.last === key) {
+					this.last = item.prev;
+				}
+			}
+
+			return this;
 		}
 
 		evict () {
@@ -47,31 +70,12 @@
 			return key in this.cache;
 		}
 
+		keys () {
+			return Object.keys(this.cache);
+		}
+
 		remove (key, bypass = false) {
-			if (bypass === true || this.has(key) === true) {
-				const item = this.cache[key];
-
-				delete this.cache[key];
-				this.length--;
-
-				if (item.next !== empty) {
-					this.cache[item.next].prev = item.prev;
-				}
-
-				if (item.prev !== empty) {
-					this.cache[item.prev].next = item.next;
-				}
-
-				if (this.first === key) {
-					this.first = item.next;
-				}
-
-				if (this.last === key) {
-					this.last = item.prev;
-				}
-			}
-
-			return this;
+			return this.delete(key, bypass);
 		}
 
 		set (key, value, bypass = false) {

@@ -16,6 +16,16 @@ exports.suite = {
 			test.equal(cache.get("1"), void 0, "Should be 'undefined'");
 			test.done();
 		}, 30);
+	},
+	keys: function (test) {
+		const cache = this.cache;
+
+		test.expect(3);
+		test.equal(cache.keys().length, 0, "Should be '0'");
+		cache.set("1", true);
+		test.equal(cache.keys().length, 1, "Should be '1'");
+		test.equal(cache.keys()[0], "1", "Should be '1'");
+		test.done();
 	}
 };
 
@@ -69,7 +79,7 @@ exports.simple = {
 		test.equal(this.cache.cache.c.next, "b", "Should be 'b'");
 		test.equal(this.cache.cache.b.prev, "c", "Should be 'c'");
 		test.equal(this.cache.cache.b.next, null, "Should be 'null'");
-		this.cache.remove("a");
+		this.cache.delete("a");
 		test.equal(this.cache.first, "e", "Should be 'e'");
 		test.equal(this.cache.last, "b", "Should be 'b'");
 		test.equal(this.cache.cache.e.prev, null, "Should be 'null'");
@@ -96,7 +106,7 @@ exports.simple = {
 		test.equal(this.cache.cache.e.next, "d", "Should be 'a'");
 		test.equal(this.cache.cache.d.prev, "e", "Should be 'a'");
 		test.equal(this.cache.cache.d.next, null, "Should be 'null'");
-		this.cache.remove("a"); // no op - repeating assertions
+		this.cache.delete("a"); // no op - repeating assertions
 		test.equal(this.cache.first, "e", "Should be 'e'");
 		test.equal(this.cache.last, "d", "Should be 'd'");
 		test.equal(this.cache.cache.e.prev, null, "Should be 'null'");
