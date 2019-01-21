@@ -81,9 +81,10 @@
 		}
 
 		set (key, value, bypass = false) {
-			if (bypass || this.has(key)) {
-				const item = this.items[key];
+			let item;
 
+			if (bypass || this.has(key)) {
+				item = this.items[key];
 				item.value = value;
 
 				if (this.last !== item) {
@@ -107,14 +108,12 @@
 						next.prev = prev;
 					}
 				}
-
-				this.last = item;
 			} else {
 				if (this.max > 0 && this.size === this.max) {
 					this.evict();
 				}
 
-				const item = this.items[key] = {
+				item = this.items[key] = {
 					expiry: this.ttl > 0 ? new Date().getTime() + this.ttl : this.ttl,
 					key: key,
 					prev: this.last,
@@ -124,12 +123,12 @@
 
 				if (++this.size === 1) {
 					this.first = item;
-					this.last = item;
 				} else {
 					this.last.next = item;
-					this.last = item;
 				}
 			}
+
+			this.last = item;
 
 			return this;
 		}
