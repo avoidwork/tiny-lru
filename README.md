@@ -124,19 +124,6 @@ const cache = lru();
 cache.last; // null - it's a new cache!
 ```
 
-## length
-### Property
-
-Number of items in cache
-
-**Example**
-
-```javascript
-const cache = lru();
-
-cache.length; // 0 - it's a new cache!
-```
-
 ## remove
 ### Method
 
@@ -164,6 +151,19 @@ Sets item in cache as `first`
 
 ```javascript
 cache.set("myKey", {prop: true});
+```
+
+## size
+### Property
+
+Number of items in cache
+
+**Example**
+
+```javascript
+const cache = lru();
+
+cache.size; // 0 - it's a new cache!
 ```
 
 ## ttl
