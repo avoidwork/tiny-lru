@@ -61,7 +61,7 @@ cache.evict();
 ## first
 ### Property
 
-Item in "first" or "top" position
+Item in "first" or "bottom" position
 
 **Example**
 
@@ -114,7 +114,7 @@ cache.max; // 500
 ## last
 ### Property
 
-Item in "last" or "bottom" position
+Item in "last" or "top" position
 
 **Example**
 
