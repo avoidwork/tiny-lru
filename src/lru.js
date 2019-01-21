@@ -1,39 +1,46 @@
 	class LRU {
-		constructor (max, ttl) {
-			this.clear();
+		constructor (max = 0, ttl = 0) {
+			this.first = null;
+			this.items = {};
+			this.last = null;
 			this.max = max;
+			this.size = 0;
 			this.ttl = ttl;
 		}
 
+		has (key) {
+			return key in this.items;
+		}
+
 		clear () {
-			this.cache = {};
-			this.first = empty;
-			this.last = empty;
-			this.length = 0;
+			this.first = null;
+			this.items = {};
+			this.last = null;
+			this.size = 0;
 
 			return this;
 		}
 
-		delete (key, bypass = false) {
-			if (bypass || this.has(key)) {
-				const item = this.cache[key];
+		delete (key) {
+			if (this.has(key)) {
+				const item = this.items[key];
 
-				delete this.cache[key];
-				this.length--;
+				delete this.items[key];
+				this.size--;
 
-				if (item.next !== empty) {
-					this.cache[item.next].prev = item.prev;
+				if (item.prev !== null) {
+					item.prev.next = item.next;
 				}
 
-				if (item.prev !== empty) {
-					this.cache[item.prev].next = item.next;
+				if (item.next !== null) {
+					item.next.prev = item.prev;
 				}
 
-				if (this.first === key) {
+				if (this.first === item) {
 					this.first = item.next;
 				}
 
-				if (this.last === key) {
+				if (this.last === item) {
 					this.last = item.prev;
 				}
 			}
@@ -42,9 +49,12 @@
 		}
 
 		evict () {
-			if (this.length > 0) {
-				this.delete(this.last, true);
-			}
+			const item = this.first;
+
+			delete this.items[item.key];
+			this.first = item.next;
+			this.first.prev = null;
+			this.size--;
 
 			return this;
 		}
@@ -53,79 +63,73 @@
 			let result;
 
 			if (this.has(key)) {
-				const item = this.cache[key];
+				const item = this.items[key];
 
-				if (item.expiry === -1 || item.expiry > Date.now()) {
+				if (this.ttl > 0 && item.expiry <= new Date().getTime()) {
+					this.delete(key);
+				} else {
 					result = item.value;
 					this.set(key, result, true);
-				} else {
-					this.delete(key, true);
 				}
 			}
 
 			return result;
 		}
 
-		has (key) {
-			return key in this.cache;
-		}
-
 		keys () {
-			return Object.keys(this.cache);
-		}
-
-		remove (key, bypass = false) {
-			return this.delete(key, bypass);
+			return Object.keys(this.items);
 		}
 
 		set (key, value, bypass = false) {
 			if (bypass || this.has(key)) {
-				const item = this.cache[key];
+				const item = this.items[key];
 
 				item.value = value;
 
-				if (this.first !== key) {
-					const p = item.prev,
-						n = item.next,
-						f = this.cache[this.first];
+				if (this.last !== item) {
+					const last = this.last,
+						next = item.next,
+						prev = item.prev;
 
-					item.prev = empty;
-					item.next = this.first;
-					f.prev = key;
-
-					if (p !== empty) {
-						this.cache[p].next = n;
+					if (this.first === item) {
+						this.first = item.next;
 					}
 
-					if (n !== empty) {
-						this.cache[n].prev = p;
+					item.next = null;
+					item.prev = this.last;
+					last.next = item;
+
+					if (prev !== null) {
+						prev.next = next;
 					}
 
-					if (this.last === key) {
-						this.last = p;
+					if (next !== null) {
+						next.prev = prev;
 					}
 				}
+
+				this.last = item;
 			} else {
-				if (this.length === this.max) {
+				if (this.max > 0 && this.size === this.max) {
 					this.evict();
 				}
 
-				this.length++;
-				this.cache[key] = {
-					expiry: this.ttl > 0 ? new Date().getTime() + this.ttl : -1,
-					prev: empty,
-					next: this.first,
-					value: value
+				const item = this.items[key] = {
+					expiry: this.ttl > 0 ? new Date().getTime() + this.ttl : this.ttl,
+					key: key,
+					prev: this.last,
+					next: null,
+					value
 				};
 
-				if (this.length === 1) {
-					this.last = key;
+				if (++this.size === 1) {
+					this.first = item;
+					this.last = item;
 				} else {
-					this.cache[this.first].prev = key;
+					this.last.next = item;
+					this.last = item;
 				}
 			}
-
-			this.first = key;
 
 			return this;
 		}

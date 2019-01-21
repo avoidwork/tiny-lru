@@ -1,118 +1,70 @@
-var path = require("path"),
+"use strict";
+
+const path = require("path"),
 	lru = require(path.join("..", "lib", "tiny-lru.js"));
 
-exports.suite = {
+exports.evict = {
 	setUp: function (done) {
-		this.cache = lru(2, 25);
-		done();
-	},
-	ttl: function (test) {
-		const cache = this.cache;
-
-		test.expect(1);
-		cache.set("1", true);
-		setTimeout(function () {
-			cache.get("1");
-			test.equal(cache.get("1"), void 0, "Should be 'undefined'");
-			test.done();
-		}, 30);
-	},
-	keys: function (test) {
-		const cache = this.cache;
-
-		test.expect(3);
-		test.equal(cache.keys().length, 0, "Should be '0'");
-		cache.set("1", true);
-		test.equal(cache.keys().length, 1, "Should be '1'");
-		test.equal(cache.keys()[0], "1", "Should be '1'");
-		test.done();
-	}
-};
-
-exports.simple = {
-	setUp: function (done) {
-		this.cache = lru(5);
+		this.cache = lru(4);
 		this.items = ["a", "b", "c", "d", "e"];
 		done();
 	},
 	test: function (test) {
 		this.items.forEach(i => this.cache.set(i, false));
-		test.expect(68);
-		test.equal(this.cache.first, "e", "Should be 'e'");
-		test.equal(this.cache.last, "a", "Should be 'a'");
-		this.cache.set("e", true);
-		test.equal(this.cache.first, "e", "Should be 'e'");
-		test.equal(this.cache.last, "a", "Should be 'a'");
-		test.equal(this.cache.cache.e.prev, null, "Should be 'null'");
-		test.equal(this.cache.cache.e.next, "d", "Should be 'd'");
-		test.equal(this.cache.cache.d.prev, "e", "Should be 'e'");
-		test.equal(this.cache.cache.d.next, "c", "Should be 'c'");
-		test.equal(this.cache.cache.c.prev, "d", "Should be 'd'");
-		test.equal(this.cache.cache.c.next, "b", "Should be 'b'");
-		test.equal(this.cache.cache.b.prev, "c", "Should be 'c'");
-		test.equal(this.cache.cache.b.next, "a", "Should be 'a'");
-		test.equal(this.cache.cache.a.prev, "b", "Should be 'b'");
-		test.equal(this.cache.cache.a.next, null, "Should be 'null'");
-		this.cache.set("a", true);
-		test.equal(this.cache.first, "a", "Should be 'a'");
-		test.equal(this.cache.last, "b", "Should be 'b'");
-		test.equal(this.cache.cache.a.prev, null, "Should be 'null'");
-		test.equal(this.cache.cache.a.next, "e", "Should be 'e'");
-		test.equal(this.cache.cache.e.prev, "a", "Should be 'a'");
-		test.equal(this.cache.cache.e.next, "d", "Should be 'd'");
-		test.equal(this.cache.cache.d.prev, "e", "Should be 'e'");
-		test.equal(this.cache.cache.d.next, "c", "Should be 'c'");
-		test.equal(this.cache.cache.c.prev, "d", "Should be 'd'");
-		test.equal(this.cache.cache.c.next, "b", "Should be 'b'");
-		test.equal(this.cache.cache.b.prev, "c", "Should be 'c'");
-		test.equal(this.cache.cache.b.next, null, "Should be 'null'");
-		this.cache.set("e", false);
-		test.equal(this.cache.first, "e", "Should be 'e'");
-		test.equal(this.cache.last, "b", "Should be 'b'");
-		test.equal(this.cache.cache.e.prev, null, "Should be 'null'");
-		test.equal(this.cache.cache.e.next, "a", "Should be 'a'");
-		test.equal(this.cache.cache.a.prev, "e", "Should be 'e'");
-		test.equal(this.cache.cache.a.next, "d", "Should be 'd'");
-		test.equal(this.cache.cache.d.prev, "a", "Should be 'a'");
-		test.equal(this.cache.cache.d.next, "c", "Should be 'c'");
-		test.equal(this.cache.cache.c.prev, "d", "Should be 'd'");
-		test.equal(this.cache.cache.c.next, "b", "Should be 'b'");
-		test.equal(this.cache.cache.b.prev, "c", "Should be 'c'");
-		test.equal(this.cache.cache.b.next, null, "Should be 'null'");
-		this.cache.delete("a");
-		test.equal(this.cache.first, "e", "Should be 'e'");
-		test.equal(this.cache.last, "b", "Should be 'b'");
-		test.equal(this.cache.cache.e.prev, null, "Should be 'null'");
-		test.equal(this.cache.cache.e.next, "d", "Should be 'a'");
-		test.equal(this.cache.cache.d.prev, "e", "Should be 'a'");
-		test.equal(this.cache.cache.d.next, "c", "Should be 'c'");
-		test.equal(this.cache.cache.c.prev, "d", "Should be 'd'");
-		test.equal(this.cache.cache.c.next, "b", "Should be 'b'");
-		test.equal(this.cache.cache.b.prev, "c", "Should be 'c'");
-		test.equal(this.cache.cache.b.next, null, "Should be 'null'");
+		test.expect(6);
+		test.equal(this.cache.first.key, "b", "Should be 'b'");
+		test.equal(this.cache.last.key, "e", "Should be 'e'");
+		test.equal(this.cache.size, 4, "Should be '4'");
 		this.cache.evict();
-		test.equal(this.cache.first, "e", "Should be 'e'");
-		test.equal(this.cache.last, "c", "Should be 'c'");
-		test.equal(this.cache.cache.e.prev, null, "Should be 'null'");
-		test.equal(this.cache.cache.e.next, "d", "Should be 'a'");
-		test.equal(this.cache.cache.d.prev, "e", "Should be 'a'");
-		test.equal(this.cache.cache.d.next, "c", "Should be 'c'");
-		test.equal(this.cache.cache.c.prev, "d", "Should be 'd'");
-		test.equal(this.cache.cache.c.next, null, "Should be 'null'");
-		this.cache.evict();
-		test.equal(this.cache.first, "e", "Should be 'e'");
-		test.equal(this.cache.last, "d", "Should be 'd'");
-		test.equal(this.cache.cache.e.prev, null, "Should be 'null'");
-		test.equal(this.cache.cache.e.next, "d", "Should be 'a'");
-		test.equal(this.cache.cache.d.prev, "e", "Should be 'a'");
-		test.equal(this.cache.cache.d.next, null, "Should be 'null'");
-		this.cache.delete("a"); // no op - repeating assertions
-		test.equal(this.cache.first, "e", "Should be 'e'");
-		test.equal(this.cache.last, "d", "Should be 'd'");
-		test.equal(this.cache.cache.e.prev, null, "Should be 'null'");
-		test.equal(this.cache.cache.e.next, "d", "Should be 'a'");
-		test.equal(this.cache.cache.d.prev, "e", "Should be 'a'");
-		test.equal(this.cache.cache.d.next, null, "Should be 'null'");
+		test.equal(this.cache.first.key, "c", "Should be 'c'");
+		test.equal(this.cache.last.key, "e", "Should be 'e'");
+		test.equal(this.cache.size, 3, "Should be '3'");
+		test.done();
+	}
+};
+
+exports.deletion = {
+	setUp: function (done) {
+		this.cache = lru(4);
+		this.items = ["a", "b", "c", "d", "e"];
+		done();
+	},
+	test: function (test) {
+		this.items.forEach(i => this.cache.set(i, false));
+		test.expect(30);
+		test.equal(this.cache.first.key, "b", "Should be 'b'");
+		test.equal(this.cache.last.key, "e", "Should be 'e'");
+		test.equal(this.cache.size, 4, "Should be '4'");
+		test.equal(this.cache.items.e.next, null, "Should be 'null'");
+		test.equal(this.cache.items.e.prev.key, "d", "Should be 'd'");
+		test.equal(this.cache.items.d.next.key, "e", "Should be 'e'");
+		test.equal(this.cache.items.d.prev.key, "c", "Should be 'c'");
+		test.equal(this.cache.items.c.next.key, "d", "Should be 'd'");
+		test.equal(this.cache.items.c.prev.key, "b", "Should be 'b'");
+		test.equal(this.cache.items.b.next.key, "c", "Should be 'c'");
+		test.equal(this.cache.items.b.prev, null, "Should be 'null'");
+		this.cache.delete("c");
+		test.equal(this.cache.first.key, "b", "Should be 'b'");
+		test.equal(this.cache.last.key, "e", "Should be 'e'");
+		test.equal(this.cache.size, 3, "Should be '3'");
+		test.equal(this.cache.items.e.next, null, "Should be 'null'");
+		test.equal(this.cache.items.e.prev.key, "d", "Should be 'd'");
+		test.equal(this.cache.items.d.next.key, "e", "Should be 'e'");
+		test.equal(this.cache.items.d.prev.key, "b", "Should be 'b'");
+		test.equal(this.cache.items.b.next.key, "d", "Should be 'd'");
+		test.equal(this.cache.items.b.prev, null, "Should be 'null'");
+		this.cache.delete("e");
+		test.equal(this.cache.first.key, "b", "Should be 'b'");
+		test.equal(this.cache.last.key, "d", "Should be 'd'");
+		test.equal(this.cache.size, 2, "Should be '2'");
+		this.cache.get("b");
+		test.equal(this.cache.first.key, "d", "Should be 'd'");
+		test.equal(this.cache.first.prev, null, "Should be 'null'");
+		test.equal(this.cache.first.next.key, "b", "Should be 'b'");
+		test.equal(this.cache.last.key, "b", "Should be 'b'");
+		test.equal(this.cache.last.prev.key, "d", "Should be 'd'");
+		test.equal(this.cache.last.next, null, "Should be 'null'");
+		test.equal(this.cache.size, 2, "Should be '2'");
 		test.done();
 	}
 };
