@@ -22,14 +22,31 @@ function populate (arg, start = 0) {
 	}
 }
 
-function bench (n = 0, x = 1) {
-	seed();
+function get (arg, start = 0) {
+	const nth = arg.max;
+	let i = -1;
 
-	const timer = precise().start();
+	while (++i < nth) {
+		arg.get(i + start, data[i]);
+	}
+}
 
-	populate(cache, n);
-	timer.stop();
-	console.log(`Run ${x} ${x === 1 ? "Set" : "Evict"} (${n === 0 ? "Low Keys" : "High Keys"}): ${timer.diff() / 1e6} ms`);
+function bench (n = 0, x = 1, type = "set") {
+	if (type === "set") {
+		seed();
+
+		const timer = precise().start();
+
+		populate(cache, n);
+		timer.stop();
+		console.log(`Run ${x} ${x === 1 ? "Set" : "Evict"} (${n === 0 ? "Low Keys" : "High Keys"}): ${timer.diff() / 1e6} ms`);
+	} else if (type === "get") {
+		const timer = precise().start();
+
+		get(cache, n);
+		timer.stop();
+		console.log(`Run ${x} Get (${n === 0 ? "Low Keys" : "High Keys"}): ${timer.diff() / 1e6} ms`);
+	}
 }
 
 console.log(`Benchmarking ${nth} items (random value per run)`);
@@ -37,3 +54,4 @@ bench();
 bench(nth, 2);
 bench(void 0, 3);
 bench(nth, 4);
+bench(nth, 5, "get");
