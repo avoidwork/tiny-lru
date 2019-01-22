@@ -1,4 +1,12 @@
 	function factory (max = 1000, ttl = 0) {
+		if (isNaN(max) || max < 0) {
+			throw new TypeError("Invalid max value");
+		}
+
+		if (isNaN(ttl) || ttl < 0) {
+			throw new TypeError("Invalid ttl value");
+		}
+
 		return new LRU(max, ttl);
 	}
 
