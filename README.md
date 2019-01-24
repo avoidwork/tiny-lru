@@ -18,6 +18,19 @@ const memoized = _.memoize(myFunc);
 memoized.cache.max = 10;
 ```
 
+
+For usage with webpack, you can `import lru from 'tiny-lru/lib/tiny-lru.es5'` or create an [alias](https://webpack.js.org/configuration/resolve/#resolve-alias):
+```javascript
+resolve: {
+  alias: {
+    'tiny-lru': 'tiny-lru/lib/tiny-lru.es5.js'
+  }
+}
+
+// This should work now
+import lru from 'tiny-lru';
+```
+
 ## clear
 ### Method
 
