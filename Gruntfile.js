@@ -56,10 +56,12 @@ module.exports = function (grunt) {
 			data = fs.readFileSync(path.join(__dirname, "lib", "tiny-lru.js"), "utf8").replace("\"use strict\";", ""); // Stripping "use strict"; because it's injected
 
 		try {
+			const es5 = require("babel-core").transform(data, {sourceFileName: "tiny-lru.js", sourceMaps: false, presets: ["env"]});
 			const minified = require("babel-core").transform(data, {sourceFileName: "tiny-lru.js", sourceMaps: true, presets: ["minify"]});
 
+			fs.writeFileSync(path.join(__dirname, "lib", "tiny-lru.es5.js"), es5.code, "utf8");
 			fs.writeFileSync(path.join(__dirname, "lib", "tiny-lru.min.js"), minified.code + "\n//# sourceMappingURL=tiny-lru.min.js.map", "utf8");
-			grunt.log.ok("1 file created.");
+			grunt.log.ok("2 files created.");
 			fs.writeFileSync(path.join(__dirname, "lib", "tiny-lru.min.js.map"), JSON.stringify(minified.map), "utf8");
 			grunt.log.ok("1 sourcemap created.");
 		} catch (e) {
