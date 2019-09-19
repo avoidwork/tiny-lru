@@ -23,9 +23,21 @@ module.exports = function (grunt) {
 		},
 		copy: {
 			main: {
-				expand: true,
-				src: "tiny-lru.d.ts",
-				dest: "lib/"
+				files: [
+					{
+						expand: true,
+						src: "tiny-lru.d.ts",
+						dest: "lib/"
+					},
+					{
+						expand: true,
+						src: "src/lru.js",
+						dest: "lib/",
+						rename: function (dest) {
+							return dest + "tiny-lru.es6.js";
+						}
+					}
+				]
 			}
 		},
 		eslint: {

@@ -13,6 +13,7 @@
   },
   "license": "BSD-3-Clause",
   "main": "lib/tiny-lru.js",
+  "module": "lib/tiny-lru.es6.js",
   "types": "lib/tiny-lru.d.ts",
   "engines": {
     "node": ">=6"
