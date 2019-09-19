@@ -21,6 +21,25 @@ module.exports = function (grunt) {
 				dest: "lib/<%= pkg.name %>.js"
 			}
 		},
+		copy: {
+			main: {
+				files: [
+					{
+						expand: true,
+						src: "tiny-lru.d.ts",
+						dest: "lib/"
+					},
+					{
+						expand: true,
+						src: "src/lru.js",
+						dest: "lib/",
+						rename: function (dest) {
+							return dest + "tiny-lru.es6.js";
+						}
+					}
+				]
+			}
+		},
 		eslint: {
 			target: [
 				"index.js",
@@ -48,6 +67,7 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks("grunt-contrib-concat");
 	grunt.loadNpmTasks("grunt-contrib-nodeunit");
 	grunt.loadNpmTasks("grunt-contrib-watch");
+	grunt.loadNpmTasks("grunt-contrib-copy");
 	grunt.loadNpmTasks("grunt-eslint");
 
 	grunt.task.registerTask("babili", "Minifies ES2016+ code", function () {
@@ -72,6 +92,6 @@ module.exports = function (grunt) {
 
 	// aliases
 	grunt.registerTask("test", ["eslint", "nodeunit"]);
-	grunt.registerTask("build", ["concat"]);
+	grunt.registerTask("build", ["copy", "concat"]);
 	grunt.registerTask("default", ["build", "test", "babili"]);
 };
