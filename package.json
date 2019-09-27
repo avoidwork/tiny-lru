@@ -11,31 +11,29 @@
   "bugs": {
     "url": "https://github.com/avoidwork/tiny-lru/issues"
   },
+  "files": [
+    "lib",
+    "*.d.ts"
+  ],
   "license": "BSD-3-Clause",
-  "main": "lib/tiny-lru.js",
-  "module": "lib/tiny-lru.es6.js",
-  "types": "lib/tiny-lru.d.ts",
+  "source": "src/lru.js",
+  "browser": "lib/tiny-lru.js",
+  "main": "lib/tiny-lru.cjs.js",
+  "module": "lib/tiny-lru.esm.js",
+  "types": "tiny-lru.d.ts",
   "engines": {
     "node": ">=6"
   },
   "engineStrict": true,
   "scripts": {
     "benchmark": "node benchmark.js",
-    "test": "grunt test",
-    "build": "grunt build"
+    "test": "nodeunit test/lru.js",
+    "build": "tslib build"
   },
   "dependencies": {},
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-minify": "^0.5.1",
-    "babel-preset-env": "^1.7.0",
-    "grunt": "^1.0.4",
-    "grunt-cli": "^1.3.2",
-    "grunt-contrib-concat": "^1.0.1",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-nodeunit": "^2.0.0",
-    "grunt-contrib-watch": "^1.1.0",
-    "grunt-eslint": "^22.0.0",
+    "tslib-cli": "^5.0.17",
+    "nodeunit": "^0.11.3",
     "precise": "^1.1.0"
   },
   "keywords": [

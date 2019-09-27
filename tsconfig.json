@@ -1,0 +1,13 @@
+{
+	"exclude": ["node_modules", "dist"],
+	"compilerOptions": {
+		"lib": ["dom", "esnext"],
+		"module": "esnext",
+		"moduleResolution": "node",
+		"outDir": "dist",
+		"strict": false,
+		"target": "esnext",
+		"allowJs": true,
+		"sourceMap": true
+	}
+}
