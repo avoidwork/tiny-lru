@@ -32,7 +32,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "tslib-cli": "^5.0.17",
+    "tslib-cli": "^5.0.18",
     "nodeunit": "^0.11.3",
     "precise": "^1.1.0"
   },
