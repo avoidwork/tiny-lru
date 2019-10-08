@@ -1,4 +1,6 @@
-[2019-10-08] f175497 (HEAD -> master, tag: 7.0.1, origin/master, origin/HEAD) Creating `changelog` npm script & `CHANGELOG` output - Jason Mulligan (jason.mulligan@avoidwork.com)
+[2019-10-08] 1890567 (HEAD -> master, tag: 7.0.1, origin/master, origin/HEAD) Version bump - Jason Mulligan (jason.mulligan@avoidwork.com)
+[2019-10-08] 97f4c36 Updating `CHANGELOG` - Jason Mulligan (jason.mulligan@avoidwork.com)
+[2019-10-08] f175497 Creating `changelog` npm script & `CHANGELOG` output - Jason Mulligan (jason.mulligan@avoidwork.com)
 [2019-09-27] 822b617 fix incorrectly marked directory (dist vs lib) - osdevisnot (osdevisnot@gmail.com)
 [2019-09-27] ab1d29f update tslib-cli - avoids warning during build - osdevisnot (osdevisnot@gmail.com)
 [2019-09-26] 0672370 (tag: 7.0.0) Version bump to release modernization effort - Jason Mulligan (jason.mulligan@avoidwork.com)
