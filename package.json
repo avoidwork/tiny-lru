@@ -16,11 +16,11 @@
     "*.d.ts"
   ],
   "license": "BSD-3-Clause",
-  "source": "src/lru.js",
+  "source": "src/lru.ts",
   "browser": "lib/tiny-lru.js",
   "main": "lib/tiny-lru.cjs.js",
   "module": "lib/tiny-lru.esm.js",
-  "types": "tiny-lru.d.ts",
+  "types": "lib/tiny-lru.d.ts",
   "engines": {
     "node": ">=6"
   },
@@ -33,7 +33,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "tslib-cli": "^5.0.18",
+    "tslib-cli": "^5.2.2",
     "nodeunit": "^0.11.3",
     "precise": "^1.1.0"
   },
