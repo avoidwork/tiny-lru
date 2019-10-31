@@ -27,7 +27,7 @@
   "engineStrict": true,
   "scripts": {
     "benchmark": "node benchmark.js",
-    "changelog": "git log --no-merges --date=short --tags --format=\"[%cd] %h%d %s - %cn (%ce)\" > CHANGELOG",
+    "changelog": "git log --date=short --tags --format=\"[%cd] %h%d %s - %cn (%ce)\" > CHANGELOG",
     "test": "nodeunit test/lru.js",
     "build": "tslib build"
   },
