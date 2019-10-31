@@ -1,14 +1,13 @@
 {
 	"exclude": ["node_modules", "lib"],
 	"compilerOptions": {
-		"declaration": true,
-		"declarationDir": "lib",
 		"lib": ["dom", "esnext"],
 		"module": "esnext",
 		"moduleResolution": "node",
 		"outDir": "lib",
 		"strict": false,
 		"target": "esnext",
+		"allowJs": true,
 		"sourceMap": true
 	}
 }
