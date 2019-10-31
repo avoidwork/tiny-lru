@@ -1,5 +1,5 @@
 declare module "tiny-lru" {
-  export class Lru<T = any> {
+  class Lru<T = any> {
     constructor(max?: number, ttl?: number);
 
     public has(key: string): boolean;
@@ -10,5 +10,5 @@ declare module "tiny-lru" {
     public evict(): this;
     public keys(): string[];
   }
-  export default Lru;
+  export default function factory<T = any>(max?: number, ttl?: number): Lru<T>;
 }
