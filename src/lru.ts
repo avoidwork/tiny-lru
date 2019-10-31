@@ -1,4 +1,12 @@
-	class LRU {
+	class LRU<T = any> {
+
+		private first;
+		private items;
+		private last;
+		private max;
+		private size;
+		private ttl;
+
 		constructor (max = 0, ttl = 0) {
 			this.first = null;
 			this.items = {};
@@ -8,7 +16,7 @@
 			this.ttl = ttl;
 		}
 
-		has (key) {
+		has (key: string) {
 			return key in this.items;
 		}
 
@@ -21,7 +29,7 @@
 			return this;
 		}
 
-		delete (key) {
+		delete (key: string) {
 			if (this.has(key)) {
 				const item = this.items[key];
 
@@ -59,7 +67,7 @@
 			return this;
 		}
 
-		get (key) {
+		get (key: string): T {
 			let result;
 
 			if (this.has(key)) {
@@ -80,7 +88,7 @@
 			return Object.keys(this.items);
 		}
 
-		set (key, value, bypass = false) {
+		set (key: string, value: T, bypass = false) {
 			let item;
 
 			if (bypass || this.has(key)) {
