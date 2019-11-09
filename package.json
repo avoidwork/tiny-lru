@@ -27,15 +27,16 @@
   "engineStrict": true,
   "scripts": {
     "benchmark": "node benchmark.js",
-    "changelog": "git log --date=short --tags --format=\"[%cd] %h%d %s - %cn (%ce)\" > CHANGELOG",
+    "changelog": "auto-changelog -p",
     "test": "nodeunit test/lru.js",
     "build": "tslib build"
   },
   "dependencies": {},
   "devDependencies": {
-    "tslib-cli": "^5.0.18",
+    "auto-changelog": "^1.16.2",
     "nodeunit": "^0.11.3",
-    "precise": "^1.1.0"
+    "precise": "^1.1.0",
+    "tslib-cli": "^5.0.18"
   },
   "keywords": [
     "LRU",
