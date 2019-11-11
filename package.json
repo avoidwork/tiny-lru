@@ -36,7 +36,7 @@
     "auto-changelog": "^1.16.2",
     "nodeunit": "^0.11.3",
     "precise": "^1.1.0",
-    "tslib-cli": "^5.0.18"
+    "tslib-cli": "^5.4.1"
   },
   "keywords": [
     "LRU",
