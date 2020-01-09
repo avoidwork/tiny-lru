@@ -3,7 +3,7 @@ declare module "tiny-lru" {
     constructor(max?: number, ttl?: number);
 
     public has(key: string): boolean;
-    public get(key: string): T;
+    public get(key: string): T | undefined;
     public set(key: string, value: T, bypass?: boolean): this;
     public clear(): this;
     public delete(key: string): this;
