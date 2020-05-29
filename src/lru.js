@@ -81,10 +81,12 @@
 		}
 
 		set (key, value, bypass = false) {
+			const expiry = this.ttl > 0 ? new Date().getTime() + this.ttl : this.ttl;
 			let item;
 
 			if (bypass || this.has(key)) {
 				item = this.items[key];
+				item.expiry = expiry;
 				item.value = value;
 
 				if (this.last !== item) {
@@ -114,7 +116,7 @@
 				}
 
 				item = this.items[key] = {
-					expiry: this.ttl > 0 ? new Date().getTime() + this.ttl : this.ttl,
+					expiry: expiry,
 					key: key,
 					prev: this.last,
 					next: null,

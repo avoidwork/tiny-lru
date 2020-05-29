@@ -1,7 +1,7 @@
 {
   "name": "tiny-lru",
   "description": "Tiny LRU cache for Client or Server",
-  "version": "7.0.2",
+  "version": "7.0.3",
   "homepage": "https://github.com/avoidwork/tiny-lru",
   "author": "Jason Mulligan <jason.mulligan@avoidwork.com>",
   "repository": {
@@ -33,7 +33,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "auto-changelog": "^1.16.2",
+    "auto-changelog": "^2.0.0",
     "nodeunit": "^0.11.3",
     "precise": "^1.1.0",
     "rollup": "^2.11.2",

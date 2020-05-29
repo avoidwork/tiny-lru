@@ -68,3 +68,18 @@ exports.deletion = {
 		test.done();
 	}
 };
+
+exports.multiSetWithTTL = {
+	setUp: function (done) {
+		this.cache = lru(4, 10);
+		done();
+	},
+	test: function (test) {
+		this.cache.set("foo", "bar");
+		setTimeout(function(){
+			this.cache.set("foo", "baz");
+			test.equal(this.cache.get("foo"), "baz", "should return baz");
+			test.done();
+		}.bind(this), 11);
+	}
+};
