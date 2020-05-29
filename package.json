@@ -29,14 +29,15 @@
     "benchmark": "node benchmark.js",
     "changelog": "auto-changelog -p",
     "test": "nodeunit test/lru.js",
-    "build": "tslib build"
+    "build": "rollup --config"
   },
   "dependencies": {},
   "devDependencies": {
     "auto-changelog": "^1.16.2",
     "nodeunit": "^0.11.3",
     "precise": "^1.1.0",
-    "tslib-cli": "^5.4.1"
+    "rollup": "^2.11.2",
+    "rollup-plugin-terser": "^6.1.0"
   },
   "keywords": [
     "LRU",
