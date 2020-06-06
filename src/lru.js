@@ -1,7 +1,7 @@
 	class LRU {
 		constructor (max = 0, ttl = 0) {
 			this.first = null;
-			this.items = {};
+			this.items = Object.create(null);
 			this.last = null;
 			this.max = max;
 			this.size = 0;
@@ -14,7 +14,7 @@
 
 		clear () {
 			this.first = null;
-			this.items = {};
+			this.items = Object.create(null);
 			this.last = null;
 			this.size = 0;
 

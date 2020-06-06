@@ -1,7 +1,7 @@
 {
   "name": "tiny-lru",
   "description": "Tiny LRU cache for Client or Server",
-  "version": "7.0.5",
+  "version": "7.0.6",
   "homepage": "https://github.com/avoidwork/tiny-lru",
   "author": "Jason Mulligan <jason.mulligan@avoidwork.com>",
   "repository": {
