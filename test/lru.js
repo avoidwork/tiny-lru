@@ -1,7 +1,7 @@
 "use strict";
 
 const path = require("path"),
-	lru = require(path.join("..", "lib", "tiny-lru.js"));
+	lru = require(path.join("..", "lib", "tiny-lru.cjs.js"));
 
 exports.evict = {
 	setUp: function (done) {
@@ -66,5 +66,21 @@ exports.deletion = {
 		test.equal(this.cache.last.next, null, "Should be 'null'");
 		test.equal(this.cache.size, 2, "Should be '2'");
 		test.done();
+	}
+};
+
+exports.multiSetWithTTL = {
+	setUp: function (done) {
+		this.cache = lru(4, 10);
+		done();
+	},
+	test: function (test) {
+		this.cache.set("foo", "baz");
+		test.equal(this.cache.get("foo"), "baz", "should return baz");
+		setTimeout(function(){
+			this.cache.set("foo", "baz");
+			test.equal(this.cache.get("foo"), "baz", "should return baz");
+			test.done();
+		}.bind(this), 11);
 	}
 };
