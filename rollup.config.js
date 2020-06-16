@@ -1,4 +1,5 @@
 const { terser } = require("rollup-plugin-terser");
+const { getBabelOutputPlugin } = require("@rollup/plugin-babel");
 
 export default [
   {
@@ -17,9 +18,25 @@ export default [
       {
         file: "lib/tiny-lru.js",
         name: "tiny-lru",
-        format: "umd",
+        format: "esm",
         compact: true,
-        plugins: [terser()],
+        plugins: [
+          getBabelOutputPlugin({
+            moduleId: "tiny-lru",
+            presets: [
+              [
+                "@babel/preset-env",
+                {
+                  modules: "umd",
+                  targets: {
+                    browsers: "ie >= 11",
+                  },
+                },
+              ],
+            ],
+          }),
+          terser(),
+        ],
       },
     ],
   },

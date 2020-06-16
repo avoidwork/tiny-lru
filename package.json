@@ -33,6 +33,9 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@babel/core": "^7.10.1",
+    "@babel/preset-env": "^7.10.2",
+    "@rollup/plugin-babel": "^5.0.2",
     "auto-changelog": "^1.16.2",
     "nodeunit": "^0.11.3",
     "precise": "^1.1.0",
