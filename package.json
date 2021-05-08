@@ -29,15 +29,17 @@
     "benchmark": "node benchmark.js",
     "changelog": "auto-changelog -p",
     "test": "nodeunit test/lru.js",
+    "test:typescript": "tsd",
     "build": "rollup --config"
   },
-  "dependencies": {},
   "devDependencies": {
     "auto-changelog": "^1.16.2",
     "nodeunit": "^0.11.3",
     "precise": "^1.1.0",
     "rollup": "^2.11.2",
-    "rollup-plugin-terser": "^6.1.0"
+    "rollup-plugin-terser": "^6.1.0",
+    "tsd": "^0.14.0",
+    "typescript": "^4.2.4"
   },
   "keywords": [
     "LRU",
@@ -48,5 +50,13 @@
     "least",
     "recently",
     "used"
-  ]
+  ],
+  "tsd": {
+    "directory": "test-tsd",
+    "compilerOptions": {
+      "esModuleInterop": false,
+      "module": "es6",
+      "target": "ES2017"
+    }
+  }
 }
