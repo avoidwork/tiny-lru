@@ -53,7 +53,10 @@
 
 			delete this.items[item.key];
 			this.first = item.next;
-			this.first.prev = null;
+			if (this.first) {
+				this.first.prev = null;
+			}
+
 			this.size--;
 
 			return this;

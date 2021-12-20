@@ -84,3 +84,17 @@ exports.multiSetWithTTL = {
 		}.bind(this), 11);
 	}
 };
+
+exports.maxOne = {
+	setUp: function (done) {
+		this.cache = lru(1, 10);
+		done();
+	},
+	test: function (test) {
+		this.cache.set("foo", "baz");
+		test.equal(this.cache.get("foo"), "baz", "should return baz");
+		this.cache.set("baz", "bar");
+		test.equal(this.cache.get("baz"), "bar", "should return bar");
+		test.done();
+	}
+};
