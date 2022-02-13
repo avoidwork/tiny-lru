@@ -48,13 +48,21 @@
 			return this;
 		}
 
-		evict () {
-			const item = this.first;
+		evict (bypass = false) {
+			if (bypass || this.size > 0) {
+				const item = this.first;
 
-			delete this.items[item.key];
-			this.first = item.next;
-			this.first.prev = null;
-			this.size--;
+				delete this.items[item.key];
+				this.size--;
+
+				if (this.size === 0) {
+					this.first = null;
+					this.last = null;
+				} else {
+					this.first = item.next;
+					this.first.prev = null;
+				}
+			}
 
 			return this;
 		}
@@ -110,7 +118,7 @@
 				}
 			} else {
 				if (this.max > 0 && this.size === this.max) {
-					this.evict();
+					this.evict(true);
 				}
 
 				item = this.items[key] = {
