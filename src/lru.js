@@ -87,10 +87,6 @@
 				item = this.items[key];
 				item.value = value;
 
-				if (bypass === false) {
-					item.expiry = this.ttl > 0 ? new Date().getTime() + this.ttl : this.ttl;
-				}
-
 				if (this.last !== item) {
 					const last = this.last,
 						next = item.next,
