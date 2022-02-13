@@ -33,11 +33,11 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "auto-changelog": "^1.16.2",
-    "nodeunit": "^0.11.3",
+    "auto-changelog": "^2.4.0",
+    "nodeunit-x": "^0.15.0",
     "precise": "^1.1.0",
-    "rollup": "^2.11.2",
-    "rollup-plugin-terser": "^6.1.0"
+    "rollup": "^2.67.2",
+    "rollup-plugin-terser": "^7.0.2"
   },
   "keywords": [
     "LRU",
