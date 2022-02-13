@@ -69,3 +69,40 @@ exports.deletion = {
 	}
 };
 
+exports.smallEvict = {
+	setUp: function (done) {
+		this.cache = lru(1);
+		this.items = ["a", "b"];
+		done();
+	},
+	test: function (test) {
+		this.items.forEach(i => this.cache.set(i, false));
+		test.expect(6);
+		test.equal(this.cache.first.key, "b", "Should be 'b'");
+		test.equal(this.cache.last.key, "b", "Should be 'b'");
+		test.equal(this.cache.size, 1, "Should be '1'");
+		this.cache.evict();
+		test.equal(this.cache.first, null, "Should be 'null'");
+		test.equal(this.cache.last, null, "Should be 'null'");
+		test.equal(this.cache.size, 0, "Should be 'null'");
+		test.done();
+	}
+};
+
+exports.emptyEvict = {
+	setUp: function (done) {
+		this.cache = lru(1);
+		done();
+	},
+	test: function (test) {
+		test.expect(6);
+		test.equal(this.cache.first, null, "Should be 'null'");
+		test.equal(this.cache.last, null, "Should be 'null'");
+		test.equal(this.cache.size, 0, "Should be 'null'");
+		this.cache.evict();
+		test.equal(this.cache.first, null, "Should be 'null'");
+		test.equal(this.cache.last, null, "Should be 'null'");
+		test.equal(this.cache.size, 0, "Should be 'null'");
+		test.done();
+	}
+};
