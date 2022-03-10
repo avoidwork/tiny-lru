@@ -4,7 +4,7 @@ declare module "tiny-lru" {
 
     public max: number;
     public ttl: number;
-    public size: boolean;
+    public size: number;
     public first: T | null;
     public last: T | null;
 
