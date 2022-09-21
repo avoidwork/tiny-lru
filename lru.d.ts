@@ -1,11 +1,4 @@
 export function lru(max?: number, ttl?: number): LRU;
-/**
- * tiny-lru
- *
- * @copyright 2022 Jason Mulligan <jason.mulligan@avoidwork.com>
- * @license BSD-3-Clause
- * @version 9.0.0
- */
 declare class LRU {
     constructor(max?: number, ttl?: number);
     first: any;

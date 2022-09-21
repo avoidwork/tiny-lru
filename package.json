@@ -22,7 +22,7 @@
   "module": "dist/tiny-lru.esm.js",
   "type": "module",
   "sourceType": "module",
-  "types": "dist/tiny-lru.esm.d.ts",
+  "types": "lru.d.ts",
   "engines": {
     "node": ">=6"
   },
@@ -35,7 +35,7 @@
     "mocha": "mocha test/*.js",
     "rollup": "rollup --config",
     "test": "npm run lint && npm run mocha",
-    "types": "npx -p typescript tsc dist/tiny-lru.esm.js --declaration --allowJs --emitDeclarationOnly"
+    "types": "npx -p typescript tsc src/*.js --declaration --allowJs --emitDeclarationOnly --outDir ."
   },
   "devDependencies": {
     "auto-changelog": "^2.4.0",
