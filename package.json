@@ -28,7 +28,7 @@
   },
   "engineStrict": true,
   "scripts": {
-    "build": "npm run lint && rm -rf dist/* && npm run rollup && npm run mocha",
+    "build": "npm run lint && rm -rf dist/* && npm run rollup && npm run types && npm run mocha",
     "benchmark": "node benchmark.js",
     "changelog": "auto-changelog -p",
     "lint": "eslint *.js src/*.js test/*.js",
