@@ -5,6 +5,18 @@
 		"es6": true,
 		"amd": true
 	},
+	"parserOptions": {
+		"ecmaVersion": 2020,
+		"sourceType": "module"
+	},
+	"globals": {
+		"describe": true,
+		"it": true,
+		"after": true,
+		"before": true,
+		"beforeEach": true,
+		"expect": true
+	},
 	"rules": {
 		"arrow-parens": [2, "as-needed"],
 		"arrow-spacing": [2, {"before": true, "after": true}],

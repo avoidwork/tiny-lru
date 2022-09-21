@@ -1,3 +1,10 @@
+/**
+ * tiny-lru
+ *
+ * @copyright 2022 Jason Mulligan <jason.mulligan@avoidwork.com>
+ * @license BSD-3-Clause
+ * @version 9.0.0
+ */
 class LRU {
 	constructor (max = 0, ttl = 0) {
 		this.first = null;
@@ -142,7 +149,7 @@ class LRU {
 	}
 }
 
-export function lru (max = 1000, ttl = 0) {
+function lru (max = 1000, ttl = 0) {
 	if (isNaN(max) || max < 0) {
 		throw new TypeError("Invalid max value");
 	}
@@ -152,4 +159,4 @@ export function lru (max = 1000, ttl = 0) {
 	}
 
 	return new LRU(max, ttl);
-}
+}export{lru};
