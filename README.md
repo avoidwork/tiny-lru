@@ -2,9 +2,8 @@
 
 Least Recently Used cache for Client or Server.
 
-[![build status](https://secure.travis-ci.org/avoidwork/tiny-lru.svg)](http://travis-ci.org/avoidwork/tiny-lru)
-
 ```javascript
+import {lru} from "tiny-lru";
 const cache = lru(max, ttl = 0);
 ```
 

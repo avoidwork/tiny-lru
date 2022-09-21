@@ -1,7 +1,7 @@
-const path = require("path"),
-	lru = require(path.join(__dirname, "lib", "tiny-lru.js")),
-	precise = require("precise"),
-	nth = 2e3,
+import {lru} from "./dist/tiny-lru.esm.js";
+import {precise} from "precise";
+
+const nth = 2e3,
 	cache = lru(nth),
 	data = new Array(nth);
 
@@ -14,19 +14,19 @@ function seed () {
 }
 
 function populate (arg, start = 0) {
-	const nth = arg.max;
+	const pnth = arg.max;
 	let i = -1;
 
-	while (++i < nth) {
+	while (++i < pnth) {
 		arg.set(i + start, data[i]);
 	}
 }
 
 function get (arg, start = 0) {
-	const nth = arg.max;
+	const gnth = arg.max;
 	let i = -1;
 
-	while (++i < nth) {
+	while (++i < gnth) {
 		arg.get(i + start, data[i]);
 	}
 }
