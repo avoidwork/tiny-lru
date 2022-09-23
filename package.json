@@ -1,7 +1,7 @@
 {
   "name": "tiny-lru",
   "description": "Tiny LRU cache for Client or Server",
-  "version": "9.0.1",
+  "version": "9.0.2",
   "homepage": "https://github.com/avoidwork/tiny-lru",
   "author": "Jason Mulligan <jason.mulligan@avoidwork.com>",
   "repository": {
@@ -28,7 +28,7 @@
   },
   "engineStrict": true,
   "scripts": {
-    "build": "npm run lint && rm -rf dist/* && npm run rollup && npm run types && npm run mocha",
+    "build": "npm run lint && rm -rf dist/* && npm run rollup && npm run mocha",
     "benchmark": "node benchmark.js",
     "changelog": "auto-changelog -p",
     "lint": "eslint *.js src/*.js test/*.js",
