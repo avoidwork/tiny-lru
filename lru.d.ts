@@ -1,18 +1,18 @@
-export function lru(max?: number, ttl?: number): LRU;
-declare class LRU {
-    constructor(max?: number, ttl?: number);
-    first: any;
-    items: any;
-    last: any;
+export function lru<T = any>(max?: number, ttl?: number): LRU<T>;
+export interface LRU<T> {
+    first: T | null;
+    last: T | null;
     max: number;
     size: number;
     ttl: number;
+
     has(key: any): boolean;
-    clear(): LRU;
-    delete(key: any): LRU;
-    evict(bypass?: boolean): LRU;
-    get(key: any): any;
+    clear(): this;
+    delete(key: any): this;
+    evict(bypass?: boolean): this;
+    get(key: any): T | undefined;
     keys(): string[];
-    set(key: any, value: any, bypass?: boolean): LRU;
+    set(key: any, value: T, bypass?: boolean): this;
 }
-export {};
+export { };
+
