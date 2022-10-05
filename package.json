@@ -1,7 +1,7 @@
 {
   "name": "tiny-lru",
   "description": "Tiny LRU cache for Client or Server",
-  "version": "9.0.2",
+  "version": "9.0.3",
   "homepage": "https://github.com/avoidwork/tiny-lru",
   "author": "Jason Mulligan <jason.mulligan@avoidwork.com>",
   "repository": {
@@ -17,7 +17,6 @@
   ],
   "license": "BSD-3-Clause",
   "source": "src/lru.js",
-  "browser": "dist/tiny-lru.js",
   "main": "dist/tiny-lru.cjs",
   "module": "dist/tiny-lru.esm.js",
   "type": "module",
@@ -35,6 +34,7 @@
     "mocha": "mocha test/*.js",
     "rollup": "rollup --config",
     "test": "npm run lint && npm run mocha",
+    "test-webpack": "rm -rf test/webpack && git clone git@github.com:rabelais88/typescript-webpack.git test/webpack && echo \"import { lru } from 'tiny-lru';console.log(lru(1));\" >> test/webpack/src/index.ts && cd test/webpack && npm install && mkdir -p node_modules/tiny-lru/dist && cp ../../package.json node_modules/tiny-lru/ && cp ../../dist/* node_modules/tiny-lru/dist/ && npm run build",
     "types": "npx -p typescript tsc src/*.js --declaration --allowJs --emitDeclarationOnly --outDir ."
   },
   "devDependencies": {
