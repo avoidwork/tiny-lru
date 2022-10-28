@@ -8,7 +8,7 @@ class LRU {
 		this.ttl = ttl;
 	}
 
-	has (key) {
+	#has (key) {
 		return key in this.items;
 	}
 
@@ -22,7 +22,7 @@ class LRU {
 	}
 
 	delete (key) {
-		if (this.has(key)) {
+		if (this.#has(key)) {
 			const item = this.items[key];
 
 			delete this.items[key];
@@ -70,7 +70,7 @@ class LRU {
 	get (key) {
 		let result;
 
-		if (this.has(key)) {
+		if (this.#has(key)) {
 			const item = this.items[key];
 
 			if (this.ttl > 0 && item.expiry <= new Date().getTime()) {
@@ -91,7 +91,7 @@ class LRU {
 	set (key, value, bypass = false) {
 		let item;
 
-		if (bypass || this.has(key)) {
+		if (bypass || this.#has(key)) {
 			item = this.items[key];
 			item.value = value;
 
