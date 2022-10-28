@@ -3,7 +3,7 @@
  *
  * @copyright 2022 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 9.0.3
+ * @version 10.0.0
  */
 (function(g,f){typeof exports==='object'&&typeof module!=='undefined'?f(exports):typeof define==='function'&&define.amd?define(['exports'],f):(g=typeof globalThis!=='undefined'?globalThis:g||self,f(g.lru={}));})(this,(function(exports){'use strict';class LRU {
 	constructor (max = 0, ttl = 0) {
@@ -15,7 +15,7 @@
 		this.ttl = ttl;
 	}
 
-	has (key) {
+	#has (key) {
 		return key in this.items;
 	}
 
@@ -29,7 +29,7 @@
 	}
 
 	delete (key) {
-		if (this.has(key)) {
+		if (this.#has(key)) {
 			const item = this.items[key];
 
 			delete this.items[key];
@@ -77,7 +77,7 @@
 	get (key) {
 		let result;
 
-		if (this.has(key)) {
+		if (this.#has(key)) {
 			const item = this.items[key];
 
 			if (this.ttl > 0 && item.expiry <= new Date().getTime()) {
@@ -98,7 +98,7 @@
 	set (key, value, bypass = false) {
 		let item;
 
-		if (bypass || this.has(key)) {
+		if (bypass || this.#has(key)) {
 			item = this.items[key];
 			item.value = value;
 
