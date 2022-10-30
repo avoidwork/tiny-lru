@@ -6,7 +6,6 @@ export interface LRU<T> {
     size: number;
     ttl: number;
 
-    has(key: any): boolean;
     clear(): this;
     delete(key: any): this;
     evict(bypass?: boolean): this;
