@@ -23,7 +23,7 @@
   "sourceType": "module",
   "types": "lru.d.ts",
   "engines": {
-    "node": ">=6"
+    "node": ">=12"
   },
   "engineStrict": true,
   "scripts": {
