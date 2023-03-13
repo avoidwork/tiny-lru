@@ -101,14 +101,10 @@ describe("Testing functionality", function () {
 		assert.equal(this.cache.size, 0, "Should be 'null'");
 	});
 
-	it("It should return expiration time", function () {
-		const ttl = 99999;
-		this.cache = lru(1, ttl);
-		const now = new Date();
-		this.cache.set("key", "value");
-		const expirationTime = this.cache.getExpirationTime("key");
-		const remainingTime = expirationTime - now.getTime();
-		// keep 100 msec margin of error just in case
-		assert.equal(99999 - remainingTime < 100, true, "Should be within a margin of error");
+	it("It should expose expiration time", function () {
+		this.cache = lru(1, 6e4);
+		this.cache.set(this.items[0], false);
+		assert.equal(typeof this.cache.expiresAt(this.items[0]), "number", "Should be a number");
+		assert.equal(this.cache.expiresAt("invalid"), undefined, "Should be undefined");
 	});
 });

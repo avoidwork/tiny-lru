@@ -84,7 +84,7 @@ Gets cached item and moves it to the front
 const item = cache.get("myKey");
 ```
 
-## getExpirationTime
+## expiresAt
 ### Method
 
 Gets expiration time for cached item
@@ -95,7 +95,7 @@ Gets expiration time for cached item
 **Example**
 
 ```javascript
-const item = cache.getExpirationTime("myKey");
+const item = cache.expiresAt("myKey");
 ```
 
 ## keys

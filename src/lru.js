@@ -84,7 +84,7 @@ class LRU {
 		return result;
 	}
 
-	getExpirationTime (key) {
+	expiresAt (key) {
 		let result;
 
 		if (this.#has(key)) {
