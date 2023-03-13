@@ -34,7 +34,6 @@
     "mocha": "mocha test/*.js",
     "rollup": "rollup --config",
     "test": "npm run lint && npm run mocha",
-    "test-webpack": "rm -rf test/webpack && git clone git@github.com:rabelais88/typescript-webpack.git test/webpack && echo \"import { lru } from 'tiny-lru';console.log(lru(1));\" >> test/webpack/src/index.ts && cd test/webpack && npm install && mkdir -p node_modules/tiny-lru/dist && cp ../../package.json node_modules/tiny-lru/ && cp ../../dist/* node_modules/tiny-lru/dist/ && npm run build",
     "types": "npx -p typescript tsc src/lru.js --declaration --allowJs --emitDeclarationOnly --outDir ."
   },
   "devDependencies": {
