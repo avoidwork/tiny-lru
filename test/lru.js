@@ -1,5 +1,6 @@
 import assert from "node:assert";
 import {lru} from "../dist/tiny-lru.esm.js";
+import {setTimeout} from "node:timers/promises";
 
 describe("Testing functionality", function () {
 	beforeEach(function () {
@@ -106,5 +107,88 @@ describe("Testing functionality", function () {
 		this.cache.set(this.items[0], false);
 		assert.equal(typeof this.cache.expiresAt(this.items[0]), "number", "Should be a number");
 		assert.equal(this.cache.expiresAt("invalid"), undefined, "Should be undefined");
+	});
+
+	it("It should update ttl on repeated set for the last entry", async function () {
+		const ttl = 1000;
+		this.cache = lru(5, ttl);
+		this.cache.set(this.items[0], false);
+
+		await setTimeout(500);
+		const expiresAtBefore = this.cache.expiresAt(this.items[0]);
+		const timeLeftBefore = expiresAtBefore - new Date().getTime();
+
+		assert.equal(timeLeftBefore < 520, true);
+		assert.equal(timeLeftBefore > 480, true);
+
+		this.cache.set(this.items[0], false, false, true);
+		const expiresAtAfter = this.cache.expiresAt(this.items[0]);
+		const timeLeftAfter = expiresAtAfter - new Date().getTime();
+
+		assert.equal(timeLeftAfter < 1020, true);
+		assert.equal(timeLeftAfter > 980, true);
+	});
+
+	it("It should update ttl on repeated set for the non-last element", async function () {
+		const ttl = 1000;
+		this.cache = lru(5, ttl);
+		this.cache.set(this.items[0], false);
+		this.cache.set(this.items[1], false);
+
+		await setTimeout(500);
+		const expiresAtBefore = this.cache.expiresAt(this.items[0]);
+		const timeLeftBefore = expiresAtBefore - new Date().getTime();
+
+		assert.equal(timeLeftBefore < 520, true);
+		assert.equal(timeLeftBefore > 480, true);
+
+		this.cache.set(this.items[0], false, false, true);
+		const expiresAtAfter = this.cache.expiresAt(this.items[0]);
+		const timeLeftAfter = expiresAtAfter - new Date().getTime();
+
+		assert.equal(timeLeftAfter < 1020, true);
+		assert.equal(timeLeftAfter > 980, true);
+	});
+
+	it("It should not update ttl on repeated set when resetTtl is disabled", async function () {
+		const ttl = 1000;
+		this.cache = lru(5, ttl);
+		this.cache.set(this.items[0], false);
+		this.cache.set(this.items[1], false);
+
+		await setTimeout(500);
+		const expiresAtBefore = this.cache.expiresAt(this.items[0]);
+		const timeLeftBefore = expiresAtBefore - new Date().getTime();
+
+		assert.equal(timeLeftBefore < 520, true);
+		assert.equal(timeLeftBefore > 480, true);
+
+		this.cache.set(this.items[0], false, false, false);
+		const expiresAtAfter = this.cache.expiresAt(this.items[0]);
+		const timeLeftAfter = expiresAtAfter - new Date().getTime();
+
+		assert.equal(timeLeftAfter < 520, true);
+		assert.equal(timeLeftAfter > 480, true);
+	});
+
+	it("It should update ttl on repeated set by default", async function () {
+		const ttl = 1000;
+		this.cache = lru(5, ttl);
+		this.cache.set(this.items[0], false);
+		this.cache.set(this.items[1], false);
+
+		await setTimeout(500);
+		const expiresAtBefore = this.cache.expiresAt(this.items[0]);
+		const timeLeftBefore = expiresAtBefore - new Date().getTime();
+
+		assert.equal(timeLeftBefore < 520, true);
+		assert.equal(timeLeftBefore > 480, true);
+
+		this.cache.set(this.items[0], false);
+		const expiresAtAfter = this.cache.expiresAt(this.items[0]);
+		const timeLeftAfter = expiresAtAfter - new Date().getTime();
+
+		assert.equal(timeLeftAfter < 1020, true);
+		assert.equal(timeLeftAfter > 980, true);
 	});
 });

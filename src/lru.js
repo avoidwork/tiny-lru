@@ -98,7 +98,7 @@ class LRU {
 		return Object.keys(this.items);
 	}
 
-	set (key, value, bypass = false, resetTtl = false) {
+	set (key, value, bypass = false, resetTtl = true) {
 		let item;
 
 		if (bypass || this.#has(key)) {
@@ -114,10 +114,6 @@ class LRU {
 					this.first = item.next;
 				}
 
-				if (resetTtl) {
-					item.expiry = this.ttl > 0 ? new Date().getTime() + this.ttl : this.ttl;
-				}
-
 				item.next = null;
 				item.prev = this.last;
 				last.next = item;
@@ -129,6 +125,9 @@ class LRU {
 				if (next !== null) {
 					next.prev = prev;
 				}
+			}
+			if (resetTtl) {
+				item.expiry = this.ttl > 0 ? new Date().getTime() + this.ttl : this.ttl;
 			}
 		} else {
 			if (this.max > 0 && this.size === this.max) {
