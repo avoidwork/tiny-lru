@@ -57,6 +57,20 @@ Evicts the least recently used item from cache
 cache.evict();
 ```
 
+## expiresAt
+### Method
+
+Gets expiration time for cached item
+
+	param  {String} key Item key
+	return {Mixed}      Undefined or number (epoch time)
+
+**Example**
+
+```javascript
+const item = cache.expiresAt("myKey");
+```
+
 ## first
 ### Property
 
@@ -82,20 +96,6 @@ Gets cached item and moves it to the front
 
 ```javascript
 const item = cache.get("myKey");
-```
-
-## expiresAt
-### Method
-
-Gets expiration time for cached item
-
-	param  {String} key Item key
-	return {Mixed}      Undefined or number (epoch time)
-
-**Example**
-
-```javascript
-const item = cache.expiresAt("myKey");
 ```
 
 ## keys
@@ -193,5 +193,5 @@ cache.ttl = 3e4;
 ```
 
 ## License
-Copyright (c) 2022 Jason Mulligan
+Copyright (c) 2023 Jason Mulligan
 Licensed under the BSD-3 license.

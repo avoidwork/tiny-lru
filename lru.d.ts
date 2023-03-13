@@ -9,9 +9,10 @@ export interface LRU<T> {
     clear(): this;
     delete(key: any): this;
     evict(bypass?: boolean): this;
+    expiresAt(key: any): number | undefined;
     get(key: any): T | undefined;
     keys(): string[];
-    set(key: any, value: T, bypass?: boolean): this;
+    set(key: any, value: T, bypass?: boolean, resetTtl?: boolean): this;
 }
 export { };
 

@@ -1,9 +1,9 @@
 /**
  * tiny-lru
  *
- * @copyright 2022 Jason Mulligan <jason.mulligan@avoidwork.com>
+ * @copyright 2023 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 10.0.1
+ * @version 10.1.0
  */
 class LRU {
 	constructor (max = 0, ttl = 0) {
@@ -86,6 +86,16 @@ class LRU {
 				result = item.value;
 				this.set(key, result, true);
 			}
+		}
+
+		return result;
+	}
+
+	expiresAt (key) {
+		let result;
+
+		if (this.#has(key)) {
+			result = this.items[key].expiry;
 		}
 
 		return result;

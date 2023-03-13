@@ -1,7 +1,7 @@
 {
   "name": "tiny-lru",
   "description": "Tiny LRU cache for Client or Server",
-  "version": "10.0.2",
+  "version": "10.1.0",
   "homepage": "https://github.com/avoidwork/tiny-lru",
   "author": "Jason Mulligan <jason.mulligan@avoidwork.com>",
   "repository": {
@@ -35,16 +35,16 @@
     "rollup": "rollup --config",
     "test": "npm run lint && npm run mocha",
     "test-webpack": "rm -rf test/webpack && git clone git@github.com:rabelais88/typescript-webpack.git test/webpack && echo \"import { lru } from 'tiny-lru';console.log(lru(1));\" >> test/webpack/src/index.ts && cd test/webpack && npm install && mkdir -p node_modules/tiny-lru/dist && cp ../../package.json node_modules/tiny-lru/ && cp ../../dist/* node_modules/tiny-lru/dist/ && npm run build",
-    "types": "npx -p typescript tsc src/*.js --declaration --allowJs --emitDeclarationOnly --outDir ."
+    "types": "npx -p typescript tsc src/lru.js --declaration --allowJs --emitDeclarationOnly --outDir ."
   },
   "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.0",
     "auto-changelog": "^2.4.0",
-    "eslint": "^8.23.1",
-    "mocha": "^10.0.0",
-    "precise": "^2.0.0",
-    "rollup": "^2.79.0",
-    "rollup-plugin-terser": "^7.0.2",
-    "typescript": "^4.8.3"
+    "eslint": "^8.36.0",
+    "mocha": "^10.2.0",
+    "precise": "^2.0.1",
+    "rollup": "^3.19.1",
+    "typescript": "^4.9.5"
   },
   "keywords": [
     "LRU",
