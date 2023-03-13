@@ -105,6 +105,10 @@ class LRU {
 			item = this.items[key];
 			item.value = value;
 
+			if (resetTtl) {
+				item.expiry = this.ttl > 0 ? new Date().getTime() + this.ttl : this.ttl;
+			}
+
 			if (this.last !== item) {
 				const last = this.last,
 					next = item.next,
@@ -112,10 +116,6 @@ class LRU {
 
 				if (this.first === item) {
 					this.first = item.next;
-				}
-
-				if (resetTtl) {
-					item.expiry = this.ttl > 0 ? new Date().getTime() + this.ttl : this.ttl;
 				}
 
 				item.next = null;
