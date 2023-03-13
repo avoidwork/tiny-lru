@@ -84,6 +84,20 @@ Gets cached item and moves it to the front
 const item = cache.get("myKey");
 ```
 
+## getExpirationTime
+### Method
+
+Gets expiration time for cached item
+
+	param  {String} key Item key
+	return {Mixed}      Undefined or number (epoch time)
+
+**Example**
+
+```javascript
+const item = cache.getExpirationTime("myKey");
+```
+
 ## keys
 ### Method
 
