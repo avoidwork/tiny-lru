@@ -84,6 +84,16 @@ class LRU {
 		return result;
 	}
 
+	expiresAt (key) {
+		let result;
+
+		if (this.#has(key)) {
+			result = this.items[key].expiry;
+		}
+
+		return result;
+	}
+
 	keys () {
 		return Object.keys(this.items);
 	}

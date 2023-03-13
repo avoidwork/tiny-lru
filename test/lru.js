@@ -100,4 +100,11 @@ describe("Testing functionality", function () {
 		assert.equal(this.cache.last, null, "Should be 'null'");
 		assert.equal(this.cache.size, 0, "Should be 'null'");
 	});
+
+	it("It should expose expiration time", function () {
+		this.cache = lru(1, 6e4);
+		this.cache.set(this.items[0], false);
+		assert.equal(typeof this.cache.expiresAt(this.items[0]), "number", "Should be a number");
+		assert.equal(this.cache.expiresAt("invalid"), undefined, "Should be undefined");
+	});
 });
