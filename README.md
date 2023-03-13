@@ -158,8 +158,8 @@ Sets item in cache as `first`
 
 	param  {String}   key      Item key
 	param  {Mixed}    value    Item value
-    param  {Boolean=false} bypass   If set to true, this will skip cache size limit check and auto-eviction of least recently used entry on overfill.
-    param  {Boolean=false} resetTtl If entry with this key already exists, by default it will keep same expiration date. With `resetTtl=true`, new expiration date will be calculated.
+	param  {Boolean=false} bypass   If set to true, this will skip cache size limit check and auto-eviction of least recently used entry on overfill.
+	param  {Boolean=false} resetTtl If entry with this key already exists, by default it will keep same expiration date. With `resetTtl=true`, new expiration date will be calculated.
 	return {Object}       LRU instance
 
 **Example**
