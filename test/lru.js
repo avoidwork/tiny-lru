@@ -109,7 +109,7 @@ describe("Testing functionality", function () {
 		assert.equal(this.cache.expiresAt("invalid"), undefined, "Should be undefined");
 	});
 
-	it("It should update ttl on repeated set for the last entry", async function () {
+	it("It should update ttl on repeated set for the last element", async function () {
 		const ttl = 1000;
 		this.cache = lru(5, ttl);
 		this.cache.set(this.items[0], false);
