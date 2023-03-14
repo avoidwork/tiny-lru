@@ -1,8 +1,9 @@
-export function lru<T = any>(max?: number, ttl?: number): LRU<T>;
+export function lru<T = any>(max?: number, ttl?: number, resetTtl?: boolean): LRU<T>;
 export interface LRU<T> {
     first: T | null;
     last: T | null;
     max: number;
+    resetTtl: boolean;
     size: number;
     ttl: number;
 

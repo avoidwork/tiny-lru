@@ -123,4 +123,20 @@ describe("Testing functionality", function () {
 			done();
 		}, 11);
 	});
+
+	it("It should reset the TTL with optional property", function (done) {
+		this.cache = lru(1, 6e4, true);
+		this.cache.set(this.items[0], false);
+		const n1 = this.cache.expiresAt(this.items[0]);
+		assert.equal(typeof n1, "number", "Should be a number");
+		assert.equal(n1 > 0, true, "Should be greater than zero");
+		setTimeout(() => {
+			this.cache.set(this.items[0], false);
+			const n2 = this.cache.expiresAt(this.items[0]);
+			assert.equal(typeof n2, "number", "Should be a number");
+			assert.equal(n2 > 0, true, "Should be greater than zero");
+			assert.equal(n2 > n1, true, "Should be greater than first expiration timestamp");
+			done();
+		}, 11);
+	});
 });
