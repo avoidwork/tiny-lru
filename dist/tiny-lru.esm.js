@@ -3,14 +3,15 @@
  *
  * @copyright 2023 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 10.1.0
+ * @version 10.1.1
  */
 class LRU {
-	constructor (max = 0, ttl = 0) {
+	constructor (max = 0, ttl = 0, resetTtl = false) {
 		this.first = null;
 		this.items = Object.create(null);
 		this.last = null;
 		this.max = max;
+		this.resetTtl = resetTtl;
 		this.size = 0;
 		this.ttl = ttl;
 	}
@@ -105,7 +106,7 @@ class LRU {
 		return Object.keys(this.items);
 	}
 
-	set (key, value, bypass = false, resetTtl = false) {
+	set (key, value, bypass = false, resetTtl = this.resetTtl) {
 		let item;
 
 		if (bypass || this.#has(key)) {
@@ -163,7 +164,7 @@ class LRU {
 	}
 }
 
-function lru (max = 1000, ttl = 0) {
+function lru (max = 1000, ttl = 0, resetTtl = false) {
 	if (isNaN(max) || max < 0) {
 		throw new TypeError("Invalid max value");
 	}
@@ -172,5 +173,9 @@ function lru (max = 1000, ttl = 0) {
 		throw new TypeError("Invalid ttl value");
 	}
 
-	return new LRU(max, ttl);
+	if (typeof resetTtl !== "boolean") {
+		throw new TypeError("Invalid resetTtl value");
+	}
+
+	return new LRU(max, ttl, resetTtl);
 }export{lru};

@@ -4,7 +4,7 @@ Least Recently Used cache for Client or Server.
 
 ```javascript
 import {lru} from "tiny-lru";
-const cache = lru(max, ttl = 0);
+const cache = lru(max, ttl = 0, resetTtl = false);
 ```
 
 Lodash provides a `memoize` function with a cache that can be swapped out as long as it implements the right interface.
@@ -137,18 +137,17 @@ const cache = lru();
 cache.last; // null - it's a new cache!
 ```
 
-## remove
-### Method
+## resetTtl
+### Property
 
-(Deprecated) Removes item from cache
-
-	param  {String} key Item key
-	return {Object}     LRU instance
+Resets `item.expiry` with each `set()` if `true` (false)
 
 **Example**
 
 ```javascript
-cache.remove("myKey");
+const cache = lru();
+
+cache.resetTtl; // false
 ```
 
 ## set
@@ -158,8 +157,8 @@ Sets item in cache as `first`
 
 	param  {String}   key      Item key
 	param  {Mixed}    value    Item value
-	param  {Boolean=false} bypass   If set to true, this will skip cache size limit check and auto-eviction of least recently used entry on overfill.
-	param  {Boolean=false} resetTtl If entry with this key already exists, by default it will keep same expiration date. With `resetTtl=true`, new expiration date will be calculated.
+	param  {Boolean}  bypass   Bypasses 'has()' check; do not use (false)
+	param  {Boolean}  resetTtl Resets the 'expiry' of the item if present; do not use (this.resetTtl)
 	return {Object}       LRU instance
 
 **Example**
