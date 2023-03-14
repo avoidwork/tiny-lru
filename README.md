@@ -155,10 +155,8 @@ cache.resetTtl; // false
 
 Sets item in cache as `first`
 
-	param  {String}   key      Item key
-	param  {Mixed}    value    Item value
-	param  {Boolean}  bypass   Bypasses 'has()' check; do not use (false)
-	param  {Boolean}  resetTtl Resets the 'expiry' of the item if present; do not use (this.resetTtl)
+	param  {String} key   Item key
+	param  {Mixed}  value Item value
 	return {Object}       LRU instance
 
 **Example**
