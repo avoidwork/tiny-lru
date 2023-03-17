@@ -3,7 +3,7 @@
  *
  * @copyright 2023 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 10.2.1
+ * @version 10.2.2
  */
 class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
@@ -81,7 +81,7 @@ class LRU {
 		if (this.#has(key)) {
 			const item = this.items[key];
 
-			if (this.ttl > 0 && item.expiry <= new Date().getTime()) {
+			if (this.ttl > 0 && item.expiry <= Date.now()) {
 				this.delete(key);
 			} else {
 				result = item.value;
@@ -114,7 +114,7 @@ class LRU {
 			item.value = value;
 
 			if (resetTtl) {
-				item.expiry = this.ttl > 0 ? new Date().getTime() + this.ttl : this.ttl;
+				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
 			}
 
 			if (this.last !== item) {
@@ -144,7 +144,7 @@ class LRU {
 			}
 
 			item = this.items[key] = {
-				expiry: this.ttl > 0 ? new Date().getTime() + this.ttl : this.ttl,
+				expiry: this.ttl > 0 ? Date.now() + this.ttl : this.ttl,
 				key: key,
 				prev: this.last,
 				next: null,
