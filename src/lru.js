@@ -1,7 +1,7 @@
 class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
 		this.first = null;
-		this.items = Object.create(null);
+		this.items = new Map();
 		this.last = null;
 		this.max = max;
 		this.resetTtl = resetTtl;
@@ -10,12 +10,12 @@ class LRU {
 	}
 
 	#has (key) {
-		return key in this.items;
+		return this.items.has(key);
 	}
 
 	clear () {
 		this.first = null;
-		this.items = Object.create(null);
+		this.items.clear();
 		this.last = null;
 		this.size = 0;
 
@@ -24,9 +24,9 @@ class LRU {
 
 	delete (key) {
 		if (this.#has(key)) {
-			const item = this.items[key];
+			const item = this.items.get(key);
 
-			delete this.items[key];
+			this.items.delete(key);
 			this.size--;
 
 			if (item.prev !== null) {
@@ -53,7 +53,7 @@ class LRU {
 		if (bypass || this.size > 0) {
 			const item = this.first;
 
-			delete this.items[item.key];
+			this.items.delete(item.key);
 			this.size--;
 
 			if (this.size === 0) {
@@ -72,7 +72,7 @@ class LRU {
 		let result;
 
 		if (this.#has(key)) {
-			const item = this.items[key];
+			const item = this.items.get(key);
 
 			if (this.ttl > 0 && item.expiry <= Date.now()) {
 				this.delete(key);
@@ -89,7 +89,7 @@ class LRU {
 		let result;
 
 		if (this.#has(key)) {
-			result = this.items[key].expiry;
+			result = this.items.get(key).expiry;
 		}
 
 		return result;
@@ -103,7 +103,7 @@ class LRU {
 		let item;
 
 		if (bypass || this.#has(key)) {
-			item = this.items[key];
+			item = this.items.get(key);
 			item.value = value;
 
 			if (resetTtl) {
@@ -136,13 +136,15 @@ class LRU {
 				this.evict(true);
 			}
 
-			item = this.items[key] = {
+			item = {
 				expiry: this.ttl > 0 ? Date.now() + this.ttl : this.ttl,
 				key: key,
 				prev: this.last,
 				next: null,
 				value
 			};
+
+			this.items.set(key, item);
 
 			if (++this.size === 1) {
 				this.first = item;
