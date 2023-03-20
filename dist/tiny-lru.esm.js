@@ -12,7 +12,6 @@ class LRU {
 		this.last = null;
 		this.max = max;
 		this.resetTtl = resetTtl;
-		this.size = 0;
 		this.ttl = ttl;
 	}
 
@@ -24,7 +23,6 @@ class LRU {
 		this.first = null;
 		this.items.clear();
 		this.last = null;
-		this.size = 0;
 
 		return this;
 	}
@@ -34,7 +32,6 @@ class LRU {
 			const item = this.items.get(key);
 
 			this.items.delete(key);
-			this.size--;
 
 			if (item.prev !== null) {
 				item.prev.next = item.next;
@@ -61,7 +58,6 @@ class LRU {
 			const item = this.first;
 
 			this.items.delete(item.key);
-			this.size--;
 
 			if (this.size === 0) {
 				this.first = null;
@@ -153,7 +149,7 @@ class LRU {
 
 			this.items.set(key, item);
 
-			if (++this.size === 1) {
+			if (this.size === 1) {
 				this.first = item;
 			} else {
 				this.last.next = item;
@@ -163,6 +159,10 @@ class LRU {
 		this.last = item;
 
 		return this;
+	}
+
+	get size () {
+		return this.items.size;
 	}
 }
 
