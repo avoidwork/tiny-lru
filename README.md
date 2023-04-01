@@ -137,19 +137,6 @@ const cache = lru();
 cache.last; // null - it's a new cache!
 ```
 
-## resetTtl
-### Property
-
-Resets `item.expiry` with each `set()` if `true` (false)
-
-**Example**
-
-```javascript
-const cache = lru();
-
-cache.resetTtl; // false
-```
-
 ## set
 ### Method
 

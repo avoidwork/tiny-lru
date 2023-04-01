@@ -8,6 +8,30 @@ class LRU {
 		this.ttl = ttl;
 	}
 
+	bumpLru (item) {
+		if (this.last !== item) {
+			const last = this.last,
+				next = item.next,
+				prev = item.prev;
+
+			if (this.first === item) {
+				this.first = item.next;
+			}
+
+			item.next = null;
+			item.prev = this.last;
+			last.next = item;
+
+			if (prev !== null) {
+				prev.next = next;
+			}
+
+			if (next !== null) {
+				next.prev = prev;
+			}
+		}
+	}
+
 	clear () {
 		this.first = null;
 		this.items = new Map();
@@ -80,7 +104,7 @@ class LRU {
 				this.delete(key);
 			} else {
 				result = item.value;
-				this.set(key, result, true);
+				this.bumpLru(item);
 			}
 		}
 
@@ -91,16 +115,12 @@ class LRU {
 		return this.items.keys();
 	}
 
-	set (key, value, bypass = false, resetTtl = this.resetTtl) {
-		let item;
-
-		if (bypass || this.items.has(key)) {
-			item = this.items.get(key);
+	set (key, value) {
+		// Reset existing item
+		if (this.items.has(key)) {
+			const item = this.items.get(key);
 			item.value = value;
-
-			if (resetTtl) {
-				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
-			}
+			item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
 
 			if (this.last !== item) {
 				const last = this.last,
@@ -123,27 +143,30 @@ class LRU {
 					next.prev = prev;
 				}
 			}
-		} else {
-			if (this.max > 0 && this.size === this.max) {
-				this.evict(true);
-			}
+			this.last = item;
 
-			item = {
-				expiry: this.ttl > 0 ? Date.now() + this.ttl : this.ttl,
-				key: key,
-				prev: this.last,
-				next: null,
-				value
-			};
-			this.items.set(key, item);
-
-			if (this.size === 1) {
-				this.first = item;
-			} else {
-				this.last.next = item;
-			}
+			return this;
 		}
 
+		// New item
+		if (this.max > 0 && this.size === this.max) {
+			this.evict(true);
+		}
+
+		const item = {
+			expiry: this.ttl > 0 ? Date.now() + this.ttl : this.ttl,
+			key: key,
+			prev: this.last,
+			next: null,
+			value
+		};
+		this.items.set(key, item);
+
+		if (this.size === 1) {
+			this.first = item;
+		} else {
+			this.last.next = item;
+		}
 		this.last = item;
 
 		return this;
