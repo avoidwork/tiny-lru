@@ -95,20 +95,19 @@ class LRU {
 	}
 
 	get (key) {
-		let result;
-
 		if (this.items.has(key)) {
 			const item = this.items.get(key);
 
 			if (this.ttl > 0 && item.expiry <= Date.now()) {
 				this.delete(key);
 			} else {
-				result = item.value;
 				this.bumpLru(item);
+
+				return item.value;
 			}
 		}
 
-		return result;
+		return undefined;
 	}
 
 	keys () {
