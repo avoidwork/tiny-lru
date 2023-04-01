@@ -30,6 +30,10 @@ class LRU {
 				next.prev = prev;
 			}
 		}
+
+		this.last = item;
+
+		return this;
 	}
 
 	clear () {
