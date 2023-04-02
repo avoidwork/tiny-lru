@@ -1,4 +1,8 @@
 class LRU {
+	get size () {
+		return this.items.size;
+	}
+
 	constructor (max = 0, ttl = 0, resetTtl = false) {
 		this.first = null;
 		this.items = new Map();
@@ -147,10 +151,6 @@ class LRU {
 		this.last = item;
 
 		return this;
-	}
-
-	get size () {
-		return this.items.size;
 	}
 }
 
