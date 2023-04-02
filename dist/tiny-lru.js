@@ -75,6 +75,16 @@
 		return this;
 	}
 
+	expiresAt (key) {
+		let result;
+
+		if (this.#has(key)) {
+			result = this.items[key].expiry;
+		}
+
+		return result;
+	}
+
 	get (key) {
 		let result;
 
@@ -87,16 +97,6 @@
 				result = item.value;
 				this.set(key, result, true);
 			}
-		}
-
-		return result;
-	}
-
-	expiresAt (key) {
-		let result;
-
-		if (this.#has(key)) {
-			result = this.items[key].expiry;
 		}
 
 		return result;
