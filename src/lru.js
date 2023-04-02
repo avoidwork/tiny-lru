@@ -50,9 +50,8 @@ class LRU {
 			const item = this.first;
 
 			delete this.items[item.key];
-			this.size--;
 
-			if (this.size === 0) {
+			if (--this.size === 0) {
 				this.first = null;
 				this.last = null;
 			} else {
