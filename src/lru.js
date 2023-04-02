@@ -9,10 +9,6 @@ class LRU {
 		this.ttl = ttl;
 	}
 
-	#has (key) {
-		return key in this.items;
-	}
-
 	clear () {
 		this.first = null;
 		this.items = Object.create(null);
@@ -93,6 +89,10 @@ class LRU {
 		}
 
 		return result;
+	}
+
+	#has (key) {
+		return key in this.items;
 	}
 
 	keys () {
