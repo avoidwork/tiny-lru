@@ -16,10 +16,6 @@ class LRU {
 		this.ttl = ttl;
 	}
 
-	#has (key) {
-		return key in this.items;
-	}
-
 	clear () {
 		this.first = null;
 		this.items = Object.create(null);
@@ -61,9 +57,8 @@ class LRU {
 			const item = this.first;
 
 			delete this.items[item.key];
-			this.size--;
 
-			if (this.size === 0) {
+			if (--this.size === 0) {
 				this.first = null;
 				this.last = null;
 			} else {
@@ -100,6 +95,10 @@ class LRU {
 		}
 
 		return result;
+	}
+
+	#has (key) {
+		return key in this.items;
 	}
 
 	keys () {
