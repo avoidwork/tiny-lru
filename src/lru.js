@@ -1,10 +1,9 @@
 class LRU {
-	constructor (max = 0, ttl = 0, resetTtl = false) {
+	constructor (max = 0, ttl = 0) {
 		this.first = null;
 		this.items = new Map();
 		this.last = null;
 		this.max = max;
-		this.resetTtl = resetTtl;
 		this.ttl = ttl;
 	}
 
@@ -91,14 +90,15 @@ class LRU {
 		return this.items.keys();
 	}
 
-	set (key, value, bypass = false, resetTtl = this.resetTtl) {
+	set (key, value, bypass = false) {
 		let item;
 
 		if (bypass || this.items.has(key)) {
 			item = this.items.get(key);
 			item.value = value;
 
-			if (resetTtl) {
+			// If this is merely an LRU bump, we shouldn't reset TTL, but for user-called set we should
+			if (!bypass) {
 				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
 			}
 
@@ -154,7 +154,7 @@ class LRU {
 	}
 }
 
-export function lru (max = 1000, ttl = 0, resetTtl = false) {
+export function lru (max = 1000, ttl = 0) {
 	if (isNaN(max) || max < 0) {
 		throw new TypeError("Invalid max value");
 	}
@@ -163,9 +163,5 @@ export function lru (max = 1000, ttl = 0, resetTtl = false) {
 		throw new TypeError("Invalid ttl value");
 	}
 
-	if (typeof resetTtl !== "boolean") {
-		throw new TypeError("Invalid resetTtl value");
-	}
-
-	return new LRU(max, ttl, resetTtl);
+	return new LRU(max, ttl);
 }
