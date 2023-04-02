@@ -1,26 +1,33 @@
 class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
 		this.first = null;
-		this.items = new Map();
+		this.items = Object.create(null);
 		this.last = null;
 		this.max = max;
 		this.resetTtl = resetTtl;
+		this.size = 0;
 		this.ttl = ttl;
+	}
+
+	#has (key) {
+		return key in this.items;
 	}
 
 	clear () {
 		this.first = null;
-		this.items = new Map();
+		this.items = Object.create(null);
 		this.last = null;
+		this.size = 0;
 
 		return this;
 	}
 
 	delete (key) {
-		if (this.items.has(key)) {
-			const item = this.items.get(key);
+		if (this.#has(key)) {
+			const item = this.items[key];
 
-			this.items.delete(key);
+			delete this.items[key];
+			this.size--;
 
 			if (item.prev !== null) {
 				item.prev.next = item.next;
@@ -46,7 +53,8 @@ class LRU {
 		if (bypass || this.size > 0) {
 			const item = this.first;
 
-			this.items.delete(item.key);
+			delete this.items[item.key];
+			this.size--;
 
 			if (this.size === 0) {
 				this.first = null;
@@ -63,8 +71,8 @@ class LRU {
 	expiresAt (key) {
 		let result;
 
-		if (this.items.has(key)) {
-			result = this.items.get(key).expiry;
+		if (this.#has(key)) {
+			result = this.items[key].expiry;
 		}
 
 		return result;
@@ -73,8 +81,8 @@ class LRU {
 	get (key) {
 		let result;
 
-		if (this.items.has(key)) {
-			const item = this.items.get(key);
+		if (this.#has(key)) {
+			const item = this.items[key];
 
 			if (this.ttl > 0 && item.expiry <= Date.now()) {
 				this.delete(key);
@@ -88,14 +96,14 @@ class LRU {
 	}
 
 	keys () {
-		return this.items.keys();
+		return Object.keys(this.items);
 	}
 
 	set (key, value, bypass = false, resetTtl = this.resetTtl) {
 		let item;
 
-		if (bypass || this.items.has(key)) {
-			item = this.items.get(key);
+		if (bypass || this.#has(key)) {
+			item = this.items[key];
 			item.value = value;
 
 			if (resetTtl) {
@@ -128,16 +136,15 @@ class LRU {
 				this.evict(true);
 			}
 
-			item = {
+			item = this.items[key] = {
 				expiry: this.ttl > 0 ? Date.now() + this.ttl : this.ttl,
 				key: key,
 				prev: this.last,
 				next: null,
 				value
 			};
-			this.items.set(key, item);
 
-			if (this.size === 1) {
+			if (++this.size === 1) {
 				this.first = item;
 			} else {
 				this.last.next = item;
@@ -147,10 +154,6 @@ class LRU {
 		this.last = item;
 
 		return this;
-	}
-
-	get size () {
-		return this.items.size;
 	}
 }
 
