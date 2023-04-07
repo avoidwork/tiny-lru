@@ -1,4 +1,4 @@
-import {lru} from "./dist/tiny-lru.esm.js";
+import {lru} from "tiny-lru";
 import {precise} from "precise";
 
 const nth = 2e3,
