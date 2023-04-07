@@ -1,3 +1,5 @@
+import {has} from "./has.js";
+
 class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
 		this.first = null;
@@ -19,7 +21,7 @@ class LRU {
 	}
 
 	delete (key) {
-		if (this.#has(key)) {
+		if (has(this.items, key)) {
 			const item = this.items[key];
 
 			delete this.items[key];
@@ -66,7 +68,7 @@ class LRU {
 	expiresAt (key) {
 		let result;
 
-		if (this.#has(key)) {
+		if (has(this.items, key)) {
 			result = this.items[key].expiry;
 		}
 
@@ -76,7 +78,7 @@ class LRU {
 	get (key) {
 		let result;
 
-		if (this.#has(key)) {
+		if (has(this.items, key)) {
 			const item = this.items[key];
 
 			if (this.ttl > 0 && item.expiry <= Date.now()) {
@@ -90,10 +92,6 @@ class LRU {
 		return result;
 	}
 
-	#has (key) {
-		return key in this.items;
-	}
-
 	keys () {
 		return Object.keys(this.items);
 	}
@@ -101,7 +99,7 @@ class LRU {
 	set (key, value, bypass = false, resetTtl = this.resetTtl) {
 		let item;
 
-		if (bypass || this.#has(key)) {
+		if (bypass || has(this.items, key)) {
 			item = this.items[key];
 			item.value = value;
 

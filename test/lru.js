@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import {lru} from "../dist/tiny-lru.esm.js";
+import {lru} from "tiny-lru";
 
 describe("Testing functionality", function () {
 	beforeEach(function () {

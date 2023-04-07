@@ -31,22 +31,22 @@ export default [
 			},
 			{
 				...esmOutBase,
-				file: `dist/${pkg.name}.esm.js`
+				file: `dist/${pkg.name}.js`
 			},
 			{
 				...esmOutBase,
 				...minOutBase,
-				file: `dist/${pkg.name}.esm.min.js`
+				file: `dist/${pkg.name}.min.js`
 			},
 			{
 				...umdOutBase,
-				file: `dist/${pkg.name}.js`,
+				file: `dist/${pkg.name}.umd.js`,
 				name: "lru"
 			},
 			{
 				...umdOutBase,
 				...minOutBase,
-				file: `dist/${pkg.name}.min.js`,
+				file: `dist/${pkg.name}.umd.min.js`,
 				name: "lru"
 			}
 		]

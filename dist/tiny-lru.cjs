@@ -3,9 +3,13 @@
  *
  * @copyright 2023 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 10.4.1
+ * @version 11.0.0
  */
 'use strict';
+
+function has (items, key) {
+	return key in items;
+}
 
 class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
@@ -28,7 +32,7 @@ class LRU {
 	}
 
 	delete (key) {
-		if (this.#has(key)) {
+		if (has(this.items, key)) {
 			const item = this.items[key];
 
 			delete this.items[key];
@@ -75,7 +79,7 @@ class LRU {
 	expiresAt (key) {
 		let result;
 
-		if (this.#has(key)) {
+		if (has(this.items, key)) {
 			result = this.items[key].expiry;
 		}
 
@@ -85,7 +89,7 @@ class LRU {
 	get (key) {
 		let result;
 
-		if (this.#has(key)) {
+		if (has(this.items, key)) {
 			const item = this.items[key];
 
 			if (this.ttl > 0 && item.expiry <= Date.now()) {
@@ -99,10 +103,6 @@ class LRU {
 		return result;
 	}
 
-	#has (key) {
-		return key in this.items;
-	}
-
 	keys () {
 		return Object.keys(this.items);
 	}
@@ -110,7 +110,7 @@ class LRU {
 	set (key, value, bypass = false, resetTtl = this.resetTtl) {
 		let item;
 
-		if (bypass || this.#has(key)) {
+		if (bypass || has(this.items, key)) {
 			item = this.items[key];
 			item.value = value;
 
