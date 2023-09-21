@@ -132,23 +132,53 @@ describe("Testing functionality", function () {
 		assert.strictEqual(this.cache.expiresAt("invalid"), undefined, "Should be undefined");
 	});
 
-	it("It should reset the TTL with optional parameter", function (done) {
+	it("It should not have a TTL by default", function () {
+		this.cache = lru(1);
+		this.cache.set(this.items[0], false);
+		const n1 = this.cache.expiresAt(this.items[0]);
+		assert.strictEqual(typeof n1, "number", "Should be a number");
+		assert.strictEqual(n1 === 0, true, "Should be zero");
+	});
+
+	it("It should have immutable TTL on set() by default", function (done) {
 		this.cache = lru(1, 6e4);
 		this.cache.set(this.items[0], false);
 		const n1 = this.cache.expiresAt(this.items[0]);
 		assert.strictEqual(typeof n1, "number", "Should be a number");
 		assert.strictEqual(n1 > 0, true, "Should be greater than zero");
+		this.cache.get(this.items[0]);
+		const n2 = this.cache.expiresAt(this.items[0]);
+		assert.strictEqual(n1, n2, "Should be equal");
 		setTimeout(() => {
-			this.cache.set(this.items[0], false, false, true);
-			const n2 = this.cache.expiresAt(this.items[0]);
-			assert.strictEqual(typeof n2, "number", "Should be a number");
-			assert.strictEqual(n2 > 0, true, "Should be greater than zero");
-			assert.strictEqual(n2 > n1, true, "Should be greater than first expiration timestamp");
+			this.cache.set(this.items[0], false);
+			const n3 = this.cache.expiresAt(this.items[0]);
+			assert.strictEqual(typeof n3, "number", "Should be a number");
+			assert.strictEqual(n3 > 0, true, "Should be greater than zero");
+			assert.strictEqual(n3 === n1, true, "Should be equal to the first expiration timestamp");
 			done();
 		}, 11);
 	});
 
-	it("It should reset the TTL with optional property", function (done) {
+	it("It should reset the TTL on set() with optional parameter", function (done) {
+		this.cache = lru(1, 6e4);
+		this.cache.set(this.items[0], false);
+		const n1 = this.cache.expiresAt(this.items[0]);
+		assert.strictEqual(typeof n1, "number", "Should be a number");
+		assert.strictEqual(n1 > 0, true, "Should be greater than zero");
+		this.cache.get(this.items[0]);
+		const n2 = this.cache.expiresAt(this.items[0]);
+		assert.strictEqual(n1, n2, "Should be equal");
+		setTimeout(() => {
+			this.cache.set(this.items[0], false, false, true);
+			const n3 = this.cache.expiresAt(this.items[0]);
+			assert.strictEqual(typeof n3, "number", "Should be a number");
+			assert.strictEqual(n3 > 0, true, "Should be greater than zero");
+			assert.strictEqual(n3 > n1, true, "Should be greater than first expiration timestamp");
+			done();
+		}, 11);
+	});
+
+	it("It should reset the TTL on set() with optional property", function (done) {
 		this.cache = lru(1, 6e4, true);
 		this.cache.set(this.items[0], false);
 		const n1 = this.cache.expiresAt(this.items[0]);
