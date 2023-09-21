@@ -3,7 +3,7 @@
  *
  * @copyright 2023 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 11.1.0
+ * @version 11.1.1
  */
 class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
@@ -116,7 +116,7 @@ class LRU {
 			item = this.items[key];
 			item.value = value;
 
-			if (resetTtl) {
+			if (bypass === false && resetTtl) {
 				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
 			}
 

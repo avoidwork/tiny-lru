@@ -109,7 +109,7 @@ class LRU {
 			item = this.items[key];
 			item.value = value;
 
-			if (resetTtl) {
+			if (bypass === false && resetTtl) {
 				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
 			}
 
