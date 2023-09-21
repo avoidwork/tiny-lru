@@ -28,16 +28,23 @@ describe("Testing functionality", function () {
 		this.items.forEach(i => this.cache.set(i, false));
 		const entries = this.cache.entries();
 		assert.strictEqual(entries.length, this.cache.keys().length, "Should be equal");
+		assert.strictEqual(JSON.stringify(entries.map(i => i[0])), JSON.stringify(this.cache.keys()), "Should be equal");
 		assert.strictEqual(entries[entries.length - 1][0], this.items[this.items.length - 1], "Should be equal");
 	});
 
 	it("It should evict", function () {
 		this.items.forEach(i => this.cache.set(i, false));
 		assert.strictEqual(this.cache.first.key, "b", "Should be 'b'");
+		assert.strictEqual(this.cache.first.next.key, "c", "Should be 'c'");
+		assert.strictEqual(this.cache.last.prev.key, "d", "Should be 'd'");
 		assert.strictEqual(this.cache.last.key, "e", "Should be 'e'");
 		assert.strictEqual(this.cache.size, 4, "Should be '4'");
 		this.cache.evict();
 		assert.strictEqual(this.cache.first.key, "c", "Should be 'c'");
+		assert.strictEqual(this.cache.first.next.key, "d", "Should be 'c'");
+		assert.strictEqual(this.cache.last.prev.key, "d", "Should be 'd'");
+		assert.strictEqual(this.cache.last.key, "e", "Should be 'e'");
+		assert.strictEqual(this.cache.size, 3, "Should be '4'");
 	});
 
 	it("It should delete", function () {
@@ -65,7 +72,9 @@ describe("Testing functionality", function () {
 		assert.strictEqual(this.cache.items.b.prev, null, "Should be 'null'");
 		this.cache.delete("e");
 		assert.strictEqual(this.cache.first.key, "b", "Should be 'b'");
+		assert.strictEqual(this.cache.first.next.key, "d", "Should be 'd'");
 		assert.strictEqual(this.cache.last.key, "d", "Should be 'd'");
+		assert.strictEqual(this.cache.last.prev.key, "b", "Should be 'b'");
 		assert.strictEqual(this.cache.size, 2, "Should be '2'");
 		this.cache.get("b");
 		assert.strictEqual(this.cache.first.key, "d", "Should be 'd'");
@@ -75,6 +84,14 @@ describe("Testing functionality", function () {
 		assert.strictEqual(this.cache.last.prev.key, "d", "Should be 'd'");
 		assert.strictEqual(this.cache.last.next, null, "Should be 'null'");
 		assert.strictEqual(this.cache.size, 2, "Should be '2'");
+		this.cache.delete("b");
+		assert.strictEqual(this.cache.first.key, "d", "Should be 'd'");
+		assert.strictEqual(this.cache.first.prev, null, "Should be 'null'");
+		assert.strictEqual(this.cache.first.next, null, "Should be 'null'");
+		assert.strictEqual(this.cache.last.key, "d", "Should be 'b'");
+		assert.strictEqual(this.cache.last.prev, null, "Should be 'null'");
+		assert.strictEqual(this.cache.last.next, null, "Should be 'null'");
+		assert.strictEqual(this.cache.size, 1, "Should be '1'");
 	});
 
 	it("It should handle a small evict", function () {
