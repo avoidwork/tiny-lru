@@ -10,15 +10,105 @@ const cache = lru(max, ttl = 0, resetTtl = false);
 Lodash provides a `memoize` function with a cache that can be swapped out as long as it implements the right interface.
 See the [lodash docs](https://lodash.com/docs#memoize) for more on `memoize`.
 
-#### Example
+## Example
 ```javascript
 _.memoize.Cache = lru().constructor;
 const memoized = _.memoize(myFunc);
 memoized.cache.max = 10;
 ```
 
-## clear
-### Method
+## Testing
+
+Tiny-LRU has 100% code coverage with its tests.
+
+```console
+--------------|---------|----------|---------|---------|-------------------
+File          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+--------------|---------|----------|---------|---------|-------------------
+All files     |     100 |    89.85 |     100 |     100 |                  
+ tiny-lru.cjs |     100 |    89.85 |     100 |     100 | 11-31,130-138,172
+--------------|---------|----------|---------|---------|-------------------
+```
+
+## API
+
+## Properties
+
+### first
+
+Item in "first" or "bottom" position; default is `null`
+
+**Example**
+
+```javascript
+const cache = lru();
+
+cache.first; // null - it's a new cache!
+```
+
+### last
+
+Item in "last" or "top" position; default is `null`
+
+**Example**
+
+```javascript
+const cache = lru();
+
+cache.last; // null - it's a new cache!
+```
+
+### max
+
+Max items to hold in cache; default is `1000`
+
+**Example**
+
+```javascript
+const cache = lru(500);
+
+cache.max; // 500
+```
+
+### resetTtl
+
+Resets `item.expiry` with each `set()` if `true`; default is `false`
+
+**Example**
+
+```javascript
+const cache = lru(500, 5*6e4, true);
+
+cache.resetTtl; // true
+```
+
+### size
+
+Number of items in cache
+
+**Example**
+
+```javascript
+const cache = lru();
+
+cache.size; // 0 - it's a new cache!
+```
+
+### ttl
+
+Milliseconds an item will remain in cache; lazy expiration upon next `get()` of an item
+
+**Example**
+
+```javascript
+const cache = lru(100, 3e4);
+
+cache.ttl; // 30000;
+```
+
+## Methods
+
+### clear
 
 Clears the contents of the cache
 
@@ -30,8 +120,7 @@ Clears the contents of the cache
 cache.clear();
 ```
 
-## delete
-### Method
+### delete
 
 Removes item from cache
 
@@ -44,8 +133,7 @@ Removes item from cache
 cache.delete("myKey");
 ```
 
-## entries(*["key1", "key2"]*)
-### Method
+### entries(*["key1", "key2"]*)
 
 Returns an `Array` cache items
 
@@ -58,8 +146,7 @@ Returns an `Array` cache items
 cache.entries(['myKey1', 'myKey2']);
 ```
 
-## evict
-### Method
+### evict
 
 Evicts the least recently used item from cache
 
@@ -71,8 +158,7 @@ Evicts the least recently used item from cache
 cache.evict();
 ```
 
-## expiresAt
-### Method
+### expiresAt
 
 Gets expiration time for cached item
 
@@ -85,21 +171,7 @@ Gets expiration time for cached item
 const item = cache.expiresAt("myKey");
 ```
 
-## first
-### Property
-
-Item in "first" or "bottom" position
-
-**Example**
-
-```javascript
-const cache = lru();
-
-cache.first; // null - it's a new cache!
-```
-
-## get
-### Method
+### get
 
 Gets cached item and moves it to the front
 
@@ -112,8 +184,7 @@ Gets cached item and moves it to the front
 const item = cache.get("myKey");
 ```
 
-## has
-### Method
+### has
 
 Returns a `Boolean` indicating if `key` is in cache
 
@@ -125,8 +196,7 @@ Returns a `Boolean` indicating if `key` is in cache
 cache.has('myKey');
 ```
 
-## keys
-### Method
+### keys
 
 Returns an `Array` of cache item keys.
 
@@ -138,47 +208,7 @@ Returns an `Array` of cache item keys.
 console.log(cache.keys());
 ```
 
-## max
-### Property
-
-Max items to hold in cache (1000)
-
-**Example**
-
-```javascript
-const cache = lru(500);
-
-cache.max; // 500
-```
-
-## last
-### Property
-
-Item in "last" or "top" position
-
-**Example**
-
-```javascript
-const cache = lru();
-
-cache.last; // null - it's a new cache!
-```
-
-## resetTtl
-### Property
-
-Resets `item.expiry` with each `set()` if `true` (false)
-
-**Example**
-
-```javascript
-const cache = lru();
-
-cache.resetTtl; // false
-```
-
-## set
-### Method
+### set
 
 Sets item in cache as `first`
 
@@ -192,34 +222,7 @@ Sets item in cache as `first`
 cache.set("myKey", {prop: true});
 ```
 
-## size
-### Property
-
-Number of items in cache
-
-**Example**
-
-```javascript
-const cache = lru();
-
-cache.size; // 0 - it's a new cache!
-```
-
-## ttl
-### Property
-
-Milliseconds an item will remain in cache; lazy expiration upon next `get()` of an item
-
-**Example**
-
-```javascript
-const cache = lru();
-
-cache.ttl = 3e4;
-```
-
-## values(*["key1", "key2"]*)
-### Method
+### values(*["key1", "key2"]*)
 
 Returns an `Array` cache items
 

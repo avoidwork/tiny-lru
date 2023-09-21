@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import {lru} from "tiny-lru";
+import {lru} from "../dist/tiny-lru.cjs";
 
 describe("Testing functionality", function () {
 	beforeEach(function () {
@@ -16,6 +16,26 @@ describe("Testing functionality", function () {
 		assert.strictEqual(this.cache.first, null, "Should be 'null'");
 		assert.strictEqual(this.cache.last, null, "Should be 'null'");
 		assert.strictEqual(this.cache.size, 0, "Should be '0'");
+	});
+
+	it("It should delete (size 1)", function () {
+		this.cache.max = 1;
+		this.items.forEach(i => this.cache.set(i, false));
+		assert.strictEqual(this.cache.size, 1, "Should be '1'");
+		this.cache.delete(this.cache.first.key);
+		assert.strictEqual(this.cache.size, 0, "Should be '0'");
+	});
+
+	it("It should expire (size 1)", function (done) {
+		this.cache.max = 1;
+		this.cache.ttl = 1;
+		this.items.forEach(i => this.cache.set(i, false));
+		assert.strictEqual(this.cache.size, 1, "Should be '1'");
+		setTimeout(() => {
+			this.cache.get(this.cache.first.key);
+			assert.strictEqual(this.cache.size, 0, "Should be '0'");
+			done();
+		}, 11);
 	});
 
 	it("It should have keys", function () {
@@ -248,11 +268,28 @@ describe("Testing functionality", function () {
 		}, 11);
 	});
 
+	it("It handle mid-deletes", function (done) {
+		this.cache = lru(3);
+		this.cache.set(this.items[0], false);
+		this.cache.set(this.items[1], false);
+		this.cache.set(this.items[2], false);
+		this.cache.delete(this.items[2]);
+		this.cache.get(this.items[1]);
+		assert.strictEqual(this.cache.size, 2, "Should be 2");
+		done();
+	});
+
 	it("It should have values()", function () {
 		this.cache.max = this.items.length;
 		this.items.forEach(i => this.cache.set(i, false));
 		assert.strictEqual(JSON.stringify(this.cache.values()), JSON.stringify(Array(this.cache.max).fill(false)), "Should be equal arrays");
 		assert.strictEqual(this.cache.values([this.items[0]])[0], false, "Should be 'false'");
 		assert.strictEqual(this.cache.values(["invalid"])[0], undefined, "Should be 'undefined'");
+	});
+
+	it("It should Error with invalid factory parameters", function () {
+		assert.throws(function () { lru(-1); }, Error);
+		assert.throws(function () { lru(1, -1); }, Error);
+		assert.throws(function () { lru(1, 1, -1); }, Error);
 	});
 });

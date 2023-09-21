@@ -3,7 +3,7 @@
  *
  * @copyright 2023 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 11.1.1
+ * @version 11.1.2
  */
 'use strict';
 
@@ -134,10 +134,6 @@ class LRU {
 				item.next = null;
 				item.prev = this.last;
 				last.next = item;
-
-				if (prev !== null) {
-					prev.next = next;
-				}
 
 				if (next !== null) {
 					next.prev = prev;
