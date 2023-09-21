@@ -176,6 +176,25 @@ describe("Testing functionality", function () {
 		}, 11);
 	});
 
+	it("It should have immutable TTL on set() with optional property of 0", function (done) {
+		this.cache = lru(1, 0, true);
+		this.cache.set(this.items[0], false);
+		const n1 = this.cache.expiresAt(this.items[0]);
+		assert.strictEqual(typeof n1, "number", "Should be a number");
+		assert.strictEqual(n1, 0, "Should be zero");
+		this.cache.get(this.items[0]);
+		const n2 = this.cache.expiresAt(this.items[0]);
+		assert.strictEqual(n1, n2, "Should be equal");
+		setTimeout(() => {
+			this.cache.set(this.items[0], false);
+			const n3 = this.cache.expiresAt(this.items[0]);
+			assert.strictEqual(typeof n3, "number", "Should be a number");
+			assert.strictEqual(n3, 0, "Should be zero");
+			assert.strictEqual(n3 === n1, true, "Should be equal");
+			done();
+		}, 11);
+	});
+
 	it("It should reset the TTL on set() with optional parameter", function (done) {
 		this.cache = lru(1, 6e4);
 		this.cache.set(this.items[0], false);
