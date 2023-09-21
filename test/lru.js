@@ -154,12 +154,15 @@ describe("Testing functionality", function () {
 		const n1 = this.cache.expiresAt(this.items[0]);
 		assert.strictEqual(typeof n1, "number", "Should be a number");
 		assert.strictEqual(n1 > 0, true, "Should be greater than zero");
+		this.cache.get(this.items[0]);
+		const n2 = this.cache.expiresAt(this.items[0]);
+		assert.strictEqual(n1, n2, "Should be equal");
 		setTimeout(() => {
 			this.cache.set(this.items[0], false);
-			const n2 = this.cache.expiresAt(this.items[0]);
-			assert.strictEqual(typeof n2, "number", "Should be a number");
-			assert.strictEqual(n2 > 0, true, "Should be greater than zero");
-			assert.strictEqual(n2 > n1, true, "Should be greater than first expiration timestamp");
+			const n3 = this.cache.expiresAt(this.items[0]);
+			assert.strictEqual(typeof n3, "number", "Should be a number");
+			assert.strictEqual(n3 > 0, true, "Should be greater than zero");
+			assert.strictEqual(n3 > n1, true, "Should be greater than first expiration timestamp");
 			done();
 		}, 11);
 	});
