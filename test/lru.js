@@ -170,16 +170,18 @@ describe("Testing functionality", function () {
 		const n1 = this.cache.expiresAt(this.items[0]);
 		assert.strictEqual(typeof n1, "number", "Should be a number");
 		assert.strictEqual(n1 > 0, true, "Should be greater than zero");
-		this.cache.get(this.items[0]);
-		const n2 = this.cache.expiresAt(this.items[0]);
-		assert.strictEqual(n1, n2, "Should be equal");
 		setTimeout(() => {
-			this.cache.set(this.items[0], false);
-			const n3 = this.cache.expiresAt(this.items[0]);
-			assert.strictEqual(typeof n3, "number", "Should be a number");
-			assert.strictEqual(n3 > 0, true, "Should be greater than zero");
-			assert.strictEqual(n3 === n1, true, "Should be equal to the first expiration timestamp");
-			done();
+			this.cache.get(this.items[0]);
+			const n2 = this.cache.expiresAt(this.items[0]);
+			assert.strictEqual(n1, n2, "Should be equal");
+			setTimeout(() => {
+				this.cache.set(this.items[0], false);
+				const n3 = this.cache.expiresAt(this.items[0]);
+				assert.strictEqual(typeof n3, "number", "Should be a number");
+				assert.strictEqual(n3 > 0, true, "Should be greater than zero");
+				assert.strictEqual(n3 === n1, true, "Should be equal to the first expiration timestamp");
+				done();
+			}, 11);
 		}, 11);
 	});
 
@@ -189,16 +191,18 @@ describe("Testing functionality", function () {
 		const n1 = this.cache.expiresAt(this.items[0]);
 		assert.strictEqual(typeof n1, "number", "Should be a number");
 		assert.strictEqual(n1, 0, "Should be zero");
-		this.cache.get(this.items[0]);
-		const n2 = this.cache.expiresAt(this.items[0]);
-		assert.strictEqual(n1, n2, "Should be equal");
 		setTimeout(() => {
-			this.cache.set(this.items[0], false);
-			const n3 = this.cache.expiresAt(this.items[0]);
-			assert.strictEqual(typeof n3, "number", "Should be a number");
-			assert.strictEqual(n3, 0, "Should be zero");
-			assert.strictEqual(n3 === n1, true, "Should be equal");
-			done();
+			this.cache.get(this.items[0]);
+			const n2 = this.cache.expiresAt(this.items[0]);
+			assert.strictEqual(n1, n2, "Should be equal");
+			setTimeout(() => {
+				this.cache.set(this.items[0], false);
+				const n3 = this.cache.expiresAt(this.items[0]);
+				assert.strictEqual(typeof n3, "number", "Should be a number");
+				assert.strictEqual(n3, 0, "Should be zero");
+				assert.strictEqual(n3 === n1, true, "Should be equal");
+				done();
+			}, 11);
 		}, 11);
 	});
 
