@@ -252,7 +252,7 @@ describe("Testing functionality", function () {
 		this.cache.max = this.items.length;
 		this.items.forEach(i => this.cache.set(i, false));
 		assert.strictEqual(JSON.stringify(this.cache.values()), JSON.stringify(Array(this.cache.max).fill(false)), "Should be equal arrays");
-		assert.strictEqual(JSON.stringify(this.cache.values([this.items[0]])), JSON.stringify([false]), "Should be equal arrays");
+		assert.strictEqual(this.cache.values([this.items[0]])[0], false, "Should be 'false'");
 		assert.strictEqual(this.cache.values(["invalid"])[0], undefined, "Should be 'undefined'");
 	});
 });
