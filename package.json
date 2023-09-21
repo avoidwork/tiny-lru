@@ -37,12 +37,14 @@
     "mocha": "nyc mocha test/*.js",
     "rollup": "rollup --config",
     "test": "npm run lint && npm run mocha",
-    "types": "npx -p typescript tsc src/lru.js --declaration --allowJs --emitDeclarationOnly --outDir ."
+    "types": "npx -p typescript tsc src/lru.js --declaration --allowJs --emitDeclarationOnly --outDir .",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.3",
     "auto-changelog": "^2.4.0",
     "eslint": "^8.49.0",
+    "husky": "^8.0.3",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
     "precise": "^2.0.1",
