@@ -7,6 +7,17 @@ describe("Testing functionality", function () {
 		this.items = ["a", "b", "c", "d", "e"];
 	});
 
+	it("It should clear", function () {
+		this.items.forEach(i => this.cache.set(i, false));
+		assert.strictEqual(this.cache.first.key, "b", "Should be 'b'");
+		assert.strictEqual(this.cache.last.key, "e", "Should be 'e'");
+		assert.strictEqual(this.cache.size, 4, "Should be '4'");
+		this.cache.clear();
+		assert.strictEqual(this.cache.first, null, "Should be 'null'");
+		assert.strictEqual(this.cache.last, null, "Should be 'null'");
+		assert.strictEqual(this.cache.size, 0, "Should be '0'");
+	});
+
 	it("It should evict", function () {
 		this.items.forEach(i => this.cache.set(i, false));
 		assert.strictEqual(this.cache.first.key, "b", "Should be 'b'");
@@ -138,5 +149,11 @@ describe("Testing functionality", function () {
 			assert.strictEqual(n2 > n1, true, "Should be greater than first expiration timestamp");
 			done();
 		}, 11);
+	});
+
+	it("It should have keys", function () {
+		this.cache.max = this.items.length;
+		this.items.forEach(i => this.cache.set(i, false));
+		assert.strictEqual(JSON.stringify(this.cache.keys()), JSON.stringify(this.items), "Should be equal arrays");
 	});
 });
