@@ -24,7 +24,14 @@ describe("Testing functionality", function () {
 		assert.strictEqual(this.cache.has(this.items[1]), true, "Should be 'true'");
 	});
 
-	it("It should have entries", function () {
+
+	it("It should have keys()", function () {
+		this.cache.max = this.items.length;
+		this.items.forEach(i => this.cache.set(i, false));
+		assert.strictEqual(JSON.stringify(this.cache.keys()), JSON.stringify(this.items), "Should be equal arrays");
+	});
+
+	it("It should have entries()", function () {
 		this.items.forEach(i => this.cache.set(i, false));
 		const entries = this.cache.entries();
 		assert.strictEqual(entries.length, this.cache.keys().length, "Should be equal");
@@ -222,22 +229,26 @@ describe("Testing functionality", function () {
 		const n1 = this.cache.expiresAt(this.items[0]);
 		assert.strictEqual(typeof n1, "number", "Should be a number");
 		assert.strictEqual(n1 > 0, true, "Should be greater than zero");
-		this.cache.get(this.items[0]);
-		const n2 = this.cache.expiresAt(this.items[0]);
-		assert.strictEqual(n1, n2, "Should be equal");
 		setTimeout(() => {
-			this.cache.set(this.items[0], false);
-			const n3 = this.cache.expiresAt(this.items[0]);
-			assert.strictEqual(typeof n3, "number", "Should be a number");
-			assert.strictEqual(n3 > 0, true, "Should be greater than zero");
-			assert.strictEqual(n3 > n1, true, "Should be greater than first expiration timestamp");
-			done();
+			this.cache.get(this.items[0]);
+			const n2 = this.cache.expiresAt(this.items[0]);
+			assert.strictEqual(n1, n2, "Should be equal");
+			setTimeout(() => {
+				this.cache.set(this.items[0], false);
+				const n3 = this.cache.expiresAt(this.items[0]);
+				assert.strictEqual(typeof n3, "number", "Should be a number");
+				assert.strictEqual(n3 > 0, true, "Should be greater than zero");
+				assert.strictEqual(n3 > n1, true, "Should be greater than first expiration timestamp");
+				done();
+			}, 11);
 		}, 11);
 	});
 
-	it("It should have keys", function () {
+	it("It should have values()", function () {
 		this.cache.max = this.items.length;
 		this.items.forEach(i => this.cache.set(i, false));
-		assert.strictEqual(JSON.stringify(this.cache.keys()), JSON.stringify(this.items), "Should be equal arrays");
+		assert.strictEqual(JSON.stringify(this.cache.values()), JSON.stringify(Array(this.cache.max).fill(false)), "Should be equal arrays");
+		assert.strictEqual(JSON.stringify(this.cache.values([this.items[0]])), JSON.stringify([false]), "Should be equal arrays");
+		assert.strictEqual(this.cache.values(["invalid"])[0], undefined, "Should be 'undefined'");
 	});
 });
