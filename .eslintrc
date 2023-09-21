@@ -15,7 +15,8 @@
 		"after": true,
 		"before": true,
 		"beforeEach": true,
-		"expect": true
+		"expect": true,
+		"Iterator": true
 	},
 	"rules": {
 		"arrow-parens": [2, "as-needed"],

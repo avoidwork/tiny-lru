@@ -1,5 +1,3 @@
-import {has} from "./has.js";
-
 class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
 		this.first = null;
@@ -21,7 +19,7 @@ class LRU {
 	}
 
 	delete (key) {
-		if (has(this.items, key)) {
+		if (this.has(key)) {
 			const item = this.items[key];
 
 			delete this.items[key];
@@ -47,6 +45,10 @@ class LRU {
 		return this;
 	}
 
+	entries (keys = this.keys()) {
+		return keys.map(key => [key, this.get(key)]);
+	}
+
 	evict (bypass = false) {
 		if (bypass || this.size > 0) {
 			const item = this.first;
@@ -68,7 +70,7 @@ class LRU {
 	expiresAt (key) {
 		let result;
 
-		if (has(this.items, key)) {
+		if (this.has(key)) {
 			result = this.items[key].expiry;
 		}
 
@@ -78,7 +80,7 @@ class LRU {
 	get (key) {
 		let result;
 
-		if (has(this.items, key)) {
+		if (this.has(key)) {
 			const item = this.items[key];
 
 			if (this.ttl > 0 && item.expiry <= Date.now()) {
@@ -92,6 +94,10 @@ class LRU {
 		return result;
 	}
 
+	has (key) {
+		return key in this.items;
+	}
+
 	keys () {
 		return Object.keys(this.items);
 	}
@@ -99,7 +105,7 @@ class LRU {
 	set (key, value, bypass = false, resetTtl = this.resetTtl) {
 		let item;
 
-		if (bypass || has(this.items, key)) {
+		if (bypass || this.has(key)) {
 			item = this.items[key];
 			item.value = value;
 
@@ -151,6 +157,10 @@ class LRU {
 		this.last = item;
 
 		return this;
+	}
+
+	values (keys = this.keys()) {
+		return keys.map(key => this.get(key));
 	}
 }
 

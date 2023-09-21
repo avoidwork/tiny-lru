@@ -3,11 +3,9 @@
  *
  * @copyright 2023 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 11.0.1
+ * @version 11.1.0
  */
-function has (items, key) {
-	return key in items;
-}class LRU {
+class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
 		this.first = null;
 		this.items = Object.create(null);
@@ -28,7 +26,7 @@ function has (items, key) {
 	}
 
 	delete (key) {
-		if (has(this.items, key)) {
+		if (this.has(key)) {
 			const item = this.items[key];
 
 			delete this.items[key];
@@ -54,6 +52,10 @@ function has (items, key) {
 		return this;
 	}
 
+	entries (keys = this.keys()) {
+		return keys.map(key => [key, this.get(key)]);
+	}
+
 	evict (bypass = false) {
 		if (bypass || this.size > 0) {
 			const item = this.first;
@@ -75,7 +77,7 @@ function has (items, key) {
 	expiresAt (key) {
 		let result;
 
-		if (has(this.items, key)) {
+		if (this.has(key)) {
 			result = this.items[key].expiry;
 		}
 
@@ -85,7 +87,7 @@ function has (items, key) {
 	get (key) {
 		let result;
 
-		if (has(this.items, key)) {
+		if (this.has(key)) {
 			const item = this.items[key];
 
 			if (this.ttl > 0 && item.expiry <= Date.now()) {
@@ -99,6 +101,10 @@ function has (items, key) {
 		return result;
 	}
 
+	has (key) {
+		return key in this.items;
+	}
+
 	keys () {
 		return Object.keys(this.items);
 	}
@@ -106,7 +112,7 @@ function has (items, key) {
 	set (key, value, bypass = false, resetTtl = this.resetTtl) {
 		let item;
 
-		if (bypass || has(this.items, key)) {
+		if (bypass || this.has(key)) {
 			item = this.items[key];
 			item.value = value;
 
@@ -158,6 +164,10 @@ function has (items, key) {
 		this.last = item;
 
 		return this;
+	}
+
+	values (keys = this.keys()) {
+		return keys.map(key => this.get(key));
 	}
 }
 

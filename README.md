@@ -44,6 +44,20 @@ Removes item from cache
 cache.delete("myKey");
 ```
 
+## entries(*["key1", "key2"]*)
+### Method
+
+Returns an `Array` cache items
+
+    param  {Array} keys (Optional) Cache item keys to get
+	return {Object} LRU instance
+
+**Example**
+
+```javascript
+cache.entries(['myKey1', 'myKey2']);
+```
+
 ## evict
 ### Method
 
@@ -96,6 +110,19 @@ Gets cached item and moves it to the front
 
 ```javascript
 const item = cache.get("myKey");
+```
+
+## has
+### Method
+
+Returns a `Boolean` indicating if `key` is in cache
+
+	return {Object} LRU instance
+
+**Example**
+
+```javascript
+cache.has('myKey');
 ```
 
 ## keys
@@ -189,6 +216,20 @@ Milliseconds an item will remain in cache; lazy expiration upon next `get()` of 
 const cache = lru();
 
 cache.ttl = 3e4;
+```
+
+## values(*["key1", "key2"]*)
+### Method
+
+Returns an `Array` cache items
+
+	param  {Array} keys (Optional) Cache item keys to get
+	return {Array} Cache items
+
+**Example**
+
+```javascript
+cache.values(['abc', 'def']);
 ```
 
 ## License

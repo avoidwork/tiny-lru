@@ -18,6 +18,19 @@ describe("Testing functionality", function () {
 		assert.strictEqual(this.cache.size, 0, "Should be '0'");
 	});
 
+	it("It should have keys", function () {
+		this.items.forEach(i => this.cache.set(i, false));
+		assert.strictEqual(this.cache.has(this.items[0]), false, "Should be 'false'");
+		assert.strictEqual(this.cache.has(this.items[1]), true, "Should be 'true'");
+	});
+
+	it("It should have entries", function () {
+		this.items.forEach(i => this.cache.set(i, false));
+		const entries = this.cache.entries();
+		assert.strictEqual(entries.length, this.cache.keys().length, "Should be equal");
+		assert.strictEqual(entries[entries.length - 1][0], this.items[this.items.length - 1], "Should be equal");
+	});
+
 	it("It should evict", function () {
 		this.items.forEach(i => this.cache.set(i, false));
 		assert.strictEqual(this.cache.first.key, "b", "Should be 'b'");
