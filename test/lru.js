@@ -292,4 +292,55 @@ describe("Testing functionality", function () {
 		assert.throws(function () { lru(1, -1); }, Error);
 		assert.throws(function () { lru(1, 1, -1); }, Error);
 	});
+
+	it("It should Error with invalid set parameters", function () {
+		this.cache = lru(1);
+		assert.throws(function () { this.cache.set(); }, Error);
+		assert.throws(function () { this.cache.set(this.items[0]); }, Error);
+	});
+
+	it("It should Error with invalid delete parameters", function () {
+		this.cache = lru(1);
+		assert.throws(function () { this.cache.delete(); }, Error);
+	});
+
+	it("It should Error with invalid evict parameters", function () {
+		this.cache = lru(1);
+		assert.throws(function () { this.cache.evict(true); }, Error);
+	});
+
+	it("It should Error with invalid has parameters", function () {
+		this.cache = lru(1);
+		assert.throws(function () { this.cache.has(); }, Error);
+	});
+
+	it("It should Error with invalid get parameters", function () {
+		this.cache = lru(1);
+		assert.throws(function () { this.cache.get(); }, Error);
+	});
+
+	it("It should Error with invalid values parameters", function () {
+		this.cache = lru(1);
+		assert.throws(function () { this.cache.values(); }, Error);
+	});
+
+	it("It should Error with invalid keys parameters", function () {
+		this.cache = lru(1);
+		assert.throws(function () { this.cache.keys(); }, Error);
+	});
+
+	it("It should Error with invalid entries parameters", function () {
+		this.cache = lru(1);
+		assert.throws(function () { this.cache.entries(); }, Error);
+	});
+
+	it("It should Error with invalid expiresAt parameters", function () {
+		this.cache = lru(1);
+		assert.throws(function () { this.cache.expiresAt(); }, Error);
+	});
+
+	it("It should Error with invalid clear parameters", function () {
+		this.cache = lru(1);
+		assert.throws(function () { this.cache.clear(true); }, Error);
+	});
 });
