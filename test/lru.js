@@ -273,8 +273,8 @@ describe("Testing functionality", function () {
 		this.cache.set(this.items[0], false);
 		this.cache.set(this.items[1], false);
 		this.cache.set(this.items[2], false);
-		this.cache.delete(this.items[2]);
-		this.cache.get(this.items[1]);
+		this.cache.delete(this.items[1]);
+		this.cache.get(this.items[2]);
 		assert.strictEqual(this.cache.size, 2, "Should be 2");
 		done();
 	});
