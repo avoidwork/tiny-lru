@@ -2,15 +2,31 @@
 
 Least Recently Used cache for Client or Server.
 
+## Using the factory
+
 ```javascript
 import {lru} from "tiny-lru";
 const cache = lru(max, ttl = 0, resetTtl = false);
 ```
 
+## Using the Class
+
+```javascript
+import {LRU} from "tiny-lru";
+const cache = new LRU(max, ttl = 0, resetTtl = false);
+```
+
+```javascript
+import {LRU} from "tiny-lru";
+class myCache extends LRU {}
+```
+
+## Interoperability
+
 Lodash provides a `memoize` function with a cache that can be swapped out as long as it implements the right interface.
 See the [lodash docs](https://lodash.com/docs#memoize) for more on `memoize`.
 
-## Example
+### Example
 ```javascript
 _.memoize.Cache = lru().constructor;
 const memoized = _.memoize(myFunc);
