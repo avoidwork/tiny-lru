@@ -3,7 +3,7 @@
  *
  * @copyright 2023 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 11.1.2
+ * @version 11.2.0
  */
 class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
@@ -181,4 +181,4 @@ function lru (max = 1000, ttl = 0, resetTtl = false) {
 	}
 
 	return new LRU(max, ttl, resetTtl);
-}export{lru};
+}export{LRU,lru};

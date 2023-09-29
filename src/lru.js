@@ -1,4 +1,4 @@
-class LRU {
+export class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
 		this.first = null;
 		this.items = Object.create(null);
