@@ -18,7 +18,7 @@ const cache = new LRU(max, ttl = 0, resetTtl = false);
 
 ```javascript
 import {LRU} from "tiny-lru";
-class myCache extends LRU {}
+class MyCache extends LRU {}
 ```
 
 ## Interoperability
