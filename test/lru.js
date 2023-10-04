@@ -268,6 +268,19 @@ describe("Testing functionality", function () {
 		}, 11);
 	});
 
+	it("It expires records which reset the TTL on set()", function (done) {
+		this.cache = lru(1, 250, true);
+		this.cache.set(this.items[0], false);
+		setTimeout(() => {
+			this.cache.set(this.items[0], false);
+			setTimeout(() => {
+				const record = this.cache.get(this.items[0]);
+				assert.strictEqual(record, undefined, "Should be a 'undefined'");
+				done();
+			}, 255);
+		}, 5);
+	});
+
 	it("It handle mid-deletes", function (done) {
 		this.cache = lru(3);
 		this.cache.set(this.items[0], false);
