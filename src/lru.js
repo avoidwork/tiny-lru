@@ -126,6 +126,10 @@ export class LRU {
 				item.prev = this.last;
 				last.next = item;
 
+				if (prev !== null) {
+					prev.next = next;
+				}
+
 				if (next !== null) {
 					next.prev = prev;
 				}

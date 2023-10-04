@@ -121,6 +121,11 @@ describe("Testing functionality", function () {
 		assert.strictEqual(this.cache.size, 1, "Should be '1'");
 	});
 
+	it("It should re-balance", function () {
+		this.items.forEach(i => this.cache.set(i, false));
+		this.cache.set("c", true);
+	});
+
 	it("It should handle a small evict", function () {
 		this.items.forEach(i => this.cache.set(i, false));
 		assert.strictEqual(this.cache.first.key, "b", "Should be 'b'");
