@@ -1,7 +1,9 @@
 .idea
+.husky
 .nyc_output
 src
 test
 .eslintrc
 .gitignore
 rollup.config.js
+benchmark.js

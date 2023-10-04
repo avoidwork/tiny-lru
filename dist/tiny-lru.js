@@ -3,7 +3,7 @@
  *
  * @copyright 2023 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 11.2.1
+ * @version 11.2.2
  */
 class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
