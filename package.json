@@ -48,7 +48,7 @@
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
     "precise": "^4.0.0",
-    "rollup": "^3.29.2",
+    "rollup": "^4.0.0",
     "typescript": "^5.2.2"
   },
   "keywords": [
