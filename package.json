@@ -17,7 +17,8 @@
   ],
   "license": "BSD-3-Clause",
   "source": "src/lru.js",
-  "main": "dist/tiny-lru",
+  "main": "./dist/tiny-lru.cjs",
+  "module": "./dist/tiny-lru.js",
   "exports": {
     "types": "./lru.d.ts",
     "import": "./dist/tiny-lru.js",
