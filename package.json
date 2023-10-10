@@ -1,7 +1,7 @@
 {
   "name": "tiny-lru",
   "description": "Tiny LRU cache for Client or Server",
-  "version": "11.2.2",
+  "version": "11.2.3",
   "homepage": "https://github.com/avoidwork/tiny-lru",
   "author": "Jason Mulligan <jason.mulligan@avoidwork.com>",
   "repository": {
@@ -17,7 +17,7 @@
   ],
   "license": "BSD-3-Clause",
   "source": "src/lru.js",
-  "main": "dist/tiny-lru",
+  "main": "dist/tiny-lru.cjs",
   "exports": {
     "types": "./lru.d.ts",
     "import": "./dist/tiny-lru.js",
