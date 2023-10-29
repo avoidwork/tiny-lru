@@ -51,6 +51,10 @@ describe("Testing functionality", function () {
 		assert.strictEqual(JSON.stringify(this.cache.keys()), JSON.stringify(this.items), "Should be equal arrays");
 	});
 
+	it("It should have no keys() when empty", function () {
+		assert.strictEqual(JSON.stringify(this.cache.keys()), JSON.stringify([]), "Should be equal");
+	});
+
 	it("It should have entries()", function () {
 		this.items.forEach(i => this.cache.set(i, false));
 		const entries = this.cache.entries();

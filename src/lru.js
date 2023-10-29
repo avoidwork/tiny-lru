@@ -102,10 +102,10 @@ export class LRU {
 		const result = [];
 		let x = this.first;
 
-		do {
+		while (x !== null) {
 			result.push(x.key);
 			x = x.next;
-		} while (x !== null);
+		}
 
 		return result;
 	}

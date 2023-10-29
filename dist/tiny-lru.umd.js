@@ -3,7 +3,7 @@
  *
  * @copyright 2023 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 11.2.4
+ * @version 11.2.5
  */
 (function(g,f){typeof exports==='object'&&typeof module!=='undefined'?f(exports):typeof define==='function'&&define.amd?define(['exports'],f):(g=typeof globalThis!=='undefined'?globalThis:g||self,f(g.lru={}));})(this,(function(exports){'use strict';class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
@@ -109,10 +109,10 @@
 		const result = [];
 		let x = this.first;
 
-		do {
+		while (x !== null) {
 			result.push(x.key);
 			x = x.next;
-		} while (x !== null);
+		}
 
 		return result;
 	}
