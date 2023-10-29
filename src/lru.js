@@ -99,7 +99,15 @@ export class LRU {
 	}
 
 	keys () {
-		return Object.keys(this.items);
+		const result = [];
+		let x = this.first;
+
+		do {
+			result.push(x.key);
+			x = x.next;
+		} while (x !== null);
+
+		return result;
 	}
 
 	set (key, value, bypass = false, resetTtl = this.resetTtl) {

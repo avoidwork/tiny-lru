@@ -45,7 +45,7 @@ describe("Testing functionality", function () {
 	});
 
 
-	it("It should have keys()", function () {
+	it("It should have keys() which reflect current order", function () {
 		this.cache.max = this.items.length;
 		this.items.forEach(i => this.cache.set(i, false));
 		assert.strictEqual(JSON.stringify(this.cache.keys()), JSON.stringify(this.items), "Should be equal arrays");
@@ -127,6 +127,7 @@ describe("Testing functionality", function () {
 		this.cache.set("c", true);
 		assert.strictEqual(this.cache.items.b.next.key, "d", "Should be 'd'");
 		assert.strictEqual(this.cache.items.d.prev.key, "b", "Should be 'b'");
+		assert.strictEqual(JSON.stringify(this.cache.keys()), JSON.stringify(["b", "d", "e", "c"]), "Should be equal arrays");
 	});
 
 	it("It should handle a small evict", function () {

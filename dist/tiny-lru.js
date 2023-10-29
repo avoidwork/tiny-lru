@@ -3,7 +3,7 @@
  *
  * @copyright 2023 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 11.2.3
+ * @version 11.2.4
  */
 class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
@@ -106,7 +106,15 @@ class LRU {
 	}
 
 	keys () {
-		return Object.keys(this.items);
+		const result = [];
+		let x = this.first;
+
+		do {
+			result.push(x.key);
+			x = x.next;
+		} while (x !== null);
+
+		return result;
 	}
 
 	set (key, value, bypass = false, resetTtl = this.resetTtl) {

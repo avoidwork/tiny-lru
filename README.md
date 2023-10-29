@@ -153,7 +153,7 @@ cache.delete("myKey");
 
 Returns an `Array` cache items
 
-    param  {Array} keys (Optional) Cache item keys to get
+    param  {Array} keys (Optional) Cache item keys to get, defaults to `this.keys()` if not provided
 	return {Object} LRU instance
 
 **Example**
@@ -214,7 +214,7 @@ cache.has('myKey');
 
 ### keys
 
-Returns an `Array` of cache item keys.
+Returns an `Array` of cache item keys (`first` to `last`)
 
 	return {Array} Array of keys
 
