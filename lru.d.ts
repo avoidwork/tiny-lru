@@ -11,7 +11,7 @@ export interface LRU<T> {
     delete(key: any): this;
     evict(bypass?: boolean): this;
     expiresAt(key: any): number | undefined;
-    has(key: any): T | undefined;
+    has(key: any): boolean;
     get(key: any): T | undefined;
     keys(): string[];
     set(key: any, value: T, bypass?: boolean, resetTtl?: boolean): this;
