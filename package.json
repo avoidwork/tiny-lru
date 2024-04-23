@@ -43,7 +43,7 @@
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.3",
     "auto-changelog": "^2.4.0",
-    "eslint": "^8.49.0",
+    "eslint": "^9.1.1",
     "husky": "^9.0.1",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
