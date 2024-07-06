@@ -1,9 +1,9 @@
-export function lru(max?: number, ttl?: number, resetTtl?: boolean): LRU;
-export class LRU {
+export function lru<T = any>(max?: number, ttl?: number, resetTtl?: boolean): LRU<T>;
+export class LRU<T> {
     constructor(max?: number, ttl?: number, resetTtl?: boolean);
-    first: any;
+    first: T | null;
     items: any;
-    last: any;
+    last: T | null;
     max: number;
     resetTtl: boolean;
     size: number;
@@ -12,10 +12,10 @@ export class LRU {
     delete(key: any): this;
     entries(keys?: any[]): any[][];
     evict(bypass?: boolean): this;
-    expiresAt(key: any): any;
-    get(key: any): any;
+    expiresAt(key: any): number | undefined;
+    get(key: any): T | null;
     has(key: any): boolean;
     keys(): any[];
-    set(key: any, value: any, bypass?: boolean, resetTtl?: boolean): this;
+    set(key: any, value: T, bypass?: boolean, resetTtl?: boolean): this;
     values(keys?: any[]): any[];
 }
