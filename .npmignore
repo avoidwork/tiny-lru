@@ -2,6 +2,10 @@
 .idea
 .husky
 .nyc_output
+dist/tiny-lru.min.js
+dist/tiny-lru.min.js.map
+dist/tiny-lru.umd.js
+dist/tiny-lru.umd.js.map
 src
 test
 .gitignore
