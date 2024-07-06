@@ -17,5 +17,5 @@ export class LRU<T> {
     has(key: any): boolean;
     keys(): any[];
     set(key: any, value: T, bypass?: boolean, resetTtl?: boolean): this;
-    values(keys?: any[]): any[];
+    values(keys?: any[]): T[];
 }
