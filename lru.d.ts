@@ -10,7 +10,7 @@ export class LRU<T> {
     ttl: number;
     clear(): this;
     delete(key: any): this;
-    entries(keys?: any[]): any[][];
+    entries(keys?: any[]): [any, T][];
     evict(bypass?: boolean): this;
     expiresAt(key: any): number | undefined;
     get(key: any): T | undefined;
