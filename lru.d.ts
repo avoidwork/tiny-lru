@@ -1,20 +1,21 @@
-export function lru<T = any>(max?: number, ttl?: number, resetTtl?: boolean): LRU<T>;
-export interface LRU<T> {
-    first: T | null;
-    last: T | null;
+export function lru(max?: number, ttl?: number, resetTtl?: boolean): LRU;
+export class LRU {
+    constructor(max?: number, ttl?: number, resetTtl?: boolean);
+    first: any;
+    items: any;
+    last: any;
     max: number;
     resetTtl: boolean;
     size: number;
     ttl: number;
-
     clear(): this;
     delete(key: any): this;
+    entries(keys?: any[]): any[][];
     evict(bypass?: boolean): this;
-    expiresAt(key: any): number | undefined;
+    expiresAt(key: any): any;
+    get(key: any): any;
     has(key: any): boolean;
-    get(key: any): T | undefined;
-    keys(): string[];
-    set(key: any, value: T, bypass?: boolean, resetTtl?: boolean): this;
+    keys(): any[];
+    set(key: any, value: any, bypass?: boolean, resetTtl?: boolean): this;
+    values(keys?: any[]): any[];
 }
-export { };
-
