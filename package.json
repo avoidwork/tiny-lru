@@ -20,12 +20,12 @@
   "source": "src/lru.js",
   "main": "dist/tiny-lru.cjs",
   "exports": {
-    "types": "./lru.d.ts",
+    "types": "./types/lru.d.ts",
     "import": "./dist/tiny-lru.js",
     "require": "./dist/tiny-lru.cjs"
   },
   "type": "module",
-  "types": "lru.d.ts",
+  "types": "types/lru.d.ts",
   "engines": {
     "node": ">=12"
   },
@@ -39,17 +39,17 @@
     "rollup": "rollup --config",
     "test": "npm run lint && npm run mocha",
     "types": "npx -p typescript tsc src/lru.js --declaration --allowJs --emitDeclarationOnly --outDir .",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "auto-changelog": "^2.4.0",
-    "eslint": "^9.6.0",
-    "husky": "^9.0.11",
-    "mocha": "^10.6.0",
+    "eslint": "^9.7.0",
+    "husky": "^9.1.1",
+    "mocha": "^10.7.0",
     "nyc": "^17.0.0",
     "precise": "^4.0.3",
-    "rollup": "^4.18.0",
+    "rollup": "^4.19.0",
     "typescript": "^5.5.3"
   },
   "keywords": [
