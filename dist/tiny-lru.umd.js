@@ -1,9 +1,9 @@
 /**
  * tiny-lru
  *
- * @copyright 2024 Jason Mulligan <jason.mulligan@avoidwork.com>
+ * @copyright 2025 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 11.2.11
+ * @version 11.3.0
  */
 (function(g,f){typeof exports==='object'&&typeof module!=='undefined'?f(exports):typeof define==='function'&&define.amd?define(['exports'],f):(g=typeof globalThis!=='undefined'?globalThis:g||self,f(g.lru={}));})(this,(function(exports){'use strict';class LRU {
 	constructor (max = 0, ttl = 0, resetTtl = false) {
@@ -115,6 +115,37 @@
 		}
 
 		return result;
+	}
+
+	setWithEvict (key, value, resetTtl = this.resetTtl) {
+		let evicted = null;
+
+		if (this.has(key)) {
+			this.set(key, value, true, resetTtl);
+		} else {
+			if (this.max > 0 && this.size === this.max) {
+				evicted = {...this.first};
+				this.evict(true);
+			}
+
+			let item = this.items[key] = {
+				expiry: this.ttl > 0 ? Date.now() + this.ttl : this.ttl,
+				key: key,
+				prev: this.last,
+				next: null,
+				value
+			};
+
+			if (++this.size === 1) {
+				this.first = item;
+			} else {
+				this.last.next = item;
+			}
+
+			this.last = item;
+		}
+
+		return evicted;
 	}
 
 	set (key, value, bypass = false, resetTtl = this.resetTtl) {

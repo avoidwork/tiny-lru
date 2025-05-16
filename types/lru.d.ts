@@ -17,5 +17,6 @@ export class LRU<T> {
     has(key: any): boolean;
     keys(): any[];
     set(key: any, value: T, bypass?: boolean, resetTtl?: boolean): this;
+    setWithEvict(key: any, value: T, resetTtl?: boolean): T | null;
     values(keys?: any[]): T[];
 }
