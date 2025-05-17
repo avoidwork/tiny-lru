@@ -3,33 +3,33 @@ import {lru} from "../dist/tiny-lru.cjs";
 
 describe("Testing functionality", function () {
 
-	it("setWithEvict should return evicted item when full", function () {
+	it("setWithEvicted should return evicted item when full", function () {
 		const cache = lru(2);
-		cache.setWithEvict("a", 1);
-		cache.setWithEvict("b", 2);
-		const evicted = cache.setWithEvict("c", 3);
+		cache.setWithEvicted("a", 1);
+		cache.setWithEvicted("b", 2);
+		const evicted = cache.setWithEvicted("c", 3);
 		assert.strictEqual(evicted.key, "a", "Should evict 'a'");
 		assert.strictEqual(evicted.value, 1, "Evicted value should be 1");
 		assert.strictEqual(cache.size, 2, "Cache size should remain at max");
 		assert.deepStrictEqual(cache.keys(), ["b", "c"], "Keys should be ['b','c']");
 	});
 
-	it("setWithEvict should return null when not evicting", function () {
+	it("setWithEvicted should return null when not evicting", function () {
 		const cache = lru(2);
-		const result = cache.setWithEvict("a", 1);
+		const result = cache.setWithEvicted("a", 1);
 		assert.strictEqual(result, null, "Should return null when not evicting");
-		cache.setWithEvict("b", 2);
-		assert.strictEqual(cache.setWithEvict("b", 3), null, "Should return null when updating existing");
+		cache.setWithEvicted("b", 2);
+		assert.strictEqual(cache.setWithEvicted("b", 3), null, "Should return null when updating existing");
 	});
 
-	it("setWithEvict: evicted item should not mutate after eviction", function () {
+	it("setWithEvicted: evicted item should not mutate after eviction", function () {
 		const cache = lru(2);
-		cache.setWithEvict("a", { foo: 1 });
-		cache.setWithEvict("b", { bar: 2 });
-		const evicted = cache.setWithEvict("c", { baz: 3 });
+		cache.setWithEvicted("a", { foo: 1 });
+		cache.setWithEvicted("b", { bar: 2 });
+		const evicted = cache.setWithEvicted("c", { baz: 3 });
 		assert.deepStrictEqual(evicted.value, { foo: 1 }, "Evicted value should be a shallow clone");
 		// Mutate cache, evicted should not change
-		cache.setWithEvict("d", { qux: 4 });
+		cache.setWithEvicted("d", { qux: 4 });
 		assert.deepStrictEqual(evicted.value, { foo: 1 }, "Evicted value should remain unchanged");
 	});
 

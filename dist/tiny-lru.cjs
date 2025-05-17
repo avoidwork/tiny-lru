@@ -119,7 +119,7 @@ class LRU {
 		return result;
 	}
 
-	setWithEvict (key, value, resetTtl = this.resetTtl) {
+	setWithEvicted (key, value, resetTtl = this.resetTtl) {
 		let evicted = null;
 
 		if (this.has(key)) {

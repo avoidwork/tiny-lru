@@ -238,7 +238,7 @@ Sets item in cache as `first`
 cache.set("myKey", {prop: true});
 ```
 
-### setWithEvict
+### setWithEvicted
 
 Sets an item in the cache and returns the evicted item if the cache was full and an eviction occurred. If no eviction occurs, returns `null`.
 
@@ -250,7 +250,7 @@ Sets an item in the cache and returns the evicted item if the cache was full and
 **Example**
 
 ```javascript
-const evicted = cache.setWithEvict("myKey", {prop: true});
+const evicted = cache.setWithEvicted("myKey", {prop: true});
 if (evicted) {
   console.log("Evicted item:", evicted.key, evicted.value);
 }
