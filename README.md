@@ -70,9 +70,9 @@ All files     |     100 |    91.54 |     100 |     100 |
 
 ## API Reference
 
-## Properties
+### Properties
 
-### first
+#### first
 
 Item in "first" or "bottom" position; default is `null`
 
@@ -84,7 +84,7 @@ const cache = lru();
 cache.first; // null - it's a new cache!
 ```
 
-### last
+#### last
 
 Item in "last" or "top" position; default is `null`
 
@@ -96,7 +96,7 @@ const cache = lru();
 cache.last; // null - it's a new cache!
 ```
 
-### max
+#### max
 
 Max items to hold in cache; default is `1000`
 
@@ -108,7 +108,7 @@ const cache = lru(500);
 cache.max; // 500
 ```
 
-### resetTtl
+#### resetTtl
 
 Resets `item.expiry` with each `set()` if `true`; default is `false`
 
@@ -120,7 +120,7 @@ const cache = lru(500, 5*6e4, true);
 cache.resetTtl; // true
 ```
 
-### size
+#### size
 
 Number of items in cache
 
@@ -132,7 +132,7 @@ const cache = lru();
 cache.size; // 0 - it's a new cache!
 ```
 
-### ttl
+#### ttl
 
 Milliseconds an item will remain in cache; lazy expiration upon next `get()` of an item
 
@@ -144,9 +144,9 @@ const cache = lru(100, 3e4);
 cache.ttl; // 30000;
 ```
 
-## Methods
+### Methods
 
-### clear
+#### clear
 
 Clears the contents of the cache
 
@@ -158,7 +158,7 @@ Clears the contents of the cache
 cache.clear();
 ```
 
-### delete
+#### delete
 
 Removes item from cache
 
@@ -171,7 +171,7 @@ Removes item from cache
 cache.delete("myKey");
 ```
 
-### entries(*["key1", "key2"]*)
+#### entries(*["key1", "key2"]*)
 
 Returns an `Array` cache items
 
@@ -184,7 +184,7 @@ Returns an `Array` cache items
 cache.entries(['myKey1', 'myKey2']);
 ```
 
-### evict
+#### evict
 
 Evicts the least recently used item from cache
 
@@ -196,7 +196,7 @@ Evicts the least recently used item from cache
 cache.evict();
 ```
 
-### expiresAt
+#### expiresAt
 
 Gets expiration time for cached item
 
@@ -209,7 +209,7 @@ Gets expiration time for cached item
 const item = cache.expiresAt("myKey");
 ```
 
-### get
+#### get
 
 Gets cached item and moves it to the front
 
@@ -222,7 +222,7 @@ Gets cached item and moves it to the front
 const item = cache.get("myKey");
 ```
 
-### has
+#### has
 
 Returns a `Boolean` indicating if `key` is in cache
 
@@ -234,7 +234,7 @@ Returns a `Boolean` indicating if `key` is in cache
 cache.has('myKey');
 ```
 
-### keys
+#### keys
 
 Returns an `Array` of cache item keys (`first` to `last`)
 
@@ -246,7 +246,7 @@ Returns an `Array` of cache item keys (`first` to `last`)
 console.log(cache.keys());
 ```
 
-### set
+#### set
 
 Sets item in cache as `first`
 
@@ -260,7 +260,7 @@ Sets item in cache as `first`
 cache.set("myKey", {prop: true});
 ```
 
-### setWithEvicted
+#### setWithEvicted
 
 Sets an item in the cache and returns the evicted item if the cache was full and an eviction occurred. If no eviction occurs, returns `null`.
 
@@ -278,7 +278,7 @@ if (evicted) {
 }
 ```
 
-### values(*["key1", "key2"]*)
+#### values(*["key1", "key2"]*)
 
 Returns an `Array` cache items
 
