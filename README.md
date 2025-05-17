@@ -1,16 +1,46 @@
 # Tiny LRU
 
-Least Recently Used cache for Client or Server.
+## What is Tiny LRU?
 
-## Using the factory
+**Tiny LRU** is a tool that helps programs remember things for a short time, so they can work faster and use less memory. It's useful for both websites and apps.
 
+### What is a "Cache"?
+A cache is like a small, quick-access box where a program stores things it might need again soon. Instead of looking up information from scratch every time (which can be slow), it checks the cache first.
+
+### What does "Least Recently Used" (LRU) mean?
+Imagine your cache is a box that can only fit a certain number of items. When the box is full and you want to add something new, you remove the item you haven't used in the longest time. This keeps the most recently used things handy, and clears out the old things you don't need anymore.
+
+### Why use Tiny LRU?
+- **Speeds things up**: By remembering recent information, programs can respond faster.
+- **Saves resources**: Limits how much memory is used by only keeping the most important items.
+- **Works anywhere**: Can be used in many kinds of apps, big or small.
+
+### When is it helpful?
+- Websites that show the same info to many people
+- Apps that look up data from the internet
+- Any program that wants to avoid repeating slow or expensive work
+
+
+## How Tiny LRU Works (No Code Needed)
+1. You set a limit for how many things the cache can remember.
+2. When the program needs to remember something, it puts it in the cache.
+3. If the cache is full, it removes the oldest unused item to make space.
+4. If the program needs something, it checks the cache first before doing extra work.
+
+
+## For Developers
+
+Below are technical details and code examples for those who want to use Tiny LRU in their code.
+
+### Using Tiny LRU in Code
+
+#### Using the factory
 ```javascript
 import {lru} from "tiny-lru";
 const cache = lru(max, ttl = 0, resetTtl = false);
 ```
 
-## Using the Class
-
+#### Using the Class
 ```javascript
 import {LRU} from "tiny-lru";
 const cache = new LRU(max, ttl = 0, resetTtl = false);
@@ -21,32 +51,28 @@ import {LRU} from "tiny-lru";
 class MyCache extends LRU {}
 ```
 
-## Interoperability
-
+#### Interoperability
 Lodash provides a `memoize` function with a cache that can be swapped out as long as it implements the right interface.
 See the [lodash docs](https://lodash.com/docs#memoize) for more on `memoize`.
 
-### Example
+Example:
 ```javascript
 _.memoize.Cache = lru().constructor;
 const memoized = _.memoize(myFunc);
 memoized.cache.max = 10;
 ```
 
-## Testing
-
+#### Testing
 Tiny-LRU has 100% code coverage with its tests.
 
 ```console
---------------|---------|----------|---------|---------|-------------------
-File          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
---------------|---------|----------|---------|---------|-------------------
-All files     |     100 |    91.54 |     100 |     100 |
+--------------|---------|----------|---------|---------|----------------File          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+--------------|---------|----------|---------|---------|----------------All files     |     100 |    91.54 |     100 |     100 |
  tiny-lru.cjs |     100 |    91.54 |     100 |     100 | 11-31,150,184
---------------|---------|----------|---------|---------|-------------------
-```
+--------------|---------|----------|---------|---------|----------------```
 
-## API
+
+## API Reference
 
 ## Properties
 
@@ -268,6 +294,7 @@ Returns an `Array` cache items
 ```javascript
 cache.values(['abc', 'def']);
 ```
+
 
 ## License
 Copyright (c) 2025 Jason Mulligan
