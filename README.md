@@ -28,19 +28,13 @@ Imagine your cache is a box that can only fit a certain number of items. When th
 4. If the program needs something, it checks the cache first before doing extra work.
 
 
-## For Developers
-
-Below are technical details and code examples for those who want to use Tiny LRU in their code.
-
-### Using Tiny LRU in Code
-
-#### Using the factory
+## Using the factory
 ```javascript
 import {lru} from "tiny-lru";
 const cache = lru(max, ttl = 0, resetTtl = false);
 ```
 
-#### Using the Class
+## Using the Class
 ```javascript
 import {LRU} from "tiny-lru";
 const cache = new LRU(max, ttl = 0, resetTtl = false);
@@ -51,18 +45,17 @@ import {LRU} from "tiny-lru";
 class MyCache extends LRU {}
 ```
 
-#### Interoperability
+## Interoperability
 Lodash provides a `memoize` function with a cache that can be swapped out as long as it implements the right interface.
 See the [lodash docs](https://lodash.com/docs#memoize) for more on `memoize`.
 
-Example:
 ```javascript
 _.memoize.Cache = lru().constructor;
 const memoized = _.memoize(myFunc);
 memoized.cache.max = 10;
 ```
 
-#### Testing
+## Testing
 Tiny-LRU has 100% code coverage with its tests.
 
 ```console
