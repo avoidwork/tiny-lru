@@ -21,7 +21,7 @@ Imagine your cache is a box that can only fit a certain number of items. When th
 - Any program that wants to avoid repeating slow or expensive work
 
 
-## How Tiny LRU Works (No Code Needed)
+## How Does Tiny LRU Work?
 1. You set a limit for how many things the cache can remember.
 2. When the program needs to remember something, it puts it in the cache.
 3. If the cache is full, it removes the oldest unused item to make space.
