@@ -110,6 +110,37 @@ export class LRU {
 		return result;
 	}
 
+	setWithEvicted (key, value, resetTtl = this.resetTtl) {
+		let evicted = null;
+
+		if (this.has(key)) {
+			this.set(key, value, true, resetTtl);
+		} else {
+			if (this.max > 0 && this.size === this.max) {
+				evicted = {...this.first};
+				this.evict(true);
+			}
+
+			let item = this.items[key] = {
+				expiry: this.ttl > 0 ? Date.now() + this.ttl : this.ttl,
+				key: key,
+				prev: this.last,
+				next: null,
+				value
+			};
+
+			if (++this.size === 1) {
+				this.first = item;
+			} else {
+				this.last.next = item;
+			}
+
+			this.last = item;
+		}
+
+		return evicted;
+	}
+
 	set (key, value, bypass = false, resetTtl = this.resetTtl) {
 		let item;
 

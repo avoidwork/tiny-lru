@@ -2,6 +2,37 @@ import assert from "node:assert";
 import {lru} from "../dist/tiny-lru.cjs";
 
 describe("Testing functionality", function () {
+
+	it("setWithEvicted should return evicted item when full", function () {
+		const cache = lru(2);
+		cache.setWithEvicted("a", 1);
+		cache.setWithEvicted("b", 2);
+		const evicted = cache.setWithEvicted("c", 3);
+		assert.strictEqual(evicted.key, "a", "Should evict 'a'");
+		assert.strictEqual(evicted.value, 1, "Evicted value should be 1");
+		assert.strictEqual(cache.size, 2, "Cache size should remain at max");
+		assert.deepStrictEqual(cache.keys(), ["b", "c"], "Keys should be ['b','c']");
+	});
+
+	it("setWithEvicted should return null when not evicting", function () {
+		const cache = lru(2);
+		const result = cache.setWithEvicted("a", 1);
+		assert.strictEqual(result, null, "Should return null when not evicting");
+		cache.setWithEvicted("b", 2);
+		assert.strictEqual(cache.setWithEvicted("b", 3), null, "Should return null when updating existing");
+	});
+
+	it("setWithEvicted: evicted item should not mutate after eviction", function () {
+		const cache = lru(2);
+		cache.setWithEvicted("a", { foo: 1 });
+		cache.setWithEvicted("b", { bar: 2 });
+		const evicted = cache.setWithEvicted("c", { baz: 3 });
+		assert.deepStrictEqual(evicted.value, { foo: 1 }, "Evicted value should be a shallow clone");
+		// Mutate cache, evicted should not change
+		cache.setWithEvicted("d", { qux: 4 });
+		assert.deepStrictEqual(evicted.value, { foo: 1 }, "Evicted value should remain unchanged");
+	});
+
 	beforeEach(function () {
 		this.cache = lru(4);
 		this.items = ["a", "b", "c", "d", "e"];

@@ -1,7 +1,7 @@
 {
   "name": "tiny-lru",
   "description": "Tiny LRU cache for Client or Server",
-  "version": "11.2.11",
+  "version": "11.3.0",
   "homepage": "https://github.com/avoidwork/tiny-lru",
   "author": "Jason Mulligan <jason.mulligan@avoidwork.com>",
   "repository": {
@@ -43,14 +43,14 @@
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
-    "auto-changelog": "^2.4.0",
-    "eslint": "^9.7.0",
-    "husky": "^9.1.1",
-    "mocha": "^11.0.1",
-    "nyc": "^17.0.0",
+    "auto-changelog": "^2.5.0",
+    "eslint": "^9.27.0",
+    "husky": "^9.1.7",
+    "mocha": "^11.3.0",
+    "nyc": "^17.1.0",
     "precise": "^4.0.3",
-    "rollup": "^4.19.0",
-    "typescript": "^5.5.3"
+    "rollup": "^4.40.2",
+    "typescript": "^5.8.3"
   },
   "keywords": [
     "LRU",

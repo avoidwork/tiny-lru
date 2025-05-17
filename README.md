@@ -238,6 +238,24 @@ Sets item in cache as `first`
 cache.set("myKey", {prop: true});
 ```
 
+### setWithEvicted
+
+Sets an item in the cache and returns the evicted item if the cache was full and an eviction occurred. If no eviction occurs, returns `null`.
+
+	param  {String} key   Item key
+	param  {Mixed}  value Item value
+	param  {Boolean} [resetTtl] Optionally reset the TTL for the item
+	return {Object|null}  The evicted item (shallow clone) or null
+
+**Example**
+
+```javascript
+const evicted = cache.setWithEvicted("myKey", {prop: true});
+if (evicted) {
+  console.log("Evicted item:", evicted.key, evicted.value);
+}
+```
+
 ### values(*["key1", "key2"]*)
 
 Returns an `Array` cache items
@@ -252,5 +270,5 @@ cache.values(['abc', 'def']);
 ```
 
 ## License
-Copyright (c) 2024 Jason Mulligan
+Copyright (c) 2025 Jason Mulligan
 Licensed under the BSD-3 license.
