@@ -1,7 +1,7 @@
 {
   "name": "tiny-lru",
   "description": "Tiny LRU cache for Client or Server",
-  "version": "11.3.1",
+  "version": "11.3.2",
   "homepage": "https://github.com/avoidwork/tiny-lru",
   "author": "Jason Mulligan <jason.mulligan@avoidwork.com>",
   "repository": {
@@ -14,7 +14,7 @@
   "files": [
     "dist/tiny-lru.cjs",
     "dist/tiny-lru.js",
-    "*.d.ts"
+    "types/*.d.ts"
   ],
   "license": "BSD-3-Clause",
   "source": "src/lru.js",
@@ -38,7 +38,7 @@
     "mocha": "nyc mocha test/*.js",
     "rollup": "rollup --config",
     "test": "npm run lint && npm run mocha",
-    "types": "npx -p typescript tsc src/lru.js --declaration --allowJs --emitDeclarationOnly --outDir .",
+    "types": "npx -p typescript tsc src/lru.js --declaration --allowJs --emitDeclarationOnly --outDir types",
     "prepare": "husky"
   },
   "devDependencies": {
