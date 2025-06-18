@@ -5,7 +5,18 @@
  * @license BSD-3-Clause
  * @version 11.3.2
  */
+/**
+ * A Least Recently Used (LRU) cache implementation with optional TTL support.
+ * Items are automatically evicted when the cache reaches its maximum size,
+ * removing the least recently used items first.
+ */
 class LRU {
+	/**
+	 * Creates a new LRU cache instance.
+	 * @param {number} [max=0] - Maximum number of items to store. 0 means unlimited.
+	 * @param {number} [ttl=0] - Time to live in milliseconds. 0 means no expiration.
+	 * @param {boolean} [resetTtl=false] - Whether to reset TTL when accessing existing items.
+	 */
 	constructor (max = 0, ttl = 0, resetTtl = false) {
 		this.first = null;
 		this.items = Object.create(null);
@@ -16,6 +27,10 @@ class LRU {
 		this.ttl = ttl;
 	}
 
+	/**
+	 * Removes all items from the cache.
+	 * @returns {LRU} The LRU instance for method chaining.
+	 */
 	clear () {
 		this.first = null;
 		this.items = Object.create(null);
@@ -25,6 +40,11 @@ class LRU {
 		return this;
 	}
 
+	/**
+	 * Removes an item from the cache by key.
+	 * @param {string} key - The key of the item to delete.
+	 * @returns {LRU} The LRU instance for method chaining.
+	 */
 	delete (key) {
 		if (this.has(key)) {
 			const item = this.items[key];
@@ -52,10 +72,20 @@ class LRU {
 		return this;
 	}
 
+	/**
+	 * Returns an array of [key, value] pairs for the specified keys.
+	 * @param {string[]} [keys=this.keys()] - Array of keys to get entries for. Defaults to all keys.
+	 * @returns {Array<[string, *]>} Array of [key, value] pairs.
+	 */
 	entries (keys = this.keys()) {
 		return keys.map(key => [key, this.get(key)]);
 	}
 
+	/**
+	 * Removes the least recently used item from the cache.
+	 * @param {boolean} [bypass=false] - Whether to bypass the size check and force eviction.
+	 * @returns {LRU} The LRU instance for method chaining.
+	 */
 	evict (bypass = false) {
 		if (bypass || this.size > 0) {
 			const item = this.first;
@@ -74,6 +104,11 @@ class LRU {
 		return this;
 	}
 
+	/**
+	 * Returns the expiration timestamp for a given key.
+	 * @param {string} key - The key to check expiration for.
+	 * @returns {number|undefined} The expiration timestamp in milliseconds, or undefined if key doesn't exist.
+	 */
 	expiresAt (key) {
 		let result;
 
@@ -84,6 +119,11 @@ class LRU {
 		return result;
 	}
 
+	/**
+	 * Retrieves a value from the cache by key. Updates the item's position to most recently used.
+	 * @param {string} key - The key to retrieve.
+	 * @returns {*} The value associated with the key, or undefined if not found or expired.
+	 */
 	get (key) {
 		let result;
 
@@ -101,10 +141,19 @@ class LRU {
 		return result;
 	}
 
+	/**
+	 * Checks if a key exists in the cache.
+	 * @param {string} key - The key to check for.
+	 * @returns {boolean} True if the key exists, false otherwise.
+	 */
 	has (key) {
 		return key in this.items;
 	}
 
+	/**
+	 * Returns an array of all keys in the cache, ordered from least to most recently used.
+	 * @returns {string[]} Array of keys in LRU order.
+	 */
 	keys () {
 		const result = [];
 		let x = this.first;
@@ -117,6 +166,13 @@ class LRU {
 		return result;
 	}
 
+	/**
+	 * Sets a value in the cache and returns any evicted item.
+	 * @param {string} key - The key to set.
+	 * @param {*} value - The value to store.
+	 * @param {boolean} [resetTtl=this.resetTtl] - Whether to reset the TTL for this operation.
+	 * @returns {Object|null} The evicted item (if any) with shape {key, value, expiry, prev, next}, or null.
+	 */
 	setWithEvicted (key, value, resetTtl = this.resetTtl) {
 		let evicted = null;
 
@@ -148,6 +204,14 @@ class LRU {
 		return evicted;
 	}
 
+	/**
+	 * Sets a value in the cache. Updates the item's position to most recently used.
+	 * @param {string} key - The key to set.
+	 * @param {*} value - The value to store.
+	 * @param {boolean} [bypass=false] - Whether to bypass normal LRU positioning (internal use).
+	 * @param {boolean} [resetTtl=this.resetTtl] - Whether to reset the TTL for this operation.
+	 * @returns {LRU} The LRU instance for method chaining.
+	 */
 	set (key, value, bypass = false, resetTtl = this.resetTtl) {
 		let item;
 
@@ -205,11 +269,24 @@ class LRU {
 		return this;
 	}
 
+	/**
+	 * Returns an array of all values in the cache for the specified keys.
+	 * @param {string[]} [keys=this.keys()] - Array of keys to get values for. Defaults to all keys.
+	 * @returns {Array<*>} Array of values corresponding to the keys.
+	 */
 	values (keys = this.keys()) {
 		return keys.map(key => this.get(key));
 	}
 }
 
+/**
+ * Factory function to create a new LRU cache instance with validation.
+ * @param {number} [max=1000] - Maximum number of items to store. Must be >= 0.
+ * @param {number} [ttl=0] - Time to live in milliseconds. Must be >= 0.
+ * @param {boolean} [resetTtl=false] - Whether to reset TTL when accessing existing items.
+ * @returns {LRU} A new LRU cache instance.
+ * @throws {TypeError} When parameters are invalid.
+ */
 function lru (max = 1000, ttl = 0, resetTtl = false) {
 	if (isNaN(max) || max < 0) {
 		throw new TypeError("Invalid max value");
