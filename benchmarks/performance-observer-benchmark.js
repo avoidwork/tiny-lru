@@ -15,8 +15,17 @@ class LRUPerformanceProfiler {
 
 	timerify (fn, name) {
 		const wrappedFn = performance.timerify(fn);
-		// Override the name for better reporting
-		Object.defineProperty(wrappedFn, "name", { value: name });
+		// Override the name for better reporting (safely handle non-configurable name property)
+		try {
+			Object.defineProperty(wrappedFn, "name", { value: name, configurable: true });
+		} catch (error) { // eslint-disable-line no-unused-vars
+			// If we can't redefine the name property, create a wrapper with the desired name
+			const namedWrapper = {
+				[name]: (...args) => wrappedFn(...args)
+			}[name];
+
+			return namedWrapper;
+		}
 
 		return wrappedFn;
 	}
