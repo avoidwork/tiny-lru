@@ -230,7 +230,7 @@ class LRU {
 	 * console.log(cache.has('nonexistent')); // false
 	 * @see {@link LRU#get}
 	 * @see {@link LRU#delete}
-	 * @since 1.0.0
+	 * @since 9.0.0
 	 */
 	has (key) {
 		return key in this.items;
@@ -398,7 +398,7 @@ class LRU {
 	 * console.log(cache.values(['a'])); // [1]
 	 * @see {@link LRU#keys}
 	 * @see {@link LRU#entries}
-	 * @since 1.0.0
+	 * @since 11.1.0
 	 */
 	values (keys = this.keys()) {
 		return keys.map(key => this.get(key));
