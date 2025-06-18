@@ -2,14 +2,14 @@
  * A Least Recently Used (LRU) cache implementation with optional TTL support.
  * Items are automatically evicted when the cache reaches its maximum size,
  * removing the least recently used items first.
- * 
+ *
  * @class LRU
  * @example
  * // Create a cache with max 100 items
  * const cache = new LRU(100);
  * cache.set('key1', 'value1');
  * console.log(cache.get('key1')); // 'value1'
- * 
+ *
  * @example
  * // Create a cache with TTL
  * const cache = new LRU(100, 5000); // 5 second TTL
@@ -19,7 +19,7 @@
 export class LRU {
 	/**
 	 * Creates a new LRU cache instance.
-	 * 
+	 *
 	 * @constructor
 	 * @param {number} [max=0] - Maximum number of items to store. 0 means unlimited.
 	 * @param {number} [ttl=0] - Time to live in milliseconds. 0 means no expiration.
@@ -41,7 +41,7 @@ export class LRU {
 
 	/**
 	 * Removes all items from the cache.
-	 * 
+	 *
 	 * @method clear
 	 * @memberof LRU
 	 * @returns {LRU} The LRU instance for method chaining.
@@ -61,7 +61,7 @@ export class LRU {
 
 	/**
 	 * Removes an item from the cache by key.
-	 * 
+	 *
 	 * @method delete
 	 * @memberof LRU
 	 * @param {string} key - The key of the item to delete.
@@ -103,7 +103,7 @@ export class LRU {
 
 	/**
 	 * Returns an array of [key, value] pairs for the specified keys.
-	 * 
+	 *
 	 * @method entries
 	 * @memberof LRU
 	 * @param {string[]} [keys=this.keys()] - Array of keys to get entries for. Defaults to all keys.
@@ -122,7 +122,7 @@ export class LRU {
 
 	/**
 	 * Removes the least recently used item from the cache.
-	 * 
+	 *
 	 * @method evict
 	 * @memberof LRU
 	 * @param {boolean} [bypass=false] - Whether to bypass the size check and force eviction.
@@ -153,7 +153,7 @@ export class LRU {
 
 	/**
 	 * Returns the expiration timestamp for a given key.
-	 * 
+	 *
 	 * @method expiresAt
 	 * @memberof LRU
 	 * @param {string} key - The key to check expiration for.
@@ -178,7 +178,7 @@ export class LRU {
 
 	/**
 	 * Retrieves a value from the cache by key. Updates the item's position to most recently used.
-	 * 
+	 *
 	 * @method get
 	 * @memberof LRU
 	 * @param {string} key - The key to retrieve.
@@ -210,7 +210,7 @@ export class LRU {
 
 	/**
 	 * Checks if a key exists in the cache.
-	 * 
+	 *
 	 * @method has
 	 * @memberof LRU
 	 * @param {string} key - The key to check for.
@@ -229,7 +229,7 @@ export class LRU {
 
 	/**
 	 * Returns an array of all keys in the cache, ordered from least to most recently used.
-	 * 
+	 *
 	 * @method keys
 	 * @memberof LRU
 	 * @returns {string[]} Array of keys in LRU order.
@@ -255,7 +255,7 @@ export class LRU {
 
 	/**
 	 * Sets a value in the cache and returns any evicted item.
-	 * 
+	 *
 	 * @method setWithEvicted
 	 * @memberof LRU
 	 * @param {string} key - The key to set.
@@ -303,7 +303,7 @@ export class LRU {
 
 	/**
 	 * Sets a value in the cache. Updates the item's position to most recently used.
-	 * 
+	 *
 	 * @method set
 	 * @memberof LRU
 	 * @param {string} key - The key to set.
@@ -378,7 +378,7 @@ export class LRU {
 
 	/**
 	 * Returns an array of all values in the cache for the specified keys.
-	 * 
+	 *
 	 * @method values
 	 * @memberof LRU
 	 * @param {string[]} [keys=this.keys()] - Array of keys to get values for. Defaults to all keys.
@@ -398,7 +398,7 @@ export class LRU {
 
 /**
  * Factory function to create a new LRU cache instance with validation.
- * 
+ *
  * @function lru
  * @param {number} [max=1000] - Maximum number of items to store. Must be >= 0.
  * @param {number} [ttl=0] - Time to live in milliseconds. Must be >= 0.
@@ -409,7 +409,7 @@ export class LRU {
  * // Create cache with factory function
  * const cache = lru(100, 5000, true);
  * cache.set('key', 'value');
- * 
+ *
  * @example
  * // Error handling
  * try {
