@@ -1,263 +1,289 @@
 # Tiny LRU
 
-## What is Tiny LRU?
+A lightweight, high-performance Least Recently Used (LRU) cache implementation for JavaScript with optional TTL (time-to-live) support. Works in both Node.js and browser environments.
 
-**Tiny LRU** is a tool that helps programs remember things for a short time, so they can work faster and use less memory. It's useful for both websites and apps.
+## Installation
 
-### What is a "Cache"?
-A cache is like a small, quick-access box where a program stores things it might need again soon. Instead of looking up information from scratch every time (which can be slow), it checks the cache first.
+```bash
+npm install tiny-lru
+```
 
-### What does "Least Recently Used" (LRU) mean?
-Imagine your cache is a box that can only fit a certain number of items. When the box is full and you want to add something new, you remove the item you haven't used in the longest time. This keeps the most recently used things handy, and clears out the old things you don't need anymore.
+## Usage
 
-### Why use Tiny LRU?
-- **Speeds things up**: By remembering recent information, programs can respond faster.
-- **Saves resources**: Limits how much memory is used by only keeping the most important items.
-- **Works anywhere**: Can be used in many kinds of apps, big or small.
-
-### When is it helpful?
-- Websites that show the same info to many people
-- Apps that look up data from the internet
-- Any program that wants to avoid repeating slow or expensive work
-
-
-## How Does Tiny LRU Work?
-1. You set a limit for how many things the cache can remember.
-2. When the program needs to remember something, it puts it in the cache.
-3. If the cache is full, it removes the oldest unused item to make space.
-4. If the program needs something, it checks the cache first before doing extra work.
-
-
-## Using the factory
+### Factory Function
 ```javascript
 import {lru} from "tiny-lru";
 const cache = lru(max, ttl = 0, resetTtl = false);
 ```
 
-## Using the Class
+### Class Constructor
 ```javascript
 import {LRU} from "tiny-lru";
 const cache = new LRU(max, ttl = 0, resetTtl = false);
 ```
 
+### Class Inheritance
 ```javascript
 import {LRU} from "tiny-lru";
-class MyCache extends LRU {}
+class MyCache extends LRU {
+  constructor(max, ttl, resetTtl) {
+    super(max, ttl, resetTtl);
+  }
+}
 ```
 
+## Parameters
+
+- **max** `{Number}` - Maximum number of items to store (default: 1000)
+- **ttl** `{Number}` - Time-to-live in milliseconds, 0 disables expiration (default: 0)
+- **resetTtl** `{Boolean}` - Reset TTL on each `set()` operation (default: false)
+
 ## Interoperability
-Lodash provides a `memoize` function with a cache that can be swapped out as long as it implements the right interface.
-See the [lodash docs](https://lodash.com/docs#memoize) for more on `memoize`.
+
+Compatible with Lodash's `memoize` function cache interface:
 
 ```javascript
+import _ from "lodash";
+import {lru} from "tiny-lru";
+
 _.memoize.Cache = lru().constructor;
 const memoized = _.memoize(myFunc);
 memoized.cache.max = 10;
 ```
 
 ## Testing
-Tiny-LRU has 100% code coverage with its tests.
+
+Tiny-LRU maintains 100% code coverage:
 
 ```console
 --------------|---------|----------|---------|---------|-------------------
 File          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
 --------------|---------|----------|---------|---------|-------------------
-All files     |     100 |    91.46 |     100 |     100 |                   
- tiny-lru.cjs |     100 |    91.46 |     100 |     100 | 11-31,134,181,215 
+All files     |     100 |    96.34 |     100 |     100 |                   
+ tiny-lru.cjs |     100 |    96.34 |     100 |     100 | 190,225,245       
 --------------|---------|----------|---------|---------|-------------------
 ```
-
 
 ## API Reference
 
 ### Properties
 
 #### first
-
-Item in "first" or "bottom" position; default is `null`
+`{Object|null}` - Item in first (least recently used) position
 
 ```javascript
 const cache = lru();
-
-cache.first; // null - it's a new cache!
+cache.first; // null - empty cache
 ```
 
 #### last
-
-Item in "last" or "top" position; default is `null`
+`{Object|null}` - Item in last (most recently used) position
 
 ```javascript
 const cache = lru();
-
-cache.last; // null - it's a new cache!
+cache.last; // null - empty cache
 ```
 
 #### max
-
-Max items to hold in cache; default is `1000`
+`{Number}` - Maximum number of items to hold in cache
 
 ```javascript
 const cache = lru(500);
-
 cache.max; // 500
 ```
 
 #### resetTtl
-
-Resets `item.expiry` with each `set()` if `true`; default is `false`
+`{Boolean}` - Whether to reset TTL on each `set()` operation
 
 ```javascript
 const cache = lru(500, 5*6e4, true);
-
 cache.resetTtl; // true
 ```
 
 #### size
-
-Number of items in cache
+`{Number}` - Current number of items in cache
 
 ```javascript
 const cache = lru();
-
-cache.size; // 0 - it's a new cache!
+cache.size; // 0 - empty cache
 ```
 
 #### ttl
-
-Milliseconds an item will remain in cache; lazy expiration upon next `get()` of an item
+`{Number}` - TTL in milliseconds (0 = no expiration)
 
 ```javascript
 const cache = lru(100, 3e4);
-
-cache.ttl; // 30000;
+cache.ttl; // 30000
 ```
 
 ### Methods
 
-#### clear
+#### clear()
+Removes all items from cache.
 
-Clears the contents of the cache
-
-	return {Object} LRU instance
+**Returns:** `{Object}` LRU instance
 
 ```javascript
 cache.clear();
 ```
 
-#### delete
+#### delete(key)
+Removes specified item from cache.
 
-Removes item from cache
+**Parameters:**
+- `key` `{String}` - Item key
 
-	param  {String} key Item key
-	return {Object}     LRU instance
+**Returns:** `{Object}` LRU instance
 
 ```javascript
 cache.delete("myKey");
 ```
 
-#### entries(*["key1", "key2"]*)
+#### entries([keys])
+Returns array of cache items as `[key, value]` pairs.
 
-Returns an `Array` cache items
+**Parameters:**
+- `keys` `{Array}` - Optional array of specific keys to retrieve
 
-    param  {Array} keys (Optional) Cache item keys to get, defaults to `this.keys()` if not provided
-	return {Object} LRU instance
+**Returns:** `{Array}` Array of `[key, value]` pairs
 
 ```javascript
-cache.entries(['myKey1', 'myKey2']);
+cache.entries(); // All entries
+cache.entries(['key1', 'key2']); // Specific entries
 ```
 
-#### evict
+#### evict()
+Removes the least recently used item from cache.
 
-Evicts the least recently used item from cache
-
-	return {Object} LRU instance
+**Returns:** `{Object}` LRU instance
 
 ```javascript
 cache.evict();
 ```
 
-#### expiresAt
+#### expiresAt(key)
+Gets expiration timestamp for cached item.
 
-Gets expiration time for cached item
+**Parameters:**
+- `key` `{String}` - Item key
 
-	param  {String} key Item key
-	return {Mixed}      Undefined or number (epoch time)
-
-```javascript
-const item = cache.expiresAt("myKey");
-```
-
-#### get
-
-Gets cached item and moves it to the front
-
-	param  {String} key Item key
-	return {Mixed}      Undefined or Item value
+**Returns:** `{Number|undefined}` Expiration time (epoch milliseconds) or undefined
 
 ```javascript
-const item = cache.get("myKey");
+const expiry = cache.expiresAt("myKey");
 ```
 
-#### has
+#### get(key)
+Retrieves cached item and promotes it to most recently used position.
 
-Returns a `Boolean` indicating if `key` is in cache
+**Parameters:**
+- `key` `{String}` - Item key
 
-	return {Object} LRU instance
+**Returns:** `{*}` Item value or undefined if not found/expired
 
 ```javascript
-cache.has('myKey');
+const value = cache.get("myKey");
 ```
 
-#### keys
+#### has(key)
+Checks if key exists in cache (without promoting it).
 
-Returns an `Array` of cache item keys (`first` to `last`)
+**Parameters:**
+- `key` `{String}` - Item key
 
-	return {Array} Array of keys
+**Returns:** `{Boolean}` True if key exists and is not expired
 
 ```javascript
-console.log(cache.keys());
+if (cache.has('myKey')) {
+  // Key exists
+}
 ```
 
-#### set
+#### keys()
+Returns array of all cache keys in LRU order (first = least recent).
 
-Sets item in cache as `first`
+**Returns:** `{Array}` Array of keys
 
-	param  {String} key   Item key
-	param  {Mixed}  value Item value
-	return {Object}       LRU instance
+```javascript
+const keys = cache.keys();
+```
+
+#### set(key, value)
+Stores item in cache as most recently used.
+
+**Parameters:**
+- `key` `{String}` - Item key
+- `value` `{*}` - Item value
+
+**Returns:** `{Object}` LRU instance
 
 ```javascript
 cache.set("myKey", {prop: true});
+cache.set("user:123", userData);
 ```
 
-#### setWithEvicted
+#### setWithEvicted(key, value)
+Stores item and returns evicted item if cache was full.
 
-Sets an item in the cache and returns the evicted item if the cache was full and an eviction occurred. If no eviction occurs, returns `null`.
+**Parameters:**
+- `key` `{String}` - Item key
+- `value` `{*}` - Item value
 
-	param  {String} key   Item key
-	param  {Mixed}  value Item value
-	param  {Boolean} [resetTtl] Optionally reset the TTL for the item
-	return {Object|null}  The evicted item (shallow clone) or null
+**Returns:** `{Object|null}` Evicted item `{key, value}` or null
 
 ```javascript
 const evicted = cache.setWithEvicted("myKey", {prop: true});
 if (evicted) {
-  console.log("Evicted item:", evicted.key, evicted.value);
+  console.log(`Evicted: ${evicted.key}`, evicted.value);
 }
 ```
 
-#### values(*["key1", "key2"]*)
+#### values([keys])
+Returns array of cache values.
 
-Returns an `Array` cache items
+**Parameters:**
+- `keys` `{Array}` - Optional array of specific keys to retrieve
 
-	param  {Array} keys (Optional) Cache item keys to get
-	return {Array} Cache items
+**Returns:** `{Array}` Array of values
 
 ```javascript
-cache.values(['abc', 'def']);
+const allValues = cache.values();
+const specificValues = cache.values(['key1', 'key2']);
 ```
 
+## Examples
+
+### Basic Usage
+```javascript
+import {lru} from "tiny-lru";
+
+const cache = lru(100); // Max 100 items
+cache.set("user:123", {name: "John", age: 30});
+cache.set("session:abc", {token: "xyz", expires: Date.now()});
+
+const user = cache.get("user:123"); // Promotes to most recent
+console.log(cache.size); // 2
+```
+
+### TTL with Auto-Expiration
+```javascript
+import {LRU} from "tiny-lru";
+
+const cache = new LRU(50, 5000); // 50 items, 5s TTL
+cache.set("temp-data", {result: "computed"});
+
+setTimeout(() => {
+  console.log(cache.get("temp-data")); // undefined - expired
+}, 6000);
+```
+
+### Reset TTL on Access
+```javascript
+const cache = lru(100, 10000, true); // Reset TTL on each set()
+cache.set("session", {user: "admin"});
+// Each subsequent set() resets the 10s TTL
+```
 
 ## License
-Copyright (c) 2025 Jason Mulligan
+Copyright (c) 2025 Jason Mulligan  
 Licensed under the BSD-3 license.
