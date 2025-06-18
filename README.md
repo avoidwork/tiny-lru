@@ -64,6 +64,95 @@ All files     |     100 |    96.34 |     100 |     100 |
 --------------|---------|----------|---------|---------|-------------------
 ```
 
+## Benchmarks
+
+Tiny-LRU includes a comprehensive benchmark suite for performance analysis and comparison. The benchmark suite uses modern Node.js best practices and popular benchmarking tools.
+
+### Benchmark Files
+
+#### Modern Benchmarks (`modern-benchmark.js`) ⭐
+**Comprehensive benchmark suite using [Tinybench](https://github.com/tinylibs/tinybench)**
+
+Features:
+- Statistically analyzed latency and throughput values
+- Standard deviation, margin of error, variance calculations
+- Proper warmup phases and statistical significance
+- Realistic workload scenarios
+
+Test categories:
+- **SET operations**: Empty cache, full cache, eviction scenarios
+- **GET operations**: Hit/miss patterns, access patterns  
+- **Mixed operations**: Real-world 80/20 read-write scenarios
+- **Special operations**: Delete, clear, different data types
+- **Memory usage analysis**
+
+#### Performance Observer Benchmarks (`performance-observer-benchmark.js`)
+**Native Node.js performance measurement using Performance Observer**
+
+Features:
+- Function-level timing using `performance.timerify()`
+- PerformanceObserver for automatic measurement collection
+- Custom high-resolution timer implementations
+- Scalability testing across different cache sizes
+
+### Running Benchmarks
+
+```bash
+# Run all modern benchmarks
+npm run benchmark:all
+
+# Run individual benchmark suites
+npm run benchmark:modern    # Tinybench suite
+npm run benchmark:perf      # Performance Observer suite
+
+# Or run directly
+node benchmarks/modern-benchmark.js
+node benchmarks/performance-observer-benchmark.js
+
+# Run with garbage collection exposed (for memory analysis)
+node --expose-gc benchmarks/modern-benchmark.js
+```
+
+### Understanding Results
+
+#### Tinybench Output
+```
+┌─────────┬─────────────────────────────┬─────────────────┬────────────────────┬──────────┬─────────┐
+│ (index) │          Task Name          │     ops/sec     │ Average Time (ns)  │  Margin  │ Samples │
+├─────────┼─────────────────────────────┼─────────────────┼────────────────────┼──────────┼─────────┤
+│    0    │ 'set-random-empty-cache-100'│   '2,486,234'   │ 402.21854775934    │ '±0.45%' │ 1243117 │
+```
+
+- **ops/sec**: Operations per second (higher is better)
+- **Average Time**: Average execution time in nanoseconds
+- **Margin**: Statistical margin of error
+- **Samples**: Number of samples collected for statistical significance
+
+#### Performance Observer Output
+```
+┌─────────────┬─────────┬────────────┬────────────┬────────────┬───────────────┬─────────┬────────┐
+│   Function  │  Calls  │  Avg (ms)  │  Min (ms)  │  Max (ms)  │  Median (ms)  │ Std Dev │Ops/sec │
+├─────────────┼─────────┼────────────┼────────────┼────────────┼───────────────┼─────────┼────────┤
+│   lru.set   │  1000   │   0.0024   │   0.0010   │   0.0156   │    0.0020     │  0.0012 │ 417292 │
+```
+
+### Performance Tips
+
+For accurate benchmark results:
+1. **Close other applications** to reduce system noise
+2. **Run multiple times** and compare results  
+3. **Use consistent hardware** for comparisons
+4. **Enable garbage collection** with `--expose-gc` for memory tests
+5. **Consider CPU frequency scaling** on laptops
+
+### Good Performance Indicators
+- ✅ **Consistent ops/sec** across runs
+- ✅ **Low margin of error** (< 5%)
+- ✅ **GET operations faster than SET**
+- ✅ **Cache hits faster than misses**
+
+See `benchmarks/README.md` for complete documentation and advanced usage.
+
 ## API Reference
 
 ### Properties
