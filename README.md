@@ -19,7 +19,14 @@ const cache = lru(max, ttl = 0, resetTtl = false);
 ### Class Constructor
 ```javascript
 import {LRU} from "tiny-lru";
-const cache = new LRU(max, ttl = 0, resetTtl = false);
+
+// Create a cache with 1000 items, 1 minute TTL, reset on access
+const cache = new LRU(1000, 60000, true);
+
+// Create a cache with TTL
+const cache2 = new LRU(100, 5000); // 100 items, 5 second TTL
+cache2.set('key1', 'value1');
+// After 5 seconds, key1 will be expired
 ```
 
 ### Class Inheritance
@@ -34,9 +41,34 @@ class MyCache extends LRU {
 
 ## Parameters
 
-- **max** `{Number}` - Maximum number of items to store (default: 1000)
+- **max** `{Number}` - Maximum number of items to store. 0 means unlimited (default: 1000)
 - **ttl** `{Number}` - Time-to-live in milliseconds, 0 disables expiration (default: 0)
 - **resetTtl** `{Boolean}` - Reset TTL on each `set()` operation (default: false)
+
+### Parameter Validation
+
+The factory function validates parameters and throws `TypeError` for invalid values:
+
+```javascript
+// Invalid parameters will throw TypeError
+try {
+  const cache = lru(-1);        // Invalid max value
+} catch (error) {
+  console.error(error.message); // "Invalid max value"
+}
+
+try {
+  const cache = lru(100, -1);   // Invalid ttl value  
+} catch (error) {
+  console.error(error.message); // "Invalid ttl value"
+}
+
+try {
+  const cache = lru(100, 0, "true"); // Invalid resetTtl value
+} catch (error) {
+  console.error(error.message); // "Invalid resetTtl value"
+}
+```
 
 ## Interoperability
 
@@ -225,21 +257,28 @@ Removes specified item from cache.
 **Returns:** `{Object}` LRU instance
 
 ```javascript
-cache.delete("myKey");
+cache.set('key1', 'value1');
+cache.delete('key1');
+console.log(cache.has('key1')); // false
 ```
+
+**See also:** [has()](#has), [clear()](#clear)
 
 #### entries([keys])
 Returns array of cache items as `[key, value]` pairs.
 
 **Parameters:**
-- `keys` `{Array}` - Optional array of specific keys to retrieve
+- `keys` `{Array}` - Optional array of specific keys to retrieve (defaults to all keys)
 
 **Returns:** `{Array}` Array of `[key, value]` pairs
 
 ```javascript
-cache.entries(); // All entries
-cache.entries(['key1', 'key2']); // Specific entries
+cache.set('a', 1).set('b', 2);
+console.log(cache.entries()); // [['a', 1], ['b', 2]]
+console.log(cache.entries(['a'])); // [['a', 1]]
 ```
+
+**See also:** [keys()](#keys), [values()](#values)
 
 #### evict()
 Removes the least recently used item from cache.
@@ -247,8 +286,11 @@ Removes the least recently used item from cache.
 **Returns:** `{Object}` LRU instance
 
 ```javascript
-cache.evict();
+cache.set('old', 'value').set('new', 'value');
+cache.evict(); // Removes 'old' item
 ```
+
+**See also:** [setWithEvicted()](#setwithevicted)
 
 #### expiresAt(key)
 Gets expiration timestamp for cached item.
@@ -256,11 +298,15 @@ Gets expiration timestamp for cached item.
 **Parameters:**
 - `key` `{String}` - Item key
 
-**Returns:** `{Number|undefined}` Expiration time (epoch milliseconds) or undefined
+**Returns:** `{Number|undefined}` Expiration time (epoch milliseconds) or undefined if key doesn't exist
 
 ```javascript
-const expiry = cache.expiresAt("myKey");
+const cache = new LRU(100, 5000); // 5 second TTL
+cache.set('key1', 'value1');
+console.log(cache.expiresAt('key1')); // timestamp 5 seconds from now
 ```
+
+**See also:** [get()](#get), [has()](#has)
 
 #### get(key)
 Retrieves cached item and promotes it to most recently used position.
@@ -271,8 +317,12 @@ Retrieves cached item and promotes it to most recently used position.
 **Returns:** `{*}` Item value or undefined if not found/expired
 
 ```javascript
-const value = cache.get("myKey");
+cache.set('key1', 'value1');
+console.log(cache.get('key1')); // 'value1'
+console.log(cache.get('nonexistent')); // undefined
 ```
+
+**See also:** [set()](#set), [has()](#has)
 
 #### has(key)
 Checks if key exists in cache (without promoting it).
@@ -283,10 +333,12 @@ Checks if key exists in cache (without promoting it).
 **Returns:** `{Boolean}` True if key exists and is not expired
 
 ```javascript
-if (cache.has('myKey')) {
-  // Key exists
-}
+cache.set('key1', 'value1');
+console.log(cache.has('key1')); // true
+console.log(cache.has('nonexistent')); // false
 ```
+
+**See also:** [get()](#get), [delete()](#delete)
 
 #### keys()
 Returns array of all cache keys in LRU order (first = least recent).
@@ -294,8 +346,12 @@ Returns array of all cache keys in LRU order (first = least recent).
 **Returns:** `{Array}` Array of keys
 
 ```javascript
-const keys = cache.keys();
+cache.set('a', 1).set('b', 2);
+cache.get('a'); // Move 'a' to most recent
+console.log(cache.keys()); // ['b', 'a']
 ```
+
+**See also:** [values()](#values), [entries()](#entries)
 
 #### set(key, value)
 Stores item in cache as most recently used.
@@ -307,9 +363,12 @@ Stores item in cache as most recently used.
 **Returns:** `{Object}` LRU instance
 
 ```javascript
-cache.set("myKey", {prop: true});
-cache.set("user:123", userData);
+cache.set('key1', 'value1')
+     .set('key2', 'value2')
+     .set('key3', 'value3');
 ```
+
+**See also:** [get()](#get), [setWithEvicted()](#setwithevicted)
 
 #### setWithEvicted(key, value)
 Stores item and returns evicted item if cache was full.
@@ -318,27 +377,34 @@ Stores item and returns evicted item if cache was full.
 - `key` `{String}` - Item key
 - `value` `{*}` - Item value
 
-**Returns:** `{Object|null}` Evicted item `{key, value}` or null
+**Returns:** `{Object|null}` Evicted item `{key, value, expiry, prev, next}` or null
 
 ```javascript
-const evicted = cache.setWithEvicted("myKey", {prop: true});
+const cache = new LRU(2);
+cache.set('a', 1).set('b', 2);
+const evicted = cache.setWithEvicted('c', 3); // evicted = {key: 'a', value: 1, ...}
 if (evicted) {
   console.log(`Evicted: ${evicted.key}`, evicted.value);
 }
 ```
 
+**See also:** [set()](#set), [evict()](#evict)
+
 #### values([keys])
 Returns array of cache values.
 
 **Parameters:**
-- `keys` `{Array}` - Optional array of specific keys to retrieve
+- `keys` `{Array}` - Optional array of specific keys to retrieve (defaults to all keys)
 
 **Returns:** `{Array}` Array of values
 
 ```javascript
-const allValues = cache.values();
-const specificValues = cache.values(['key1', 'key2']);
+cache.set('a', 1).set('b', 2);
+console.log(cache.values()); // [1, 2]
+console.log(cache.values(['a'])); // [1]
 ```
+
+**See also:** [keys()](#keys), [entries()](#entries)
 
 ## Examples
 
@@ -346,9 +412,14 @@ const specificValues = cache.values(['key1', 'key2']);
 ```javascript
 import {lru} from "tiny-lru";
 
-const cache = lru(100); // Max 100 items
-cache.set("user:123", {name: "John", age: 30});
-cache.set("session:abc", {token: "xyz", expires: Date.now()});
+// Create a cache with max 100 items
+const cache = lru(100);
+cache.set('key1', 'value1');
+console.log(cache.get('key1')); // 'value1'
+
+// Method chaining
+cache.set("user:123", {name: "John", age: 30})
+     .set("session:abc", {token: "xyz", expires: Date.now()});
 
 const user = cache.get("user:123"); // Promotes to most recent
 console.log(cache.size); // 2
