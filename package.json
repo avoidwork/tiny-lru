@@ -1,7 +1,7 @@
 {
   "name": "tiny-lru",
   "description": "Tiny LRU cache for Client or Server",
-  "version": "11.3.2",
+  "version": "11.3.3",
   "homepage": "https://github.com/avoidwork/tiny-lru",
   "author": "Jason Mulligan <jason.mulligan@avoidwork.com>",
   "repository": {
@@ -32,9 +32,11 @@
   "engineStrict": true,
   "scripts": {
     "build": "npm run lint && npm run rollup && npm run mocha",
-    "benchmark": "node benchmark.js",
+    "benchmark:modern": "node benchmarks/modern-benchmark.js",
+    "benchmark:perf": "node benchmarks/performance-observer-benchmark.js",
+    "benchmark:all": "npm run benchmark:modern && npm run benchmark:perf",
     "changelog": "auto-changelog -p",
-    "lint": "eslint --fix *.js src/*.js test/*.js",
+    "lint": "eslint --fix *.js src/*.js test/*.js benchmarks/*.js",
     "mocha": "nyc mocha test/*.js",
     "rollup": "rollup --config",
     "test": "npm run lint && npm run mocha",
@@ -44,12 +46,12 @@
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "auto-changelog": "^2.5.0",
-    "eslint": "^9.27.0",
+    "eslint": "^9.29.0",
     "husky": "^9.1.7",
-    "mocha": "^11.3.0",
+    "mocha": "^11.7.0",
     "nyc": "^17.1.0",
-    "precise": "^4.0.3",
-    "rollup": "^4.40.2",
+    "rollup": "^4.43.0",
+    "tinybench": "^4.0.1",
     "typescript": "^5.8.3"
   },
   "keywords": [
