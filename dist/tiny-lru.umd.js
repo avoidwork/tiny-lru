@@ -121,7 +121,7 @@ class LRU {
 	 * console.log(cache.entries(['a'])); // [['a', 1]]
 	 * @see {@link LRU#keys}
 	 * @see {@link LRU#values}
-	 * @since 1.0.0
+	 * @since 11.1.0
 	 */
 	entries (keys = this.keys()) {
 		return keys.map(key => [key, this.get(key)]);
@@ -246,7 +246,7 @@ class LRU {
 	 * console.log(cache.keys()); // ['b', 'a']
 	 * @see {@link LRU#values}
 	 * @see {@link LRU#entries}
-	 * @since 1.0.0
+	 * @since 9.0.0
 	 */
 	keys () {
 		const result = [];
@@ -275,7 +275,7 @@ class LRU {
 	 * const evicted = cache.setWithEvicted('c', 3); // evicted = {key: 'a', value: 1, ...}
 	 * @see {@link LRU#set}
 	 * @see {@link LRU#evict}
-	 * @since 1.0.0
+	 * @since 11.3.0
 	 */
 	setWithEvicted (key, value, resetTtl = this.resetTtl) {
 		let evicted = null;
