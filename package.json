@@ -31,28 +31,26 @@
   },
   "engineStrict": true,
   "scripts": {
-    "build": "npm run lint && npm run rollup && npm run mocha",
+    "build": "npm run lint && npm run rollup",
     "benchmark:modern": "node benchmarks/modern-benchmark.js",
     "benchmark:perf": "node benchmarks/performance-observer-benchmark.js",
     "benchmark:all": "npm run benchmark:modern && npm run benchmark:perf",
     "changelog": "auto-changelog -p",
     "lint": "eslint --fix *.js src/*.js test/*.js benchmarks/*.js",
-    "mocha": "nyc mocha test/*.js",
+    "mocha": "c8 mocha test/*.js",
     "rollup": "rollup --config",
-    "test": "npm run lint && npm run mocha",
-    "types": "npx -p typescript tsc src/lru.js --declaration --allowJs --emitDeclarationOnly --outDir types",
+    "test": "npm run mocha",
     "prepare": "husky"
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "auto-changelog": "^2.5.0",
+    "c8": "^10.1.3",
     "eslint": "^9.29.0",
     "husky": "^9.1.7",
     "mocha": "^11.7.0",
-    "nyc": "^17.1.0",
     "rollup": "^4.43.0",
-    "tinybench": "^4.0.1",
-    "typescript": "^5.8.3"
+    "tinybench": "^4.0.1"
   },
   "keywords": [
     "LRU",

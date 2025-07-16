@@ -1,4 +1,4 @@
-import {LRU, lru} from "../dist/tiny-lru.cjs";
+import {LRU, lru} from "../dist/tiny-lru.js";
 import {strict as assert} from "assert";
 
 describe("LRU Cache", function () {
