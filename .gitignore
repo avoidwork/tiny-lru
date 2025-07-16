@@ -1,6 +1,4 @@
-/node_modules/
-/test/webpack/
+coverage
+node_modules
 .idea
-.nyc_output
-*.tgz
 .DS_Store
