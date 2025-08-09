@@ -6,9 +6,9 @@
 [![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/ci.yml/badge.svg)](https://github.com/avoidwork/tiny-lru/actions)
 [![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/avoidwork/tiny-lru)
 
-A **high-performance, lightweight** LRU cache for JavaScript with **fastest UPDATES and competitive GET/SET/DELETE** and **compact bundle size**. Built for developers who need fast caching without compromising on features.
+A **high-performance, lightweight** LRU cache for JavaScript with **fastest UPDATES and competitive SET/GET/DELETE** and **compact bundle size**. Built for developers who need fast caching without compromising on features.
 
-> **Just 2.2 KiB** • **Fastest UPDATES and competitive GET/SET/DELETE** • **100% TypeScript support** • **Works everywhere**
+> **Just 2.2 KiB** • **Fastest UPDATES and competitive SET/GET/DELETE** • **100% TypeScript support** • **Works everywhere**
 
 ```javascript
 import {lru} from "tiny-lru";
