@@ -36,8 +36,8 @@
     "benchmark:perf": "node benchmarks/performance-observer-benchmark.js",
     "benchmark:all": "npm run benchmark:modern && npm run benchmark:perf",
     "changelog": "auto-changelog -p",
-    "lint": "eslint --fix *.js src/*.js test/*.js benchmarks/*.js",
-    "mocha": "c8 mocha test/*.js",
+    "lint": "eslint --fix *.js src/*.js tests/**/*.js benchmarks/*.js",
+    "mocha": "c8 mocha \"tests/**/*.js\"",
     "rollup": "rollup --config",
     "test": "npm run mocha",
     "prepare": "husky"

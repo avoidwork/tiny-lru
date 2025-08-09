@@ -1,4 +1,4 @@
-import {LRU, lru} from "../src/lru.js";
+import {LRU, lru} from "../../src/lru.js";
 import {strict as assert} from "assert";
 
 describe("LRU Cache", function () {
@@ -563,3 +563,4 @@ describe("LRU Cache", function () {
 		});
 	});
 });
+
