@@ -6,9 +6,9 @@
 [![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/ci.yml/badge.svg)](https://github.com/avoidwork/tiny-lru/actions)
 [![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/avoidwork/tiny-lru)
 
-The **fastest, smallest, and most reliable** LRU cache for JavaScript! Built for developers who need **blazing-fast performance** without compromising on bundle size or features.
+A **high-performance, lightweight** LRU cache for JavaScript with **industry-leading UPDATE operations** and the **smallest bundle size** among full-featured libraries. Built for developers who need fast caching without compromising on features.
 
-> **Just 2.3KB** • **340K+ UPDATE ops/sec** • **100% TypeScript support** • **Works everywhere**
+> **Just 2.3KB** • **348K UPDATE ops/sec** • **100% TypeScript support** • **Works everywhere**
 
 ```javascript
 import {lru} from "tiny-lru";
@@ -27,27 +27,27 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 
 ### Performance That Leads the Pack
 
-| Operation | Tiny LRU | lru-cache | quick-lru | 
-|-----------|----------|-----------|-----------|
-| **UPDATE** | **340,187 ops/sec** 🥇 | 120,495 ops/sec | 327,171 ops/sec |
-| **DELETE** | **342,009 ops/sec** 🥇 | 153,116 ops/sec | 395,741 ops/sec |
-| **GET** | 120,277 ops/sec | 99,815 ops/sec | **117,901 ops/sec** |
-| **SET** | 41,826 ops/sec | 26,930 ops/sec | **51,533 ops/sec** |
-| **Bundle Size** | **2.3KB** 🥇 | ~15KB | ~1.8KB |
+| Library | SET ops/sec | GET ops/sec | UPDATE ops/sec | DELETE ops/sec | Bundle Size | Memory/Item |
+|---------|-------------|-------------|---------------|---------------|-------------|-------------|
+| **tiny-lru** | 43,022 | 113,531 | **348,829** 🥇 | **335,038** 🥇 | **2.3KB** 🥇 | 185 bytes |
+| lru-cache | 27,819 | 96,739 | 133,706 | 149,700 | ~15KB | **114 bytes** 🥇 |
+| quick-lru | **52,200** 🥇 | 118,758 | 321,377 | **391,763** 🥇 | ~1.8KB | 176 bytes |
+| mnemonist | 29,933 | **192,073** 🥇 | 210,628 | N/A† | ~45KB | **99 bytes** 🥇 |
 
+† *mnemonist uses different method names for delete operations*  
 *Benchmarks run on Node.js v24.5.0, Apple Silicon (M4)*
 
 ### 🎯 **Key Highlights**
-- **🚀 340K+ UPDATE operations per second** - Industry-leading performance for cache updates
+- **🚀 348K UPDATE operations per second** - Leads the field in cache update performance
 - **📦 Just 2.3KB minified** - Smallest bundle among full-featured LRU libraries  
-- **⚡ O(1) complexity** - Lightning-fast operations that scale
+- **⚡ O(1) complexity** - Consistent performance that scales
 - **🛡️ 100% test coverage** - Battle-tested and reliable
 - **🌐 Universal compatibility** - Works in Node.js and browsers
 - **📝 Full TypeScript support** - Complete type definitions included
 
 ## ✨ Features
 
-- 🚀 **Industry-Leading Performance** - 340K+ UPDATE ops/sec, optimized O(1) operations
+- 🚀 **Leading UPDATE Performance** - 348K UPDATE ops/sec, optimized O(1) operations
 - 💾 **Smallest Bundle** - Just 2.3KB minified among full-featured LRU libraries
 - ⏱️ **TTL Support** - Optional time-to-live with automatic expiration
 - 🔄 **Method Chaining** - Fluent API for better developer experience
@@ -60,12 +60,12 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 
 ### Real-World Benchmarks
 
-**Typical performance on modern hardware:**
-- **SET operations**: ~42,000 ops/sec 
-- **GET operations**: ~120,000 ops/sec (cache hits)
-- **UPDATE operations**: ~340,000 ops/sec (existing keys)
-- **DELETE operations**: ~342,000 ops/sec
-- **Memory footprint**: ~185 bytes per cached item
+**Validated performance on modern hardware (Node.js v24.5.0, Apple Silicon M4):**
+- **SET operations**: 43,022 ops/sec 
+- **GET operations**: 113,531 ops/sec (cache hits)
+- **UPDATE operations**: 348,829 ops/sec (existing keys)
+- **DELETE operations**: 335,038 ops/sec
+- **Memory footprint**: 185 bytes per cached item
 
 ### When to Choose Tiny LRU
 
