@@ -8,8 +8,6 @@
 
 A **high-performance, lightweight** LRU cache for JavaScript with **fastest UPDATES and competitive SET/GET/DELETE** and **compact bundle size**. Built for developers who need fast caching without compromising on features.
 
-> **Just 2.2 KiB** • **Fastest UPDATES and competitive SET/GET/DELETE** • **100% TypeScript support** • **Works everywhere**
-
 ```javascript
 import {lru} from "tiny-lru";
 
@@ -39,14 +37,13 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 ### Why Choose Tiny LRU?
 
 - **🔄 Excellent Cache Updates** - 348K UPDATE ops/sec, outperforming alternatives by 2.6x
-- **📦 Very Small Bundle** - Just 2.2 KiB minified for a full-featured LRU library
+- **📦 Compact Bundle** - Just 2.2 KiB minified for a full-featured LRU library
 - **⚖️ Balanced Performance** - Strong across all operations with O(1) complexity
 - **⏱️ TTL Support** - Optional time-to-live with automatic expiration
 - **🔄 Method Chaining** - Fluent API for better developer experience
 - **🎯 TypeScript Ready** - Full TypeScript support with complete type definitions
 - **🌐 Universal Compatibility** - Works seamlessly in Node.js and browsers
-- **🛡️ Production Ready** - 100% test coverage, battle-tested and reliable
-- **🎛️ Rich Feature Set** - TTL, chaining, TypeScript support - all in 2.2 KiB
+- **🛡️ Production Ready** - Battle-tested and reliable
 
 ### Benchmark Comparison
 
@@ -62,23 +59,13 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 
 ## 📊 Performance Deep Dive
 
-### Real-World Benchmarks
-
-**Validated performance on modern hardware (Node.js v24.5.0, Apple Silicon M4):**
-- **SET operations**: 43,022 ops/sec 
-- **GET operations**: 113,531 ops/sec (cache hits)
-- **UPDATE operations**: 348,829 ops/sec (existing keys)
-- **DELETE operations**: 335,038 ops/sec
-- **Memory footprint**: 185 bytes per cached item
-
 ### When to Choose Tiny LRU
 
 **✅ Perfect for:**
-- **Frequent cache updates** - Leading UPDATE performance (340K ops/sec)
-- **Mixed read/write workloads** - Balanced GET/UPDATE/DELETE performance
-- **Bundle size constraints** - Very small size (2.2 KiB) among full-featured LRU libraries
-- **High-frequency operations** - Optimized for speed with O(1) complexity
-- **Production applications** - 100% test coverage and TypeScript support
+- **Frequent cache updates** - Leading UPDATE performance 
+- **Mixed read/write workloads** - Balanced across all operations
+- **Bundle size constraints** - Compact library with full features
+- **Production applications** - Battle-tested with comprehensive testing
 
 ### Running Your Own Benchmarks
 
