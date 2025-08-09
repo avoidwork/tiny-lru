@@ -93,14 +93,7 @@ const cache = lru(max, ttl = 0, resetTtl = false);
 ### Class Constructor
 ```javascript
 import {LRU} from "tiny-lru";
-
-// Create a cache with 1000 items, 1 minute TTL, reset on access
-const cache = new LRU(1000, 60000, true);
-
-// Create a cache with TTL
-const cache2 = new LRU(100, 5000); // 100 items, 5 second TTL
-cache2.set('key1', 'value1');
-// After 5 seconds, key1 will be expired
+const cache = new LRU(1000, 60000, true); // 1000 items, 1 min TTL, reset on access
 ```
 
 ### Class Inheritance
@@ -111,89 +104,6 @@ class MyCache extends LRU {
     super(max, ttl, resetTtl);
   }
 }
-```
-
-## Browser Usage
-
-Tiny LRU works seamlessly in browser environments with multiple integration options:
-
-### ES Modules (Modern Browsers)
-```javascript
-import {lru, LRU} from "tiny-lru";
-
-// Cache API responses
-const apiCache = lru(50, 300000); // 50 items, 5 min TTL
-
-async function fetchUser(id) {
-  const cacheKey = `user:${id}`;
-  
-  // Check cache first
-  if (apiCache.has(cacheKey)) {
-    return apiCache.get(cacheKey);
-  }
-  
-  // Fetch and cache
-  const response = await fetch(`/api/users/${id}`);
-  const user = await response.json();
-  apiCache.set(cacheKey, user);
-  
-  return user;
-}
-```
-
-### Script Tag (Universal)
-```html
-<script src="https://unpkg.com/tiny-lru/dist/tiny-lru.js"></script>
-<script>
-  // Available as window.tinyLRU
-  const cache = window.tinyLRU.lru(100);
-  
-  // Cache DOM queries
-  const elementCache = window.tinyLRU.lru(20);
-  
-  function getElement(selector) {
-    if (elementCache.has(selector)) {
-      return elementCache.get(selector);
-    }
-    
-    const element = document.querySelector(selector);
-    if (element) {
-      elementCache.set(selector, element);
-    }
-    
-    return element;
-  }
-</script>
-```
-
-### Service Worker
-```javascript
-// In service worker
-import {lru} from "tiny-lru";
-
-const responseCache = lru(100, 600000); // 10 min TTL
-
-self.addEventListener('fetch', event => {
-  const url = event.request.url;
-  
-  if (responseCache.has(url)) {
-    event.respondWith(
-      new Response(responseCache.get(url))
-    );
-    return;
-  }
-  
-  event.respondWith(
-    fetch(event.request).then(response => {
-      if (response.ok) {
-        response.clone().text().then(body => {
-          responseCache.set(url, body);
-        });
-      }
-      return response;
-    })
-  );
-});
 ```
 
 ## Parameters
@@ -588,23 +498,6 @@ console.log(cache.values(['a'])); // [1]
 
 ## Examples
 
-### Basic Usage
-```javascript
-import {lru} from "tiny-lru";
-
-// Create a cache with max 100 items
-const cache = lru(100);
-cache.set('key1', 'value1');
-console.log(cache.get('key1')); // 'value1'
-
-// Method chaining
-cache.set("user:123", {name: "John", age: 30})
-     .set("session:abc", {token: "xyz", expires: Date.now()});
-
-const user = cache.get("user:123"); // Promotes to most recent
-console.log(cache.size); // 2
-```
-
 ### API Response Caching
 ```javascript
 import {lru} from "tiny-lru";
@@ -738,25 +631,6 @@ class DatabaseCache {
     return `${sql}:${JSON.stringify(params)}`;
   }
 }
-```
-
-### TTL with Auto-Expiration
-```javascript
-import {LRU} from "tiny-lru";
-
-const cache = new LRU(50, 5000); // 50 items, 5s TTL
-cache.set("temp-data", {result: "computed"});
-
-setTimeout(() => {
-  console.log(cache.get("temp-data")); // undefined - expired
-}, 6000);
-```
-
-### Reset TTL on Access
-```javascript
-const cache = lru(100, 10000, true); // Reset TTL on each set()
-cache.set("session", {user: "admin"});
-// Each subsequent set() resets the 10s TTL
 ```
 
 ### Best Practices
