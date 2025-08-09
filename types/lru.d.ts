@@ -1,6 +1,6 @@
 export function lru<T = any>(max?: number, ttl?: number, resetTtl?: boolean): LRU<T>;
 
-interface LRUItem<T> {
+export interface LRUItem<T> {
     expiry: number;
     key: any;
     prev: LRUItem<T> | null;
@@ -8,15 +8,15 @@ interface LRUItem<T> {
     value: T;
 }
 
-export class LRU<T> {
+export class LRU<T = any> {
     constructor(max?: number, ttl?: number, resetTtl?: boolean);
-    first: LRUItem<T> | null;
-    items: Record<any, LRUItem<T>>;
-    last: LRUItem<T> | null;
-    max: number;
-    resetTtl: boolean;
-    size: number;
-    ttl: number;
+    readonly first: LRUItem<T> | null;
+    readonly items: Record<any, LRUItem<T>>;
+    readonly last: LRUItem<T> | null;
+    readonly max: number;
+    readonly resetTtl: boolean;
+    readonly size: number;
+    readonly ttl: number;
     clear(): this;
     delete(key: any): this;
     entries(keys?: any[]): [any, T][];
