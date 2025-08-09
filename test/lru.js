@@ -540,5 +540,26 @@ describe("LRU Cache", function () {
 			// TTL should not be reset
 			assert.equal(originalExpiry, newExpiry);
 		});
+
+		it("should set expiry when using setWithEvicted with ttl > 0", function () {
+			const cache = new LRU(2, 100); // ttl > 0
+			const before = Date.now();
+			cache.set("a", 1);
+			cache.set("b", 2);
+			const evicted = cache.setWithEvicted("c", 3); // triggers eviction and new item creation
+			assert.notEqual(evicted, null);
+			const expiry = cache.expiresAt("c");
+			assert.ok(expiry >= before + 100);
+			assert.ok(expiry <= before + 250); // allow some margin
+		});
+
+		it("should set expiry to 0 when resetTtl=true and ttl=0 on update", function () {
+			const cache = new LRU(2, 0); // ttl = 0
+			cache.set("x", 1);
+			assert.equal(cache.expiresAt("x"), 0);
+			// update existing key with resetTtl=true to exercise branch in set()
+			cache.set("x", 2, false, true);
+			assert.equal(cache.expiresAt("x"), 0);
+		});
 	});
 });
