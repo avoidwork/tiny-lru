@@ -8,7 +8,7 @@
 
 A **high-performance, lightweight** LRU cache for JavaScript with **industry-leading UPDATE operations** and the **smallest bundle size** among full-featured libraries. Built for developers who need fast caching without compromising on features.
 
-> **Just 2.3KB** • **348K UPDATE ops/sec** • **100% TypeScript support** • **Works everywhere**
+> **Just 2.2 KiB** • **348K UPDATE ops/sec** • **100% TypeScript support** • **Works everywhere**
 
 ```javascript
 import {lru} from "tiny-lru";
@@ -29,10 +29,10 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 
 | Library | SET ops/sec | GET ops/sec | UPDATE ops/sec | DELETE ops/sec | Bundle Size | Memory/Item |
 |---------|-------------|-------------|---------------|---------------|-------------|-------------|
-| **tiny-lru** | 43,022 | 113,531 | **348,829** 🥇 | 335,038 | 2.3KB | 185 bytes |
-| lru-cache | 27,819 | 96,739 | 133,706 | 149,700 | ~15KB | **114 bytes** 🥇 |
-| quick-lru | 52,200 | 118,758 | 321,377 | **391,763** 🥇 | ~1.8KB | 176 bytes |
-| mnemonist | 29,933 | **192,073** 🥇 | 210,628 | N/A† | ~45KB | 99 bytes |
+| **tiny-lru** | 43,022 | 113,531 | **348,829** 🥇 | 335,038 | 2.2 KiB | 185 bytes |
+| lru-cache | 27,819 | 96,739 | 133,706 | 149,700 | ~14.6 KiB | **114 bytes** 🥇 |
+| quick-lru | 52,200 | 118,758 | 321,377 | **391,763** 🥇 | ~1.8 KiB | 176 bytes |
+| mnemonist | 29,933 | **192,073** 🥇 | 210,628 | N/A† | ~43.9 KiB | 99 bytes |
 
 † *mnemonist uses different method names for delete operations*  
 *Benchmarks run on Node.js v24.5.0, Apple Silicon (M4)*
@@ -40,14 +40,14 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 ## ✨ **What Makes Tiny LRU Useful**
 
 - **🔄 Excellent Cache Updates** - 348K UPDATE ops/sec, outperforming alternatives by 2.6x
-- **📦 Very Small Bundle** - Just 2.3KB minified for a full-featured LRU library
+- **📦 Very Small Bundle** - Just 2.2 KiB minified for a full-featured LRU library
 - **⚖️ Balanced Performance** - Strong across all operations with O(1) complexity
 - **⏱️ TTL Support** - Optional time-to-live with automatic expiration
 - **🔄 Method Chaining** - Fluent API for better developer experience
 - **🎯 TypeScript Ready** - Full TypeScript support with complete type definitions
 - **🌐 Universal Compatibility** - Works seamlessly in Node.js and browsers
 - **🛡️ Production Ready** - 100% test coverage, battle-tested and reliable
-- **🎛️ Rich Feature Set** - TTL, chaining, TypeScript support - all in 2.3KB
+- **🎛️ Rich Feature Set** - TTL, chaining, TypeScript support - all in 2.2 KiB
 
 ## 📊 Performance Deep Dive
 
@@ -65,7 +65,7 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 **✅ Perfect for:**
 - **Frequent cache updates** - Leading UPDATE performance (340K ops/sec)
 - **Mixed read/write workloads** - Balanced GET/UPDATE/DELETE performance
-- **Bundle size constraints** - Smallest size (2.3KB) among full-featured LRU libraries
+- **Bundle size constraints** - Very small size (2.2 KiB) among full-featured LRU libraries
 - **High-frequency operations** - Optimized for speed with O(1) complexity
 - **Production applications** - 100% test coverage and TypeScript support
 
