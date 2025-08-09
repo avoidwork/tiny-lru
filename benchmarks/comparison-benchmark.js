@@ -257,6 +257,83 @@ async function runBenchmarks () {
 	await deleteBench.run();
 	deleteBench.table();
 
+	// UPDATE operations benchmark
+	console.log('\n📊 UPDATE Operations Benchmark');
+	console.log('=' .repeat(50));
+
+	const updateBench = new Bench({ time: 2000 });
+
+	updateBench
+		.add('tiny-lru update', () => {
+			const cache = tinyLru(CACHE_SIZE);
+			// Pre-populate with initial values
+			for (let i = 0; i < 100; i++) {
+				cache.set(testData.keys[i], testData.values[i]);
+			}
+			// Update existing keys with new values
+			for (let i = 0; i < 100; i++) {
+				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
+			}
+		})
+		.add('tiny-lru-ttl update', () => {
+			const cache = tinyLru(CACHE_SIZE, TTL_MS);
+			// Pre-populate with initial values
+			for (let i = 0; i < 100; i++) {
+				cache.set(testData.keys[i], testData.values[i]);
+			}
+			// Update existing keys with new values
+			for (let i = 0; i < 100; i++) {
+				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
+			}
+		})
+		.add('lru-cache update', () => {
+			const cache = new LRUCache({ max: CACHE_SIZE });
+			// Pre-populate with initial values
+			for (let i = 0; i < 100; i++) {
+				cache.set(testData.keys[i], testData.values[i]);
+			}
+			// Update existing keys with new values
+			for (let i = 0; i < 100; i++) {
+				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
+			}
+		})
+		.add('lru-cache-ttl update', () => {
+			const cache = new LRUCache({ max: CACHE_SIZE, ttl: TTL_MS });
+			// Pre-populate with initial values
+			for (let i = 0; i < 100; i++) {
+				cache.set(testData.keys[i], testData.values[i]);
+			}
+			// Update existing keys with new values
+			for (let i = 0; i < 100; i++) {
+				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
+			}
+		})
+		.add('quick-lru update', () => {
+			const cache = new QuickLRU({ maxSize: CACHE_SIZE });
+			// Pre-populate with initial values
+			for (let i = 0; i < 100; i++) {
+				cache.set(testData.keys[i], testData.values[i]);
+			}
+			// Update existing keys with new values
+			for (let i = 0; i < 100; i++) {
+				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
+			}
+		})
+		.add('mnemonist update', () => {
+			const cache = new MnemonistLRU(CACHE_SIZE);
+			// Pre-populate with initial values
+			for (let i = 0; i < 100; i++) {
+				cache.set(testData.keys[i], testData.values[i]);
+			}
+			// Update existing keys with new values
+			for (let i = 0; i < 100; i++) {
+				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
+			}
+		});
+
+	await updateBench.run();
+	updateBench.table();
+
 	// Memory usage analysis
 	console.log("\n📊 Memory Usage Analysis");
 	console.log("=" .repeat(50));
@@ -311,10 +388,20 @@ async function runBenchmarks () {
 		opsPerSec: task.result?.hz ? Math.round(task.result.hz) : 0
 	}));
 
+	const updateResults = updateBench.tasks.map(task => ({
+		name: task.name,
+		opsPerSec: task.result?.hz ? Math.round(task.result.hz) : 0
+	}));
+
+	const deleteResults = deleteBench.tasks.map(task => ({
+		name: task.name,
+		opsPerSec: task.result?.hz ? Math.round(task.result.hz) : 0
+	}));
+
 	console.log("\nOperations per second (higher is better):");
-	console.log("┌─────────────────┬─────────────────┬─────────────────┐");
-	console.log("│ Library         │ SET ops/sec     │ GET ops/sec     │");
-	console.log("├─────────────────┼─────────────────┼─────────────────┤");
+	console.log("┌─────────────────┬─────────────────┬─────────────────┬─────────────────┬─────────────────┐");
+	console.log("│ Library         │ SET ops/sec     │ GET ops/sec     │ UPDATE ops/sec  │ DELETE ops/sec  │");
+	console.log("├─────────────────┼─────────────────┼─────────────────┼─────────────────┼─────────────────┤");
 
 	// Group results by library
 	const libraries = ["tiny-lru", "lru-cache", "quick-lru", "mnemonist"];
@@ -322,16 +409,20 @@ async function runBenchmarks () {
 	libraries.forEach(lib => {
 		const setResult = setResults.find(r => r.name.includes(lib));
 		const getResult = getResults.find(r => r.name.includes(lib));
+		const updateResult = updateResults.find(r => r.name.includes(lib));
+		const deleteResult = deleteResults.find(r => r.name.includes(lib));
 
-		if (setResult && getResult) {
+		if (setResult && getResult && updateResult && deleteResult) {
 			const nameCol = lib.padEnd(15);
 			const setCol = setResult.opsPerSec.toLocaleString().padEnd(15);
 			const getCol = getResult.opsPerSec.toLocaleString().padEnd(15);
-			console.log(`│ ${nameCol} │ ${setCol} │ ${getCol} │`);
+			const updateCol = updateResult.opsPerSec.toLocaleString().padEnd(15);
+			const deleteCol = deleteResult.opsPerSec.toLocaleString().padEnd(15);
+			console.log(`│ ${nameCol} │ ${setCol} │ ${getCol} │ ${updateCol} │ ${deleteCol} │`);
 		}
 	});
 
-	console.log("└─────────────────┴─────────────────┴─────────────────┘");
+	console.log("└─────────────────┴─────────────────┴─────────────────┴─────────────────┴─────────────────┘");
 
 	console.log("\n✅ Benchmark completed!");
 	console.log("\nTo regenerate this data, run: npm run benchmark:comparison");
