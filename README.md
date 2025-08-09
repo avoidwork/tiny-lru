@@ -10,7 +10,7 @@ A **lightweight, high-performance** Least Recently Used (LRU) cache implementati
 
 Perfect for caching API responses, memoizing expensive computations, session management, and any scenario where you need fast, memory-efficient caching with automatic eviction of least-used items.
 
-> **🎯 Why Tiny LRU?** Just **2.1KB minified**, delivers **4M+ ops/sec** performance, maintains **100% test coverage**, and provides **full TypeScript support** - making it the ideal choice for performance-critical applications.
+> **🎯 Why Tiny LRU?** Just **2.3KB minified**, delivers **~58K GET ops/sec** performance, maintains **100% test coverage**, and provides **full TypeScript support** - making it the ideal choice for performance-critical applications.
 
 ## Features
 
@@ -144,21 +144,20 @@ Tiny LRU is designed for high-performance applications with O(1) complexity for 
 ### Benchmark Results
 
 **Typical performance on modern hardware:**
-- **SET operations**: ~2.5M ops/sec 
-- **GET operations**: ~4M ops/sec (cache hits)
-- **DELETE operations**: ~3M ops/sec
-- **Memory footprint**: ~40 bytes per cached item
+- **SET operations**: ~40,000 ops/sec 
+- **GET operations**: ~58,000 ops/sec (cache hits)
+- **Memory footprint**: ~132 bytes per cached item
 
 ### Performance Comparison
 
 | Library | Bundle Size | SET ops/sec | GET ops/sec | Memory/Item |
 |---------|-------------|-------------|-------------|-------------|
-| tiny-lru | 2.1KB | 2.5M | 4.0M | 40 bytes |
-| lru-cache | 15KB | 1.8M | 3.2M | 180 bytes |
-| quick-lru | 1.8KB | 2.1M | 3.5M | 65 bytes |
-| mnemonist | 45KB | 2.0M | 3.0M | 120 bytes |
+| tiny-lru | 2.3KB | 40,095 | 57,884 | 132 bytes |
+| lru-cache | ~15KB | 27,288 | 95,796 | 29 bytes |
+| quick-lru | ~1.8KB | 51,971 | 111,340 | 69 bytes |
+| mnemonist | ~45KB | 29,737 | 194,249 | 49 bytes |
 
-*Benchmarks run on Node.js 20.x, Intel i7-12700K. Results may vary.*
+*Benchmarks run on Node.js v24.5.0, Apple Silicon (M1/M2). Results may vary by hardware and workload. Memory measurements include object overhead.*
 
 ### Running Benchmarks
 
@@ -167,11 +166,12 @@ Tiny LRU is designed for high-performance applications with O(1) complexity for 
 npm run benchmark:all
 
 # Individual benchmark suites
-npm run benchmark:modern    # Comprehensive Tinybench suite
-npm run benchmark:perf      # Performance Observer measurements
+npm run benchmark:modern     # Comprehensive Tinybench suite
+npm run benchmark:perf       # Performance Observer measurements
+npm run benchmark:comparison # Compare against other LRU libraries
 
 # Memory analysis (requires --expose-gc)
-node --expose-gc benchmarks/modern-benchmark.js
+node --expose-gc benchmarks/comparison-benchmark.js
 ```
 
 ### Optimization Tips
