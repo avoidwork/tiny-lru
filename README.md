@@ -54,7 +54,7 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 |---------|-------------|-------------|---------------|---------------|-------------|-------------|
 | **tiny-lru** | 43,022 | 113,531 | **348,829** 🥇 | 335,038 | 2.2 KiB | 185 bytes |
 | lru-cache | 27,819 | 96,739 | 133,706 | 149,700 | ~14.6 KiB | **114 bytes** 🥇 |
-| quick-lru | 52,200 | 118,758 | 321,377 | **391,763** 🥇 | ~1.8 KiB | 176 bytes |
+| quick-lru | **52,200** 🥇 | 118,758 | 321,377 | **391,763** 🥇 | ~1.8 KiB | 176 bytes |
 | mnemonist | 29,933 | **192,073** 🥇 | 210,628 | N/A† | ~43.9 KiB | 99 bytes |
 
 † *mnemonist uses different method names for delete operations*  
