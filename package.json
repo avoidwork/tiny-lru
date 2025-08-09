@@ -1,7 +1,7 @@
 {
   "name": "tiny-lru",
-  "description": "Ultra-fast LRU cache (340K+ UPDATE ops/sec) with TTL support. Smallest bundle (2.3KB), O(1) operations, TypeScript support, 100% test coverage.",
-  "version": "11.3.4",
+  "description": "A high-performance, lightweight LRU cache. Built for developers who need fast caching without compromising on features.",
+  "version": "11.4.0",
   "homepage": "https://github.com/avoidwork/tiny-lru",
   "author": "Jason Mulligan <jason.mulligan@avoidwork.com>",
   "repository": {
