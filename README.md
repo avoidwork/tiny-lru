@@ -1,11 +1,10 @@
 # Tiny LRU
 
-[![NPM Version](https://img.shields.io/npm/v/tiny-lru.svg?style=flat-square)](https://www.npmjs.com/package/tiny-lru)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/avoidwork/tiny-lru/ci.yml?branch=main&style=flat-square)](https://github.com/avoidwork/tiny-lru/actions)
-[![Coverage Status](https://img.shields.io/coveralls/github/avoidwork/tiny-lru?style=flat-square)](https://coveralls.io/github/avoidwork/tiny-lru)
-[![License](https://img.shields.io/npm/l/tiny-lru.svg?style=flat-square)](https://github.com/avoidwork/tiny-lru/blob/main/LICENSE)
-[![NPM Downloads](https://img.shields.io/npm/dm/tiny-lru.svg?style=flat-square)](https://www.npmjs.com/package/tiny-lru)
-[![Bundle Size](https://img.shields.io/bundlephobia/minzip/tiny-lru?style=flat-square)](https://bundlephobia.com/package/tiny-lru)
+[![npm version](https://badge.fury.io/js/tiny-lru.svg)](https://badge.fury.io/js/tiny-lru)
+[![Node.js Version](https://img.shields.io/node/v/tiny-lru.svg)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/ci.yml/badge.svg)](https://github.com/avoidwork/tiny-lru/actions)
+[![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/avoidwork/tiny-lru)
 
 A lightweight, high-performance Least Recently Used (LRU) cache implementation for JavaScript with optional TTL (time-to-live) support. Works in both Node.js and browser environments.
 
