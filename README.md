@@ -6,7 +6,11 @@
 [![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/ci.yml/badge.svg)](https://github.com/avoidwork/tiny-lru/actions)
 [![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/avoidwork/tiny-lru)
 
-A lightweight, high-performance Least Recently Used (LRU) cache implementation for JavaScript with optional TTL (time-to-live) support. Works in both Node.js and browser environments.
+A **lightweight, high-performance** Least Recently Used (LRU) cache implementation for JavaScript and TypeScript. Features **O(1) operations**, optional **TTL (time-to-live)** support, and works seamlessly in both **Node.js and browser** environments.
+
+Perfect for caching API responses, memoizing expensive computations, session management, and any scenario where you need fast, memory-efficient caching with automatic eviction of least-used items.
+
+> **🎯 Why Tiny LRU?** Just **2.1KB minified**, delivers **4M+ ops/sec** performance, maintains **100% test coverage**, and provides **full TypeScript support** - making it the ideal choice for performance-critical applications.
 
 ## Features
 

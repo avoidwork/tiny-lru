@@ -1,6 +1,6 @@
 {
   "name": "tiny-lru",
-  "description": "Tiny LRU cache for Client or Server",
+  "description": "Lightweight, high-performance LRU cache with TTL support for Node.js and browsers. O(1) operations, TypeScript support, 100% test coverage.",
   "version": "11.3.4",
   "homepage": "https://github.com/avoidwork/tiny-lru",
   "author": "Jason Mulligan <jason.mulligan@avoidwork.com>",
@@ -55,11 +55,17 @@
   "keywords": [
     "LRU",
     "cache",
-    "tiny",
-    "client",
-    "server",
-    "least",
-    "recently",
-    "used"
+    "caching",
+    "performance",
+    "memory",
+    "TTL",
+    "expiration",
+    "memoization",
+    "typescript",
+    "browser",
+    "nodejs",
+    "lightweight",
+    "fast",
+    "least-recently-used"
   ]
 }
