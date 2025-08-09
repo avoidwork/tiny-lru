@@ -10,7 +10,7 @@ A **lightweight, high-performance** Least Recently Used (LRU) cache implementati
 
 Perfect for caching API responses, memoizing expensive computations, session management, and any scenario where you need fast, memory-efficient caching with automatic eviction of least-used items.
 
-> **🎯 Why Tiny LRU?** Just **2.3KB minified**, delivers **~58K GET ops/sec** performance, maintains **100% test coverage**, and provides **full TypeScript support** - making it the ideal choice for performance-critical applications.
+> **🎯 Why Tiny LRU?** Just **2.3KB minified**, delivers **~119K GET ops/sec** performance, maintains **100% test coverage**, and provides **full TypeScript support** - making it the ideal choice for performance-critical applications.
 
 ## Features
 
@@ -145,17 +145,17 @@ Tiny LRU is designed for high-performance applications with O(1) complexity for 
 
 **Typical performance on modern hardware:**
 - **SET operations**: ~40,000 ops/sec 
-- **GET operations**: ~58,000 ops/sec (cache hits)
-- **Memory footprint**: ~132 bytes per cached item
+- **GET operations**: ~119,000 ops/sec (cache hits)
+- **Memory footprint**: ~177 bytes per cached item
 
 ### Performance Comparison
 
 | Library | Bundle Size | SET ops/sec | GET ops/sec | Memory/Item |
 |---------|-------------|-------------|-------------|-------------|
-| tiny-lru | 2.3KB | 40,095 | 57,884 | 132 bytes |
-| lru-cache | ~15KB | 27,288 | 95,796 | 29 bytes |
-| quick-lru | ~1.8KB | 51,971 | 111,340 | 69 bytes |
-| mnemonist | ~45KB | 29,737 | 194,249 | 49 bytes |
+| tiny-lru | 2.3KB | 40,045 | 119,496 | 177 bytes |
+| lru-cache | ~15KB | 26,494 | 100,933 | 114 bytes |
+| quick-lru | ~1.8KB | 50,767 | 116,480 | 154 bytes |
+| mnemonist | ~45KB | 29,249 | 189,654 | 105 bytes |
 
 *Benchmarks run on Node.js v24.5.0, Apple Silicon (M1/M2). Results may vary by hardware and workload. Memory measurements include object overhead.*
 
