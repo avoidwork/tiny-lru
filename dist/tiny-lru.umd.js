@@ -199,20 +199,25 @@ class LRU {
 	 * @since 1.0.0
 	 */
 	get (key) {
-		let result;
+		const item = this.items[key];
 
-		if (this.has(key)) {
-			const item = this.items[key];
+		if (item !== undefined) {
+			// Check TTL only if enabled to avoid unnecessary Date.now() calls
+			if (this.ttl > 0) {
+				if (item.expiry <= Date.now()) {
+					this.delete(key);
 
-			if (this.ttl > 0 && item.expiry <= Date.now()) {
-				this.delete(key);
-			} else {
-				result = item.value;
-				this.set(key, result, true);
+					return undefined;
+				}
 			}
+
+			// Fast LRU update without full set() overhead
+			this.moveToEnd(item);
+
+			return item.value;
 		}
 
-		return result;
+		return undefined;
 	}
 
 	/**
@@ -232,6 +237,52 @@ class LRU {
 	 */
 	has (key) {
 		return key in this.items;
+	}
+
+	/**
+	 * Efficiently moves an item to the end of the LRU list (most recently used position).
+	 * This is much faster than calling set() for LRU position updates.
+	 *
+	 * @method moveToEnd
+	 * @memberof LRU
+	 * @param {Object} item - The item to move to the end.
+	 * @private
+	 * @since 11.3.5
+	 */
+	moveToEnd (item) {
+		// If already at the end, nothing to do
+		if (this.last === item) {
+			return;
+		}
+
+		// Remove item from current position in the list
+		if (item.prev !== null) {
+			item.prev.next = item.next;
+		}
+
+		if (item.next !== null) {
+			item.next.prev = item.prev;
+		}
+
+		// Update first pointer if this was the first item
+		if (this.first === item) {
+			this.first = item.next;
+		}
+
+		// Add item to the end
+		item.prev = this.last;
+		item.next = null;
+
+		if (this.last !== null) {
+			this.last.next = item;
+		}
+
+		this.last = item;
+
+		// Handle edge case: if this was the only item, it's also first
+		if (this.first === null) {
+			this.first = item;
+		}
 	}
 
 	/**
@@ -327,38 +378,20 @@ class LRU {
 	 * @since 1.0.0
 	 */
 	set (key, value, bypass = false, resetTtl = this.resetTtl) {
-		let item;
+		let item = this.items[key];
 
-		if (bypass || this.has(key)) {
-			item = this.items[key];
+		if (bypass || item !== undefined) {
+			// Existing item: update value and position
 			item.value = value;
 
 			if (bypass === false && resetTtl) {
 				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
 			}
 
-			if (this.last !== item) {
-				const last = this.last,
-					next = item.next,
-					prev = item.prev;
-
-				if (this.first === item) {
-					this.first = item.next;
-				}
-
-				item.next = null;
-				item.prev = this.last;
-				last.next = item;
-
-				if (prev !== null) {
-					prev.next = next;
-				}
-
-				if (next !== null) {
-					next.prev = prev;
-				}
-			}
+			// Always move to end, but the bypass parameter affects TTL reset behavior
+			this.moveToEnd(item);
 		} else {
+			// New item: check for eviction and create
 			if (this.max > 0 && this.size === this.max) {
 				this.evict(true);
 			}
@@ -376,9 +409,9 @@ class LRU {
 			} else {
 				this.last.next = item;
 			}
-		}
 
-		this.last = item;
+			this.last = item;
+		}
 
 		return this;
 	}

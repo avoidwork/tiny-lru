@@ -199,12 +199,14 @@ export class LRU {
 			if (this.ttl > 0) {
 				if (item.expiry <= Date.now()) {
 					this.delete(key);
+
 					return undefined;
 				}
 			}
 
 			// Fast LRU update without full set() overhead
 			this.moveToEnd(item);
+
 			return item.value;
 		}
 
