@@ -43,10 +43,17 @@ graph TD
 
 ### Core Components
 
-- **Hash Map**: Provides O(1) key-based access to cache nodes
-- **Doubly Linked List**: Maintains LRU order with O(1) insertion/deletion
-- **Cache Nodes**: Store key, value, expiry, and linked list pointers
-- **TTL Manager**: Handles time-based expiration (optional)
+- **Hash Map (`items`)**: Object.create(null) providing O(1) key-based access to cache nodes
+- **Doubly Linked List**: Maintains LRU order with `first` and `last` pointers for O(1) insertion/deletion
+- **Cache Nodes**: Store key, value, expiry timestamp, and linked list pointers (prev/next)
+- **LRU Class Properties**:
+  - `first`: Pointer to least recently used item
+  - `last`: Pointer to most recently used item
+  - `items`: Hash map for O(1) key lookup
+  - `max`: Maximum cache size (0 = unlimited)
+  - `size`: Current number of items
+  - `ttl`: Time-to-live in milliseconds (0 = no expiration)
+  - `resetTtl`: Whether to reset TTL on access
 
 ## Data Flow
 
@@ -64,18 +71,18 @@ sequenceDiagram
     HashMap-->>LRU: node reference
     
     alt TTL enabled
-        LRU->>LRU: check expiry
+        LRU->>LRU: check item.expiry <= Date.now()
         alt expired
             LRU->>HashMap: delete items[key]
             LRU->>LinkedList: remove node
             LRU-->>Client: undefined
         else not expired
-            LRU->>LinkedList: move to tail (most recent)
-            LRU-->>Client: node.value
+            LRU->>LRU: moveToEnd(item) - O(1) optimization
+            LRU-->>Client: item.value
         end
     else no TTL
-        LRU->>LinkedList: move to tail (most recent)
-        LRU-->>Client: node.value
+        LRU->>LRU: moveToEnd(item) - O(1) optimization
+        LRU-->>Client: item.value
     end
 ```
 
@@ -92,15 +99,17 @@ sequenceDiagram
     LRU->>HashMap: check items[key]
     HashMap-->>LRU: undefined (miss)
     
-    alt cache full
-        LRU->>LinkedList: get first (LRU) node
-        LRU->>HashMap: delete items[lru_key]
-        LRU->>LinkedList: remove first node
-        Note over LRU: Eviction complete
+    alt cache full (size === max)
+        LRU->>LRU: evict() - remove this.first
+        LRU->>HashMap: delete items[first.key]
+        LRU->>LinkedList: update first pointer
+        Note over LRU: LRU eviction complete
     end
     
-    LRU->>HashMap: items[key] = new node
-    LRU->>LinkedList: append to tail
+    LRU->>HashMap: items[key] = new item
+    LRU->>LinkedList: set item.prev = this.last
+    LRU->>LinkedList: update this.last = item
+    LRU->>LRU: increment size
     LRU-->>Client: this (chainable)
 ```
 
@@ -108,21 +117,109 @@ sequenceDiagram
 
 ### Time Complexity
 
-| Operation | Average Case | Worst Case | Space |
-|-----------|--------------|------------|-------|
-| `get(key)` | O(1) | O(1) | O(1) |
-| `set(key, value)` | O(1) | O(1) | O(1) |
-| `delete(key)` | O(1) | O(1) | O(1) |
-| `has(key)` | O(1) | O(1) | O(1) |
-| `clear()` | O(1) | O(1) | O(1) |
-| `keys()` | O(n) | O(n) | O(n) |
-| `values()` | O(n) | O(n) | O(n) |
+| Operation | Average Case | Worst Case | Space | Description |
+|-----------|--------------|------------|-------|-------------|
+| `get(key)` | O(1) | O(1) | O(1) | Retrieve value and move to end |
+| `set(key, value)` | O(1) | O(1) | O(1) | Store value, evict if needed |
+| `setWithEvicted(key, value)` | O(1) | O(1) | O(1) | Store value, return evicted item |
+| `delete(key)` | O(1) | O(1) | O(1) | Remove item from cache |
+| `has(key)` | O(1) | O(1) | O(1) | Check key existence |
+| `clear()` | O(1) | O(1) | O(1) | Reset all pointers |
+| `evict()` | O(1) | O(1) | O(1) | Remove least recently used item |
+| `expiresAt(key)` | O(1) | O(1) | O(1) | Get expiration timestamp |
+| `moveToEnd(item)` | O(1) | O(1) | O(1) | Internal: optimize LRU positioning |
+| `keys()` | O(n) | O(n) | O(n) | Array of all keys in LRU order |
+| `values(keys?)` | O(n) | O(n) | O(n) | Array of values for specified keys |
+| `entries(keys?)` | O(n) | O(n) | O(n) | Array of [key, value] pairs |
 
 ### Memory Usage
 
 - **Per Node**: ~120 bytes (key + value + pointers + metadata)
 - **Base Overhead**: ~200 bytes (class instance + hash map)
 - **Total**: `base + (nodes × 120)` bytes approximately
+
+## TypeScript Support
+
+The library includes comprehensive TypeScript definitions with generic type support for type-safe value storage.
+
+### Interface Definitions
+
+```typescript
+// Factory function with optional generic type
+export function lru<T = any>(max?: number, ttl?: number, resetTtl?: boolean): LRU<T>;
+
+// Main LRU class with generic value type
+export class LRU<T> {
+    constructor(max?: number, ttl?: number, resetTtl?: boolean);
+    
+    // Instance properties
+    first: LRUItem<T> | null;
+    items: Record<any, LRUItem<T>>;
+    last: LRUItem<T> | null;
+    max: number;
+    resetTtl: boolean;
+    size: number;
+    ttl: number;
+    
+    // Core methods
+    clear(): this;
+    delete(key: any): this;
+    entries(keys?: any[]): [any, T][];
+    evict(bypass?: boolean): this;
+    expiresAt(key: any): number | undefined;
+    get(key: any): T | undefined;
+    has(key: any): boolean;
+    keys(): any[];
+    set(key: any, value: T, bypass?: boolean, resetTtl?: boolean): this;
+    setWithEvicted(key: any, value: T, resetTtl?: boolean): LRUItem<T> | null;
+    values(keys?: any[]): T[];
+}
+
+// Internal item structure
+interface LRUItem<T> {
+    expiry: number;
+    key: any;
+    prev: LRUItem<T> | null;
+    next: LRUItem<T> | null;
+    value: T;
+}
+```
+
+### TypeScript Usage Examples
+
+```typescript
+import { LRU, lru } from 'tiny-lru';
+
+// Type-safe cache for user objects
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
+
+const userCache = new LRU<User>(1000, 300000); // 1000 users, 5 min TTL
+userCache.set('user_123', { id: 123, name: 'John', email: 'john@example.com' });
+const user: User | undefined = userCache.get('user_123'); // Fully typed
+
+// Type-safe cache for API responses
+interface APIResponse<T> {
+    data: T;
+    status: number;
+    timestamp: number;
+}
+
+const apiCache = lru<APIResponse<any>>(500, 600000); // 10 min TTL
+apiCache.set('endpoint_abc', {
+    data: { results: [] },
+    status: 200,
+    timestamp: Date.now()
+});
+
+// String cache with factory function
+const stringCache = lru<string>(100);
+stringCache.set('key1', 'value1');
+const value: string | undefined = stringCache.get('key1');
+```
 
 ## Modern Usage Patterns
 
@@ -219,7 +316,12 @@ class APICache {
         }
         
         const profile = await fetch(`/api/users/${userId}`).then(r => r.json());
-        cache.set(key, profile);
+        
+        // Use setWithEvicted to track what gets evicted for analytics
+        const evicted = cache.setWithEvicted(key, profile);
+        if (evicted) {
+            console.log(`Evicted user profile: ${evicted.key}`);
+        }
         
         return profile;
     }
@@ -294,6 +396,22 @@ class QueryCache {
         });
     }
     
+    // Get cache statistics using modern API methods
+    getCacheStats() {
+        const allKeys = this.cache.keys();
+        const allEntries = this.cache.entries(); // Gets [key, value] pairs
+        const dependentQueries = this.cache.values(
+            allKeys.filter(key => this.dependencyMap.has(key))
+        );
+        
+        return {
+            totalQueries: this.cache.size,
+            queryKeys: allKeys,
+            dependentQueryCount: dependentQueries.length,
+            lruOrder: allEntries.map(([key, _]) => key) // Least to most recent
+        };
+    }
+    
     trackDependencies(key, dependencies) {
         if (dependencies.length > 0) {
             this.dependencyMap.set(key, dependencies);
@@ -327,6 +445,12 @@ class AuthCache {
             loginTime: Date.now(),
             lastActivity: Date.now()
         });
+        
+        // Log when this session will expire
+        const expiryTime = this.sessions.expiresAt(key);
+        if (expiryTime) {
+            console.log(`Session ${sessionId} expires at: ${new Date(expiryTime)}`);
+        }
     }
     
     getSession(sessionId, domain = 'app') {
@@ -769,6 +893,92 @@ class MonitoredCache {
 }
 ```
 
+## Build Configuration and Distribution
+
+The library uses Rollup for building and distributing multiple module formats to support different JavaScript environments.
+
+### Build Process
+
+```javascript
+// rollup.config.js
+export default [{
+    input: "./src/lru.js",
+    output: [
+        // CommonJS for Node.js
+        { format: "cjs", file: "dist/tiny-lru.cjs" },
+        // ES Modules for modern bundlers
+        { format: "esm", file: "dist/tiny-lru.js" },
+        // Minified ES Modules
+        { format: "esm", file: "dist/tiny-lru.min.js", plugins: [terser()] },
+        // UMD for browsers
+        { format: "umd", file: "dist/tiny-lru.umd.js", name: "lru" },
+        // Minified UMD
+        { format: "umd", file: "dist/tiny-lru.umd.min.js", name: "lru", plugins: [terser()] }
+    ]
+}];
+```
+
+### Package Exports
+
+```json
+{
+  "source": "src/lru.js",
+  "main": "dist/tiny-lru.cjs",
+  "exports": {
+    "types": "./types/lru.d.ts",
+    "import": "./dist/tiny-lru.js",
+    "require": "./dist/tiny-lru.cjs"
+  },
+  "type": "module",
+  "types": "types/lru.d.ts"
+}
+```
+
+### Available Formats
+
+- **ESM**: `dist/tiny-lru.js` - ES Modules for modern bundlers
+- **CommonJS**: `dist/tiny-lru.cjs` - Node.js compatible format
+- **UMD**: `dist/tiny-lru.umd.js` - Universal format for browsers
+- **Minified**: All formats available with `.min.js` extension
+- **TypeScript**: `types/lru.d.ts` - Complete type definitions
+
+### Development Commands
+
+```bash
+# Build all distribution formats
+npm run build
+
+# Run tests with coverage
+npm test
+
+# Lint code
+npm run lint
+
+# Run benchmarks
+npm run benchmark:all
+```
+
+### File Structure
+
+```
+tiny-lru/
+├── src/
+│   └── lru.js              # Source implementation
+├── types/
+│   └── lru.d.ts           # TypeScript definitions
+├── dist/                   # Built distributions (generated)
+│   ├── tiny-lru.js        # ES Modules
+│   ├── tiny-lru.cjs       # CommonJS
+│   ├── tiny-lru.min.js    # Minified ESM
+│   ├── tiny-lru.umd.js    # UMD
+│   └── tiny-lru.umd.min.js # Minified UMD
+├── tests/
+│   ├── unit/              # Unit tests with mocha
+│   └── integration/       # Integration tests
+├── benchmarks/            # Performance benchmarks
+└── docs/                  # Documentation
+```
+
 ## Conclusion
 
 The tiny-lru library provides a robust foundation for caching in modern applications. By following these patterns, security guidelines, and best practices, you can build efficient, secure, and maintainable caching solutions for contemporary use cases including AI/ML applications, API gateways, and high-performance web services.
@@ -778,4 +988,6 @@ Remember to:
 - Monitor cache performance and hit rates
 - Implement appropriate TTL strategies
 - Handle errors gracefully
-- Consider memory constraints in your sizing decisions 
+- Consider memory constraints in your sizing decisions
+- Choose the appropriate module format for your environment
+- Leverage TypeScript support for type safety 
