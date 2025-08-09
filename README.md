@@ -167,7 +167,7 @@ Tiny LRU is designed for high-performance applications with O(1) complexity for 
 - **Competitive GET performance** - 120K ops/sec, balanced with small bundle size
 - **Best size-to-performance ratio** - Smallest bundle with top-tier UPDATE/DELETE speed
 
-*Benchmarks run on Node.js v24.5.0, Apple Silicon (M1/M2). Results may vary by hardware and workload. Memory measurements include object overhead.*
+*Benchmarks run on Node.js v24.5.0, Apple Silicon (M4). Results may vary by hardware and workload. Memory measurements include object overhead.*
 
 ### Running Benchmarks
 
