@@ -37,32 +37,17 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 † *mnemonist uses different method names for delete operations*  
 *Benchmarks run on Node.js v24.5.0, Apple Silicon (M4)*
 
-### 🎯 **Tiny LRU's Competitive Advantages**
+## ✨ **What Makes Tiny LRU Useful**
 
-- **🔄 Best for Cache Updates** - 348K UPDATE ops/sec outperforms alternatives by 2.6x
-- **📦 Smallest Full-Featured Bundle** - Just 2.3KB vs 15KB+ for comparable libraries  
-- **⚖️ Balanced Performance** - Strong across all operations without major weaknesses
-- **🎛️ Rich Feature Set** - TTL support, method chaining, TypeScript - all in 2.3KB
-
-### 🎯 **Key Highlights**
-
-- **🚀 348K UPDATE operations per second** - Leads the field in cache update performance
-- **📦 Just 2.3KB minified** - Smallest bundle among full-featured LRU libraries  
-- **⚡ O(1) complexity** - Consistent performance that scales
-- **🛡️ 100% test coverage** - Battle-tested and reliable
-- **🌐 Universal compatibility** - Works in Node.js and browsers
-- **📝 Full TypeScript support** - Complete type definitions included
-
-## ✨ Features
-
-- 🚀 **Leading UPDATE Performance** - 348K UPDATE ops/sec, optimized O(1) operations
-- 💾 **Smallest Bundle** - Just 2.3KB minified among full-featured LRU libraries
-- ⏱️ **TTL Support** - Optional time-to-live with automatic expiration
-- 🔄 **Method Chaining** - Fluent API for better developer experience
-- 📦 **Universal** - Works in Node.js and browsers
-- 🎯 **TypeScript** - Full TypeScript support with type definitions
-- ✅ **100% Coverage** - Thoroughly tested and reliable
-- 🛡️ **Production Ready** - Used in production by thousands of projects
+- **🔄 Excellent Cache Updates** - 348K UPDATE ops/sec, outperforming alternatives by 2.6x
+- **📦 Very Small Bundle** - Just 2.3KB minified for a full-featured LRU library
+- **⚖️ Balanced Performance** - Strong across all operations with O(1) complexity
+- **⏱️ TTL Support** - Optional time-to-live with automatic expiration
+- **🔄 Method Chaining** - Fluent API for better developer experience
+- **🎯 TypeScript Ready** - Full TypeScript support with complete type definitions
+- **🌐 Universal Compatibility** - Works seamlessly in Node.js and browsers
+- **🛡️ Production Ready** - 100% test coverage, battle-tested and reliable
+- **🎛️ Rich Feature Set** - TTL, chaining, TypeScript support - all in 2.3KB
 
 ## 📊 Performance Deep Dive
 
