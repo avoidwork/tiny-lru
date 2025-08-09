@@ -8,6 +8,20 @@
 
 A **high-performance, lightweight** LRU cache for JavaScript with **fastest UPDATES and competitive SET/GET/DELETE** and **compact bundle size**. Built for developers who need fast caching without compromising on features.
 
+## 📦 Installation
+
+```bash
+npm install tiny-lru
+# or
+yarn add tiny-lru  
+# or
+pnpm add tiny-lru
+```
+
+**Requirements:** Node.js ≥12
+
+## ⚡ Quick Start
+
 ```javascript
 import {lru} from "tiny-lru";
 
@@ -25,11 +39,11 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 
 - [✨ Features & Benefits](#-features--benefits)
 - [📊 Performance Deep Dive](#-performance-deep-dive)
+- [📖 API Reference](#-api-reference)
 - [🚀 Getting Started](#-getting-started)
 - [💡 Real-World Examples](#-real-world-examples)
 - [🔗 Interoperability](#-interoperability)
 - [🛠️ Development](#️-development)
-- [📖 API Reference](#-api-reference)
 - [📄 License](#-license)
 
 ## ✨ Features & Benefits
@@ -347,9 +361,9 @@ All files |     100 |      100 |     100 |     100 |
 
 ### Contributing
 
-We welcome contributions! Here's how you can help:
+We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md).
 
-### Development Setup
+#### Quick Start for Contributors
 
 ```bash
 # Clone and setup
@@ -360,24 +374,35 @@ npm install
 # Run tests
 npm test
 
+# Run linting
+npm run lint
+
 # Run benchmarks  
 npm run benchmark:all
+
+# Build distribution files
+npm run build
 ```
 
-### Guidelines
+#### Development Workflow
 
-- **Code Style**: Follow existing style and ESLint rules
-- **Tests**: All changes must include tests and maintain 100% coverage
-- **Documentation**: Update README.md for API changes
-- **Performance**: Consider performance impact of changes
+1. **Fork** the repository on GitHub
+2. **Clone** your fork locally
+3. **Create** a feature branch: `git checkout -b feature/amazing-feature`
+4. **Develop** your changes with tests
+5. **Test** thoroughly: `npm test && npm run lint`
+6. **Commit** using conventional commits: `git commit -m "feat: add amazing feature"`
+7. **Push** to your fork: `git push origin feature/amazing-feature`
+8. **Submit** a Pull Request
 
-### Submitting Changes
+#### Contribution Guidelines
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes with tests
-4. Ensure all tests pass: `npm test`
-5. Submit a pull request
+- **Code Quality**: Follow ESLint rules and existing code style
+- **Testing**: Maintain 100% test coverage for all changes
+- **Documentation**: Update README.md and JSDoc for API changes  
+- **Performance**: Benchmark changes that could impact performance
+- **Compatibility**: Ensure Node.js ≥12 compatibility
+- **Commit Messages**: Use [Conventional Commits](https://conventionalcommits.org/) format
 
 ---
 
