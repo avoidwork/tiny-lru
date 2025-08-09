@@ -23,7 +23,30 @@ const tempCache = lru(50, 5000);
 tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 ```
 
-## 🏆 Why Choose Tiny LRU?
+## 📑 Table of Contents
+
+- [✨ Features & Benefits](#-features--benefits)
+- [📊 Performance Deep Dive](#-performance-deep-dive)
+- [🚀 Getting Started](#-getting-started)
+- [💡 Real-World Examples](#-real-world-examples)
+- [🔗 Interoperability](#-interoperability)
+- [🛠️ Development](#️-development)
+- [📖 API Reference](#-api-reference)
+- [📄 License](#-license)
+
+## ✨ Features & Benefits
+
+### Why Choose Tiny LRU?
+
+- **🔄 Excellent Cache Updates** - 348K UPDATE ops/sec, outperforming alternatives by 2.6x
+- **📦 Very Small Bundle** - Just 2.2 KiB minified for a full-featured LRU library
+- **⚖️ Balanced Performance** - Strong across all operations with O(1) complexity
+- **⏱️ TTL Support** - Optional time-to-live with automatic expiration
+- **🔄 Method Chaining** - Fluent API for better developer experience
+- **🎯 TypeScript Ready** - Full TypeScript support with complete type definitions
+- **🌐 Universal Compatibility** - Works seamlessly in Node.js and browsers
+- **🛡️ Production Ready** - 100% test coverage, battle-tested and reliable
+- **🎛️ Rich Feature Set** - TTL, chaining, TypeScript support - all in 2.2 KiB
 
 ### Benchmark Comparison
 
@@ -36,18 +59,6 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 
 † *mnemonist uses different method names for delete operations*  
 *Benchmarks run on Node.js v24.5.0, Apple Silicon (M4)*
-
-## ✨ **What Makes Tiny LRU Useful**
-
-- **🔄 Excellent Cache Updates** - 348K UPDATE ops/sec, outperforming alternatives by 2.6x
-- **📦 Very Small Bundle** - Just 2.2 KiB minified for a full-featured LRU library
-- **⚖️ Balanced Performance** - Strong across all operations with O(1) complexity
-- **⏱️ TTL Support** - Optional time-to-live with automatic expiration
-- **🔄 Method Chaining** - Fluent API for better developer experience
-- **🎯 TypeScript Ready** - Full TypeScript support with complete type definitions
-- **🌐 Universal Compatibility** - Works seamlessly in Node.js and browsers
-- **🛡️ Production Ready** - 100% test coverage, battle-tested and reliable
-- **🎛️ Rich Feature Set** - TTL, chaining, TypeScript support - all in 2.2 KiB
 
 ## 📊 Performance Deep Dive
 
@@ -152,6 +163,61 @@ class MyCache extends LRU<User> {
 }
 ```
 
+### Configuration Options
+
+#### Factory Function
+```javascript
+import {lru} from "tiny-lru";
+
+const cache = lru(max, ttl = 0, resetTtl = false);
+```
+
+**Parameters:**
+- `max` `{Number}` - Maximum number of items (0 = unlimited, default: 1000)
+- `ttl` `{Number}` - Time-to-live in milliseconds (0 = no expiration, default: 0)
+- `resetTtl` `{Boolean}` - Reset TTL on each `get()` operation (default: false)
+
+#### Class Constructor
+```javascript
+import {LRU} from "tiny-lru";
+
+const cache = new LRU(1000, 60000, true); // 1000 items, 1 min TTL, reset on access
+```
+
+#### Best Practices
+```javascript
+// 1. Size your cache appropriately
+const cache = lru(1000); // Not too small, not too large
+
+// 2. Use meaningful keys
+cache.set(`user:${userId}:profile`, userProfile);
+cache.set(`product:${productId}:details`, productDetails);
+
+// 3. Handle cache misses gracefully
+function getData(key) {
+  const cached = cache.get(key);
+  if (cached !== undefined) {
+    return cached;
+  }
+  
+  // Fallback to slower data source
+  const data = expensiveOperation(key);
+  cache.set(key, data);
+  return data;
+}
+
+// 4. Clean up when needed
+process.on('exit', () => {
+  cache.clear(); // Help garbage collection
+});
+```
+
+#### Optimization Tips
+- **Cache Size**: Keep cache size reasonable (1000-10000 items for most use cases)
+- **TTL Usage**: Only use TTL when necessary; it adds overhead
+- **Key Types**: String keys perform better than object keys
+- **Memory**: Call `clear()` when done to help garbage collection
+
 ## 💡 Real-World Examples
 
 ### API Response Caching
@@ -246,66 +312,7 @@ class SessionManager {
 }
 ```
 
-## 🔧 Configuration & Best Practices
 
-### Factory Function
-
-```javascript
-import {lru} from "tiny-lru";
-
-const cache = lru(max, ttl = 0, resetTtl = false);
-```
-
-**Parameters:**
-- `max` `{Number}` - Maximum number of items (0 = unlimited, default: 1000)
-- `ttl` `{Number}` - Time-to-live in milliseconds (0 = no expiration, default: 0)
-- `resetTtl` `{Boolean}` - Reset TTL on each `set()` operation (default: false)
-
-### Class Constructor
-
-```javascript
-import {LRU} from "tiny-lru";
-
-const cache = new LRU(1000, 60000, true); // 1000 items, 1 min TTL, reset on access
-```
-
-### Best Practices
-
-```javascript
-import {lru} from "tiny-lru";
-
-// 1. Size your cache appropriately
-const cache = lru(1000); // Not too small, not too large
-
-// 2. Use meaningful keys
-cache.set(`user:${userId}:profile`, userProfile);
-cache.set(`product:${productId}:details`, productDetails);
-
-// 3. Handle cache misses gracefully
-function getData(key) {
-  const cached = cache.get(key);
-  if (cached !== undefined) {
-    return cached;
-  }
-  
-  // Fallback to slower data source
-  const data = expensiveOperation(key);
-  cache.set(key, data);
-  return data;
-}
-
-// 4. Clean up when needed
-process.on('exit', () => {
-  cache.clear(); // Help garbage collection
-});
-```
-
-### Optimization Tips
-
-- **Cache Size**: Keep cache size reasonable (1000-10000 items for most use cases)
-- **TTL Usage**: Only use TTL when necessary; it adds overhead
-- **Key Types**: String keys perform better than object keys
-- **Memory**: Call `clear()` when done to help garbage collection
 
 ## 🔗 Interoperability
 
@@ -320,7 +327,9 @@ const memoized = _.memoize(myFunc);
 memoized.cache.max = 10;
 ```
 
-## 🧪 Testing
+## 🛠️ Development
+
+### Testing
 
 Tiny LRU maintains 100% test coverage with comprehensive unit and integration tests.
 
@@ -338,7 +347,7 @@ npm run lint
 npm run build
 ```
 
-### Test Coverage
+**Test Coverage:** 100% coverage across all modules
 
 ```console
 ----------|---------|----------|---------|---------|-------------------
@@ -349,7 +358,7 @@ All files |     100 |      100 |     100 |     100 |
 ----------|---------|----------|---------|---------|-------------------
 ```
 
-## 🤝 Contributing
+### Contributing
 
 We welcome contributions! Here's how you can help:
 

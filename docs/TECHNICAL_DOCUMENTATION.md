@@ -9,11 +9,13 @@ The tiny-lru library provides a high-performance, memory-efficient Least Recentl
 - [Architecture Overview](#architecture-overview)
 - [Data Flow](#data-flow)
 - [Core Operations](#core-operations)
+- [TypeScript Support](#typescript-support)
 - [Modern Usage Patterns](#modern-usage-patterns)
 - [Security Considerations](#security-considerations)
 - [Performance Characteristics](#performance-characteristics)
 - [Integration Examples](#integration-examples)
 - [Best Practices](#best-practices)
+- [Build Configuration and Distribution](#build-configuration-and-distribution)
 
 ## Architecture Overview
 
