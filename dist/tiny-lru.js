@@ -6,9 +6,9 @@
  * @version 11.3.4
  */
 /**
- * A Least Recently Used (LRU) cache implementation with optional TTL support.
+ * A high-performance Least Recently Used (LRU) cache implementation with optional TTL support.
  * Items are automatically evicted when the cache reaches its maximum size,
- * removing the least recently used items first.
+ * removing the least recently used items first. All core operations (get, set, delete) are O(1).
  *
  * @class LRU
  * @example
@@ -26,14 +26,15 @@
 class LRU {
 	/**
 	 * Creates a new LRU cache instance.
+	 * Note: Constructor does not validate parameters. Use lru() factory function for parameter validation.
 	 *
 	 * @constructor
 	 * @param {number} [max=0] - Maximum number of items to store. 0 means unlimited.
 	 * @param {number} [ttl=0] - Time to live in milliseconds. 0 means no expiration.
-	 * @param {boolean} [resetTtl=false] - Whether to reset TTL when accessing existing items.
-	 * @throws {TypeError} When parameters are of invalid type.
+	 * @param {boolean} [resetTtl=false] - Whether to reset TTL when accessing existing items via get().
 	 * @example
 	 * const cache = new LRU(1000, 60000, true); // 1000 items, 1 minute TTL, reset on access
+	 * @see {@link lru} For parameter validation
 	 * @since 1.0.0
 	 */
 	constructor (max = 0, ttl = 0, resetTtl = false) {
@@ -110,11 +111,12 @@ class LRU {
 
 	/**
 	 * Returns an array of [key, value] pairs for the specified keys.
+	 * Order follows LRU order (least to most recently used).
 	 *
 	 * @method entries
 	 * @memberof LRU
 	 * @param {string[]} [keys=this.keys()] - Array of keys to get entries for. Defaults to all keys.
-	 * @returns {Array<Array<*>>} Array of [key, value] pairs.
+	 * @returns {Array<Array<*>>} Array of [key, value] pairs in LRU order.
 	 * @example
 	 * cache.set('a', 1).set('b', 2);
 	 * console.log(cache.entries()); // [['a', 1], ['b', 2]]
@@ -132,7 +134,7 @@ class LRU {
 	 *
 	 * @method evict
 	 * @memberof LRU
-	 * @param {boolean} [bypass=false] - Whether to bypass the size check and force eviction.
+	 * @param {boolean} [bypass=false] - Whether to force eviction even when cache is empty.
 	 * @returns {LRU} The LRU instance for method chaining.
 	 * @example
 	 * cache.set('old', 'value').set('new', 'value');
@@ -241,11 +243,12 @@ class LRU {
 
 	/**
 	 * Efficiently moves an item to the end of the LRU list (most recently used position).
-	 * This is much faster than calling set() for LRU position updates.
+	 * This is an internal optimization method that avoids the overhead of the full set() operation
+	 * when only LRU position needs to be updated.
 	 *
 	 * @method moveToEnd
 	 * @memberof LRU
-	 * @param {Object} item - The item to move to the end.
+	 * @param {Object} item - The cache item with prev/next pointers to reposition.
 	 * @private
 	 * @since 11.3.5
 	 */
@@ -366,7 +369,7 @@ class LRU {
 	 * @memberof LRU
 	 * @param {string} key - The key to set.
 	 * @param {*} value - The value to store.
-	 * @param {boolean} [bypass=false] - Whether to bypass normal LRU positioning (internal use).
+	 * @param {boolean} [bypass=false] - Internal parameter for setWithEvicted method.
 	 * @param {boolean} [resetTtl=this.resetTtl] - Whether to reset the TTL for this operation.
 	 * @returns {LRU} The LRU instance for method chaining.
 	 * @example
@@ -418,11 +421,12 @@ class LRU {
 
 	/**
 	 * Returns an array of all values in the cache for the specified keys.
+	 * Order follows LRU order (least to most recently used).
 	 *
 	 * @method values
 	 * @memberof LRU
 	 * @param {string[]} [keys=this.keys()] - Array of keys to get values for. Defaults to all keys.
-	 * @returns {Array<*>} Array of values corresponding to the keys.
+	 * @returns {Array<*>} Array of values corresponding to the keys in LRU order.
 	 * @example
 	 * cache.set('a', 1).set('b', 2);
 	 * console.log(cache.values()); // [1, 2]
@@ -437,14 +441,14 @@ class LRU {
 }
 
 /**
- * Factory function to create a new LRU cache instance with validation.
+ * Factory function to create a new LRU cache instance with parameter validation.
  *
  * @function lru
- * @param {number} [max=1000] - Maximum number of items to store. Must be >= 0.
- * @param {number} [ttl=0] - Time to live in milliseconds. Must be >= 0.
- * @param {boolean} [resetTtl=false] - Whether to reset TTL when accessing existing items.
+ * @param {number} [max=1000] - Maximum number of items to store. Must be >= 0. Use 0 for unlimited size.
+ * @param {number} [ttl=0] - Time to live in milliseconds. Must be >= 0. Use 0 for no expiration.
+ * @param {boolean} [resetTtl=false] - Whether to reset TTL when accessing existing items via get().
  * @returns {LRU} A new LRU cache instance.
- * @throws {TypeError} When parameters are invalid.
+ * @throws {TypeError} When parameters are invalid (negative numbers or wrong types).
  * @example
  * // Create cache with factory function
  * const cache = lru(100, 5000, true);

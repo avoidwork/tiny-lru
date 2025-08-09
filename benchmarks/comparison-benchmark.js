@@ -258,13 +258,13 @@ async function runBenchmarks () {
 	deleteBench.table();
 
 	// UPDATE operations benchmark
-	console.log('\n📊 UPDATE Operations Benchmark');
-	console.log('=' .repeat(50));
+	console.log("\n📊 UPDATE Operations Benchmark");
+	console.log("=" .repeat(50));
 
 	const updateBench = new Bench({ time: 2000 });
 
 	updateBench
-		.add('tiny-lru update', () => {
+		.add("tiny-lru update", () => {
 			const cache = tinyLru(CACHE_SIZE);
 			// Pre-populate with initial values
 			for (let i = 0; i < 100; i++) {
@@ -275,7 +275,7 @@ async function runBenchmarks () {
 				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
 			}
 		})
-		.add('tiny-lru-ttl update', () => {
+		.add("tiny-lru-ttl update", () => {
 			const cache = tinyLru(CACHE_SIZE, TTL_MS);
 			// Pre-populate with initial values
 			for (let i = 0; i < 100; i++) {
@@ -286,7 +286,7 @@ async function runBenchmarks () {
 				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
 			}
 		})
-		.add('lru-cache update', () => {
+		.add("lru-cache update", () => {
 			const cache = new LRUCache({ max: CACHE_SIZE });
 			// Pre-populate with initial values
 			for (let i = 0; i < 100; i++) {
@@ -297,7 +297,7 @@ async function runBenchmarks () {
 				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
 			}
 		})
-		.add('lru-cache-ttl update', () => {
+		.add("lru-cache-ttl update", () => {
 			const cache = new LRUCache({ max: CACHE_SIZE, ttl: TTL_MS });
 			// Pre-populate with initial values
 			for (let i = 0; i < 100; i++) {
@@ -308,7 +308,7 @@ async function runBenchmarks () {
 				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
 			}
 		})
-		.add('quick-lru update', () => {
+		.add("quick-lru update", () => {
 			const cache = new QuickLRU({ maxSize: CACHE_SIZE });
 			// Pre-populate with initial values
 			for (let i = 0; i < 100; i++) {
@@ -319,7 +319,7 @@ async function runBenchmarks () {
 				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
 			}
 		})
-		.add('mnemonist update', () => {
+		.add("mnemonist update", () => {
 			const cache = new MnemonistLRU(CACHE_SIZE);
 			// Pre-populate with initial values
 			for (let i = 0; i < 100; i++) {
