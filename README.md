@@ -347,7 +347,7 @@ npm run mocha
 # Lint code
 npm run lint
 
-# Full build (lint + test + build)
+# Full build (lint + build)
 npm run build
 ```
 
