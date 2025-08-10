@@ -1,7 +1,7 @@
 {
   "name": "tiny-lru",
   "description": "A high-performance, lightweight LRU cache. Built for developers who need fast caching without compromising on features.",
-  "version": "11.4.0",
+  "version": "11.4.1",
   "homepage": "https://github.com/avoidwork/tiny-lru",
   "author": "Jason Mulligan <jason.mulligan@avoidwork.com>",
   "repository": {

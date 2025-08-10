@@ -124,10 +124,9 @@ const cacheWithTtl = lru(50, 30000); // 30 second TTL
 cacheWithTtl.set('temp-data', {important: true});
 // Automatically expires after 30 seconds
 
-// TTL that resets on access
 const resetCache = lru(25, 10000, true);
 resetCache.set('session', 'user123');
-// TTL resets every time you access the item
+// Because resetTtl is true, TTL resets when you set() the same key again
 ```
 
 ### CDN Usage (Browser)
@@ -139,10 +138,12 @@ resetCache.set('session', 'user123');
   const cache = lru(100);
 </script>
 
-<!-- UMD Bundle -->
-<script src="https://unpkg.com/tiny-lru/dist/tiny-lru.js"></script>
+<!-- UMD Bundle (global: window.lru) -->
+<script src="https://unpkg.com/tiny-lru/dist/tiny-lru.umd.js"></script>
 <script>
-  const cache = window.tinyLRU.lru(100);
+  const {lru, LRU} = window.lru;
+  const cache = lru(100);
+  // or: const cache = new LRU(100);
 </script>
 ```
 
@@ -152,14 +153,15 @@ resetCache.set('session', 'user123');
 import {lru, LRU} from "tiny-lru";
 
 // Type-safe cache
-const cache: LRU<string> = lru(100);
+const cache = lru<string>(100);
+// or: const cache: LRU<string> = lru<string>(100);
 cache.set('user:123', 'John Doe');
 const user: string | undefined = cache.get('user:123');
 
 // Class inheritance
 class MyCache extends LRU<User> {
   constructor() {
-    super(1000, 60000, true); // 1000 items, 1 min TTL, reset on access
+    super(1000, 60000, true); // 1000 items, 1 min TTL, reset TTL on set
   }
 }
 ```
@@ -176,13 +178,13 @@ const cache = lru(max, ttl = 0, resetTtl = false);
 **Parameters:**
 - `max` `{Number}` - Maximum number of items (0 = unlimited, default: 1000)
 - `ttl` `{Number}` - Time-to-live in milliseconds (0 = no expiration, default: 0)
-- `resetTtl` `{Boolean}` - Reset TTL on each `get()` operation (default: false)
+- `resetTtl` `{Boolean}` - Reset TTL when updating existing items via `set()` (default: false)
 
 #### Class Constructor
 ```javascript
 import {LRU} from "tiny-lru";
 
-const cache = new LRU(1000, 60000, true); // 1000 items, 1 min TTL, reset on access
+const cache = new LRU(1000, 60000, true); // 1000 items, 1 min TTL, reset TTL on set
 ```
 
 #### Best Practices
@@ -287,7 +289,7 @@ import {lru} from "tiny-lru";
 
 class SessionManager {
   constructor() {
-    // 30 minute TTL, reset on access
+    // 30 minute TTL, with resetTtl enabled for set()
     this.sessions = lru(1000, 1800000, true);
   }
 
@@ -304,7 +306,8 @@ class SessionManager {
   }
 
   getSession(sessionId) {
-    return this.sessions.get(sessionId); // Auto-extends TTL
+    // get() does not extend TTL; to extend, set the session again when resetTtl is true
+    return this.sessions.get(sessionId);
   }
 
   endSession(sessionId) {
@@ -415,9 +418,9 @@ npm run build
 Creates a new LRU cache instance using the factory function.
 
 **Parameters:**
-- `max` `{Number}` - Maximum number of items to store (default: 0 = unlimited)
-- `ttl` `{Number}` - Time-to-live in milliseconds (default: 0 = no expiration)  
-- `resetTtl` `{Boolean}` - Reset TTL on each `set()` operation (default: false)
+- `max` `{Number}` - Maximum number of items to store (default: 1000; 0 = unlimited)
+- `ttl` `{Number}` - Time-to-live in milliseconds (default: 0; 0 = no expiration)  
+- `resetTtl` `{Boolean}` - Reset TTL when updating existing items via `set()` (default: false)
 
 **Returns:** `{LRU}` New LRU cache instance
 
@@ -432,7 +435,7 @@ const cache = lru(100);
 // With TTL
 const cacheWithTtl = lru(50, 30000); // 30 second TTL
 
-// With TTL reset on access
+// With resetTtl enabled for set()
 const resetCache = lru(25, 10000, true);
 
 // Validation errors
@@ -468,7 +471,7 @@ cache.max; // 500
 ```
 
 #### resetTtl
-`{Boolean}` - Whether to reset TTL on each `set()` operation
+`{Boolean}` - Whether to reset TTL when updating existing items via `set()`
 
 ```javascript
 const cache = lru(500, 5*6e4, true);
@@ -561,6 +564,8 @@ Retrieves cached item and promotes it to most recently used position.
 - `key` `{String}` - Item key
 
 **Returns:** `{*}` Item value or undefined if not found/expired
+
+Note: `get()` does not reset or extend TTL. TTL is only reset on `set()` when `resetTtl` is `true`.
 
 ```javascript
 cache.set('key1', 'value1');
