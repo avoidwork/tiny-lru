@@ -364,8 +364,6 @@ All files |     100 |      100 |     100 |     100 |
 
 ### Contributing
 
-We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md).
-
 #### Quick Start for Contributors
 
 ```bash

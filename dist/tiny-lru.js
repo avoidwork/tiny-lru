@@ -3,7 +3,7 @@
  *
  * @copyright 2025 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 11.4.2
+ * @version 11.4.3
  */
 /**
  * A high-performance Least Recently Used (LRU) cache implementation with optional TTL support.
