@@ -41,23 +41,50 @@ try {
 const CACHE_SIZE = 1000;
 const TTL_MS = 60000; // 1 minute for libraries that support it
 const ITERATIONS = 10000;
+const OPS_PER_INVOCATION = 50; // Do multiple ops per call to reduce harness overhead
 
-// Test data generation
+/**
+ * Generates deterministic test data to avoid random/Date overhead in hot paths.
+ *
+ * @param {number} count - Number of items to generate
+ * @returns {{keys: string[], values: Array<{id:number,data:string,nested:{foo:string,baz:number}}>} }
+ */
 function generateTestData (count) {
-	const keys = [];
-	const values = [];
+	const keys = new Array(count);
+	const values = new Array(count);
 
 	for (let i = 0; i < count; i++) {
-		keys.push(`key_${i}_${Math.random().toString(36).substring(2)}`);
-		values.push({
+		keys[i] = `key_${i}`;
+		values[i] = {
 			id: i,
 			data: `value_${i}`,
-			timestamp: Date.now(),
 			nested: { foo: "bar", baz: i }
-		});
+		};
 	}
 
 	return { keys, values };
+}
+
+/**
+ * Precomputes access patterns to remove Math.random from critical sections.
+ *
+ * @param {number} length - Number of accesses to generate
+ * @param {number} modulo - Upper bound for indices
+ * @returns {Uint32Array}
+ */
+function generateAccessPattern (length, modulo) {
+	const pattern = new Uint32Array(length);
+	let x = 123456789;
+	let y = 362436069;
+	// Xorshift-based fast PRNG to avoid using Math.random()
+	for (let i = 0; i < length; i++) {
+		x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+		y = y + 1 >>> 0;
+		const n = x + y >>> 0;
+		pattern[i] = n % modulo;
+	}
+
+	return pattern;
 }
 
 // Initialize caches
@@ -73,8 +100,14 @@ function createCaches () {
 }
 
 // Memory usage helper
-function getMemoryUsage () {
-	if (global.gc) {
+/**
+ * Retrieves memory usage; optionally forces a GC cycle if available.
+ *
+ * @param {boolean} force - Whether to call global.gc() if available
+ * @returns {NodeJS.MemoryUsage}
+ */
+function getMemoryUsage (force = false) {
+	if (force && global.gc) {
 		global.gc();
 	}
 
@@ -104,6 +137,10 @@ async function runBenchmarks () {
 	console.log(`Platform: ${process.platform} ${process.arch}\n`);
 
 	const testData = generateTestData(ITERATIONS);
+	const setPattern = generateAccessPattern(ITERATIONS, testData.keys.length);
+	const getPattern = generateAccessPattern(ITERATIONS, Math.min(CACHE_SIZE, 500));
+	const updatePattern = generateAccessPattern(ITERATIONS, 100);
+	const deletePattern = generateAccessPattern(ITERATIONS, 50);
 
 	// SET operations benchmark
 	console.log("📊 SET Operations Benchmark");
@@ -111,46 +148,75 @@ async function runBenchmarks () {
 
 	const setBench = new Bench({ time: 2000 });
 
+	// Dedicated caches and state for SET to avoid measuring setup per-iteration
+	const setCaches = createCaches();
+	const setState = {
+		"tiny-lru": 0,
+		"tiny-lru-ttl": 0,
+		"lru-cache": 0,
+		"lru-cache-ttl": 0,
+		"quick-lru": 0,
+		"mnemonist": 0
+	};
+
 	setBench
 		.add("tiny-lru set", () => {
-			const cache = tinyLru(CACHE_SIZE);
-			for (let i = 0; i < 1000; i++) {
-				cache.set(testData.keys[i % testData.keys.length], testData.values[i % testData.values.length]);
+			const cache = setCaches["tiny-lru"];
+			let i = setState["tiny-lru"]; // cursor
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = setPattern[i++ % setPattern.length];
+				cache.set(testData.keys[idx], testData.values[idx]);
 			}
+			setState["tiny-lru"] = i;
 		})
 		.add("tiny-lru-ttl set", () => {
-			const cache = tinyLru(CACHE_SIZE, TTL_MS);
-			for (let i = 0; i < 1000; i++) {
-				cache.set(testData.keys[i % testData.keys.length], testData.values[i % testData.values.length]);
+			const cache = setCaches["tiny-lru-ttl"];
+			let i = setState["tiny-lru-ttl"];
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = setPattern[i++ % setPattern.length];
+				cache.set(testData.keys[idx], testData.values[idx]);
 			}
+			setState["tiny-lru-ttl"] = i;
 		})
 		.add("lru-cache set", () => {
-			const cache = new LRUCache({ max: CACHE_SIZE });
-			for (let i = 0; i < 1000; i++) {
-				cache.set(testData.keys[i % testData.keys.length], testData.values[i % testData.values.length]);
+			const cache = setCaches["lru-cache"];
+			let i = setState["lru-cache"];
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = setPattern[i++ % setPattern.length];
+				cache.set(testData.keys[idx], testData.values[idx]);
 			}
+			setState["lru-cache"] = i;
 		})
 		.add("lru-cache-ttl set", () => {
-			const cache = new LRUCache({ max: CACHE_SIZE, ttl: TTL_MS });
-			for (let i = 0; i < 1000; i++) {
-				cache.set(testData.keys[i % testData.keys.length], testData.values[i % testData.values.length]);
+			const cache = setCaches["lru-cache-ttl"];
+			let i = setState["lru-cache-ttl"];
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = setPattern[i++ % setPattern.length];
+				cache.set(testData.keys[idx], testData.values[idx]);
 			}
+			setState["lru-cache-ttl"] = i;
 		})
 		.add("quick-lru set", () => {
-			const cache = new QuickLRU({ maxSize: CACHE_SIZE });
-			for (let i = 0; i < 1000; i++) {
-				cache.set(testData.keys[i % testData.keys.length], testData.values[i % testData.values.length]);
+			const cache = setCaches["quick-lru"];
+			let i = setState["quick-lru"];
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = setPattern[i++ % setPattern.length];
+				cache.set(testData.keys[idx], testData.values[idx]);
 			}
+			setState["quick-lru"] = i;
 		})
 		.add("mnemonist set", () => {
-			const cache = new MnemonistLRU(CACHE_SIZE);
-			for (let i = 0; i < 1000; i++) {
-				cache.set(testData.keys[i % testData.keys.length], testData.values[i % testData.values.length]);
+			const cache = setCaches.mnemonist;
+			let i = setState.mnemonist;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = setPattern[i++ % setPattern.length];
+				cache.set(testData.keys[idx], testData.values[idx]);
 			}
+			setState.mnemonist = i;
 		});
 
 	await setBench.run();
-	setBench.table();
+	console.table(setBench.table());
 
 	// GET operations benchmark (with pre-populated caches)
 	console.log("\n📊 GET Operations Benchmark");
@@ -158,49 +224,69 @@ async function runBenchmarks () {
 
 	const caches = createCaches();
 
-	// Pre-populate all caches
+	// Pre-populate all caches deterministically
+	const prepopulated = Math.min(CACHE_SIZE, 500);
 	Object.values(caches).forEach(cache => {
-		for (let i = 0; i < Math.min(CACHE_SIZE, 500); i++) {
+		for (let i = 0; i < prepopulated; i++) {
 			cache.set(testData.keys[i], testData.values[i]);
 		}
 	});
 
 	const getBench = new Bench({ time: 2000 });
+	const getState = { idx: 0 };
 
 	getBench
 		.add("tiny-lru get", () => {
-			for (let i = 0; i < 1000; i++) {
-				caches["tiny-lru"].get(testData.keys[i % 500]);
+			let i = getState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = getPattern[i++ % getPattern.length];
+				caches["tiny-lru"].get(testData.keys[idx]);
 			}
+			getState.idx = i;
 		})
 		.add("tiny-lru-ttl get", () => {
-			for (let i = 0; i < 1000; i++) {
-				caches["tiny-lru-ttl"].get(testData.keys[i % 500]);
+			let i = getState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = getPattern[i++ % getPattern.length];
+				caches["tiny-lru-ttl"].get(testData.keys[idx]);
 			}
+			getState.idx = i;
 		})
 		.add("lru-cache get", () => {
-			for (let i = 0; i < 1000; i++) {
-				caches["lru-cache"].get(testData.keys[i % 500]);
+			let i = getState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = getPattern[i++ % getPattern.length];
+				caches["lru-cache"].get(testData.keys[idx]);
 			}
+			getState.idx = i;
 		})
 		.add("lru-cache-ttl get", () => {
-			for (let i = 0; i < 1000; i++) {
-				caches["lru-cache-ttl"].get(testData.keys[i % 500]);
+			let i = getState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = getPattern[i++ % getPattern.length];
+				caches["lru-cache-ttl"].get(testData.keys[idx]);
 			}
+			getState.idx = i;
 		})
 		.add("quick-lru get", () => {
-			for (let i = 0; i < 1000; i++) {
-				caches["quick-lru"].get(testData.keys[i % 500]);
+			let i = getState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = getPattern[i++ % getPattern.length];
+				caches["quick-lru"].get(testData.keys[idx]);
 			}
+			getState.idx = i;
 		})
 		.add("mnemonist get", () => {
-			for (let i = 0; i < 1000; i++) {
-				caches.mnemonist.get(testData.keys[i % 500]);
+			let i = getState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = getPattern[i++ % getPattern.length];
+				caches.mnemonist.get(testData.keys[idx]);
 			}
+			getState.idx = i;
 		});
 
 	await getBench.run();
-	getBench.table();
+	console.table(getBench.table());
 
 	// DELETE operations benchmark
 	console.log("\n📊 DELETE Operations Benchmark");
@@ -208,54 +294,63 @@ async function runBenchmarks () {
 
 	const deleteBench = new Bench({ time: 2000 });
 
+	// Dedicated caches and state for DELETE
+	const deleteCaches = {
+		"tiny-lru": tinyLru(CACHE_SIZE),
+		"lru-cache": new LRUCache({ max: CACHE_SIZE }),
+		"quick-lru": new QuickLRU({ maxSize: CACHE_SIZE }),
+		"mnemonist": new MnemonistLRU(CACHE_SIZE)
+	};
+	const deleteState = { idx: 0 };
+
+	// Pre-populate
+	Object.values(deleteCaches).forEach(cache => {
+		for (let i = 0; i < 100; i++) {
+			cache.set(testData.keys[i], testData.values[i]);
+		}
+	});
+
 	deleteBench
 		.add("tiny-lru delete", () => {
-			const cache = tinyLru(CACHE_SIZE);
-			// Pre-populate
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[i]);
+			let i = deleteState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = deletePattern[i++ % deletePattern.length];
+				deleteCaches["tiny-lru"].delete(testData.keys[idx]);
+				// Re-add to keep steady state for future deletes
+				deleteCaches["tiny-lru"].set(testData.keys[idx], testData.values[idx]);
 			}
-			// Delete
-			for (let i = 0; i < 50; i++) {
-				cache.delete(testData.keys[i]);
-			}
+			deleteState.idx = i;
 		})
 		.add("lru-cache delete", () => {
-			const cache = new LRUCache({ max: CACHE_SIZE });
-			// Pre-populate
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[i]);
+			let i = deleteState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = deletePattern[i++ % deletePattern.length];
+				deleteCaches["lru-cache"].delete(testData.keys[idx]);
+				deleteCaches["lru-cache"].set(testData.keys[idx], testData.values[idx]);
 			}
-			// Delete
-			for (let i = 0; i < 50; i++) {
-				cache.delete(testData.keys[i]);
-			}
+			deleteState.idx = i;
 		})
 		.add("quick-lru delete", () => {
-			const cache = new QuickLRU({ maxSize: CACHE_SIZE });
-			// Pre-populate
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[i]);
+			let i = deleteState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = deletePattern[i++ % deletePattern.length];
+				deleteCaches["quick-lru"].delete(testData.keys[idx]);
+				deleteCaches["quick-lru"].set(testData.keys[idx], testData.values[idx]);
 			}
-			// Delete
-			for (let i = 0; i < 50; i++) {
-				cache.delete(testData.keys[i]);
-			}
+			deleteState.idx = i;
 		})
 		.add("mnemonist delete", () => {
-			const cache = new MnemonistLRU(CACHE_SIZE);
-			// Pre-populate
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[i]);
+			let i = deleteState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = deletePattern[i++ % deletePattern.length];
+				deleteCaches.mnemonist.remove(testData.keys[idx]);
+				deleteCaches.mnemonist.set(testData.keys[idx], testData.values[idx]);
 			}
-			// Delete (using remove method)
-			for (let i = 0; i < 50; i++) {
-				cache.remove(testData.keys[i]);
-			}
+			deleteState.idx = i;
 		});
 
 	await deleteBench.run();
-	deleteBench.table();
+	console.table(deleteBench.table());
 
 	// UPDATE operations benchmark
 	console.log("\n📊 UPDATE Operations Benchmark");
@@ -263,76 +358,69 @@ async function runBenchmarks () {
 
 	const updateBench = new Bench({ time: 2000 });
 
+	// Dedicated caches for UPDATE
+	const updateCaches = createCaches();
+	// Pre-populate with initial values
+	Object.values(updateCaches).forEach(cache => {
+		for (let i = 0; i < 100; i++) {
+			cache.set(testData.keys[i], testData.values[i]);
+		}
+	});
+
+	const updateState = { idx: 0 };
+
 	updateBench
 		.add("tiny-lru update", () => {
-			const cache = tinyLru(CACHE_SIZE);
-			// Pre-populate with initial values
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[i]);
+			let i = updateState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = updatePattern[i++ % updatePattern.length];
+				updateCaches["tiny-lru"].set(testData.keys[idx], testData.values[(idx + 50) % testData.values.length]);
 			}
-			// Update existing keys with new values
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
-			}
+			updateState.idx = i;
 		})
 		.add("tiny-lru-ttl update", () => {
-			const cache = tinyLru(CACHE_SIZE, TTL_MS);
-			// Pre-populate with initial values
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[i]);
+			let i = updateState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = updatePattern[i++ % updatePattern.length];
+				updateCaches["tiny-lru-ttl"].set(testData.keys[idx], testData.values[(idx + 50) % testData.values.length]);
 			}
-			// Update existing keys with new values
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
-			}
+			updateState.idx = i;
 		})
 		.add("lru-cache update", () => {
-			const cache = new LRUCache({ max: CACHE_SIZE });
-			// Pre-populate with initial values
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[i]);
+			let i = updateState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = updatePattern[i++ % updatePattern.length];
+				updateCaches["lru-cache"].set(testData.keys[idx], testData.values[(idx + 50) % testData.values.length]);
 			}
-			// Update existing keys with new values
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
-			}
+			updateState.idx = i;
 		})
 		.add("lru-cache-ttl update", () => {
-			const cache = new LRUCache({ max: CACHE_SIZE, ttl: TTL_MS });
-			// Pre-populate with initial values
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[i]);
+			let i = updateState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = updatePattern[i++ % updatePattern.length];
+				updateCaches["lru-cache-ttl"].set(testData.keys[idx], testData.values[(idx + 50) % testData.values.length]);
 			}
-			// Update existing keys with new values
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
-			}
+			updateState.idx = i;
 		})
 		.add("quick-lru update", () => {
-			const cache = new QuickLRU({ maxSize: CACHE_SIZE });
-			// Pre-populate with initial values
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[i]);
+			let i = updateState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = updatePattern[i++ % updatePattern.length];
+				updateCaches["quick-lru"].set(testData.keys[idx], testData.values[(idx + 50) % testData.values.length]);
 			}
-			// Update existing keys with new values
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
-			}
+			updateState.idx = i;
 		})
 		.add("mnemonist update", () => {
-			const cache = new MnemonistLRU(CACHE_SIZE);
-			// Pre-populate with initial values
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[i]);
+			let i = updateState.idx;
+			for (let j = 0; j < OPS_PER_INVOCATION; j++) {
+				const idx = updatePattern[i++ % updatePattern.length];
+				updateCaches.mnemonist.set(testData.keys[idx], testData.values[(idx + 50) % testData.values.length]);
 			}
-			// Update existing keys with new values
-			for (let i = 0; i < 100; i++) {
-				cache.set(testData.keys[i], testData.values[(i + 50) % testData.values.length]);
-			}
+			updateState.idx = i;
 		});
 
 	await updateBench.run();
-	updateBench.table();
+	console.table(updateBench.table());
 
 	// Memory usage analysis
 	console.log("\n📊 Memory Usage Analysis");
@@ -342,14 +430,14 @@ async function runBenchmarks () {
 	const testSize = 1000;
 
 	for (const [name, cache] of Object.entries(createCaches())) {
-		const beforeMem = getMemoryUsage();
+		const beforeMem = getMemoryUsage(true);
 
 		// Fill cache
 		for (let i = 0; i < testSize; i++) {
 			cache.set(testData.keys[i], testData.values[i]);
 		}
 
-		const afterMem = getMemoryUsage();
+		const afterMem = getMemoryUsage(true);
 		const memoryPerItem = calculateMemoryPerItem(beforeMem, afterMem, testSize);
 
 		memoryResults[name] = {
