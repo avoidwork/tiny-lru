@@ -10,28 +10,58 @@ const ITERATIONS = {
 };
 
 // Utility functions for generating test data
+/**
+ * Generates deterministic pseudo-random data without using Math.random in hot paths.
+ *
+ * @param {number} size - Number of items
+ * @returns {Array<{key:string,value:string}>}
+ */
 function generateRandomData (size) {
-	const data = [];
+	const data = new Array(size);
+	let x = 2463534242;
 	for (let i = 0; i < size; i++) {
-		data.push({
-			key: `key_${i}_${Math.random().toString(36).substr(2, 9)}`,
-			value: `value_${i}_${Math.random().toString(36).substr(2, 20)}`
-		});
+		// xorshift32
+		x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+		const n = (x >>> 0).toString(36);
+		data[i] = {
+			key: `key_${i}_${n}`,
+			value: `value_${i}_${n}${n}`
+		};
 	}
 
 	return data;
 }
 
 function generateSequentialData (size) {
-	const data = [];
+	const data = new Array(size);
 	for (let i = 0; i < size; i++) {
-		data.push({
+		data[i] = {
 			key: `seq_key_${i}`,
 			value: `seq_value_${i}`
-		});
+		};
 	}
 
 	return data;
+}
+
+/**
+ * Generates an access pattern of indices into a bounded range.
+ *
+ * @param {number} length - Number of accesses
+ * @param {number} modulo - Upper bound (exclusive)
+ * @returns {Uint32Array}
+ */
+function generateAccessPattern (length, modulo) {
+	const pattern = new Uint32Array(length);
+	let x = 123456789;
+	let y = 362436069;
+	for (let i = 0; i < length; i++) {
+		x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+		y = y + 1 >>> 0;
+		pattern[i] = (x + y >>> 0) % modulo;
+	}
+
+	return pattern;
 }
 
 // Pre-populate cache with data
@@ -53,33 +83,39 @@ async function runSetOperationsBenchmarks () {
 
 		console.log(`\nCache Size: ${cacheSize}, Workload: ${workloadSize}`);
 
-		// Prepare test data
+		// Prepare test data & patterns
 		const randomData = generateRandomData(workloadSize);
 		const sequentialData = generateSequentialData(workloadSize);
+		const randomPattern = generateAccessPattern(10000, workloadSize);
+		let randomCursor = 0;
 
 		// Test scenarios
 		bench
 			.add(`set-random-empty-cache-${cacheSize}`, () => {
 				const cache = lru(cacheSize);
-				const item = randomData[Math.floor(Math.random() * randomData.length)];
+				const idx = randomPattern[randomCursor++ % randomPattern.length];
+				const item = randomData[idx];
 				cache.set(item.key, item.value);
 			})
 			.add(`set-sequential-empty-cache-${cacheSize}`, () => {
 				const cache = lru(cacheSize);
-				const item = sequentialData[Math.floor(Math.random() * sequentialData.length)];
+				const idx = randomPattern[randomCursor++ % randomPattern.length];
+				const item = sequentialData[idx];
 				cache.set(item.key, item.value);
 			})
 			.add(`set-random-full-cache-${cacheSize}`, () => {
 				const cache = lru(cacheSize);
 				prepopulateCache(cache, randomData);
-				const item = randomData[Math.floor(Math.random() * randomData.length)];
+				const idx = randomPattern[randomCursor++ % randomPattern.length];
+				const item = randomData[idx];
 				cache.set(item.key, item.value);
 			})
 			.add(`set-new-items-full-cache-${cacheSize}`, () => {
 				const cache = lru(cacheSize);
 				prepopulateCache(cache, randomData);
 				// Force eviction by adding new items
-				cache.set(`new_key_${Date.now()}_${Math.random()}`, `new_value_${Date.now()}`);
+				const idx = randomPattern[randomCursor++ % randomPattern.length];
+				cache.set(`new_key_${cacheSize}_${idx}`, `new_value_${idx}`);
 			});
 
 		await bench.run();
@@ -110,26 +146,34 @@ async function runGetOperationsBenchmarks () {
 		prepopulateCache(mixedCache, [...randomData.slice(0, Math.floor(workloadSize / 2)),
 			...sequentialData.slice(0, Math.floor(workloadSize / 2))]);
 
+		const hitPattern = generateAccessPattern(20000, Math.floor(workloadSize * 0.8));
+		const missPattern = generateAccessPattern(20000, 1 << 30);
+		let getCursor = 0;
+
 		bench
 			.add(`get-hit-random-${cacheSize}`, () => {
-				const item = randomData[Math.floor(Math.random() * Math.floor(workloadSize * 0.8))];
+				const idx = hitPattern[getCursor++ % hitPattern.length];
+				const item = randomData[idx];
 				randomCache.get(item.key);
 			})
 			.add(`get-hit-sequential-${cacheSize}`, () => {
-				const item = sequentialData[Math.floor(Math.random() * Math.floor(workloadSize * 0.8))];
+				const idx = hitPattern[getCursor++ % hitPattern.length];
+				const item = sequentialData[idx];
 				sequentialCache.get(item.key);
 			})
 			.add(`get-miss-${cacheSize}`, () => {
-				randomCache.get(`nonexistent_key_${Math.random()}`);
+				const idx = missPattern[getCursor++ % missPattern.length];
+				randomCache.get(`nonexistent_key_${idx}`);
 			})
 			.add(`get-mixed-pattern-${cacheSize}`, () => {
-				if (Math.random() > 0.2) {
-					// 80% hit rate
-					const item = randomData[Math.floor(Math.random() * Math.floor(workloadSize * 0.8))];
+				const choose = hitPattern[getCursor++ % hitPattern.length] % 10; // 0..9
+				if (choose < 8) {
+					const idx = hitPattern[getCursor++ % hitPattern.length];
+					const item = randomData[idx];
 					mixedCache.get(item.key);
 				} else {
-					// 20% miss rate
-					mixedCache.get(`miss_key_${Math.random()}`);
+					const idx = missPattern[getCursor++ % missPattern.length];
+					mixedCache.get(`miss_key_${idx}`);
 				}
 			});
 
@@ -149,21 +193,22 @@ async function runMixedOperationsBenchmarks () {
 		console.log(`\nCache Size: ${cacheSize}, Workload: ${workloadSize}`);
 
 		const testData = generateRandomData(workloadSize * 2); // More data than cache
+		const choosePattern = generateAccessPattern(50000, 10);
+		const idxPattern = generateAccessPattern(50000, testData.length);
+		let mixedCursor = 0;
 
 		bench
 			.add(`real-world-80-20-read-write-${cacheSize}`, () => {
 				const cache = lru(cacheSize);
 				prepopulateCache(cache, testData, 0.5);
-
 				// Simulate 80% reads, 20% writes
 				for (let i = 0; i < 10; i++) {
-					if (Math.random() > 0.2) {
-						// Read operation
-						const item = testData[Math.floor(Math.random() * workloadSize)];
+					const choose = choosePattern[mixedCursor++ % choosePattern.length];
+					if (choose < 8) {
+						const item = testData[idxPattern[mixedCursor++ % idxPattern.length] % workloadSize];
 						cache.get(item.key);
 					} else {
-						// Write operation
-						const item = testData[Math.floor(Math.random() * testData.length)];
+						const item = testData[idxPattern[mixedCursor++ % idxPattern.length]];
 						cache.set(item.key, item.value);
 					}
 				}
@@ -182,7 +227,8 @@ async function runMixedOperationsBenchmarks () {
 
 				// High churn - constantly adding new items
 				for (let i = 0; i < 5; i++) {
-					cache.set(`churn_${Date.now()}_${i}_${Math.random()}`, `value_${i}`);
+					const idx = idxPattern[mixedCursor++ % idxPattern.length];
+					cache.set(`churn_${cacheSize}_${i}_${idx}`, `value_${i}`);
 				}
 			})
 			.add(`lru-access-pattern-${cacheSize}`, () => {
@@ -190,10 +236,13 @@ async function runMixedOperationsBenchmarks () {
 				prepopulateCache(cache, testData, 1.0);
 
 				// Access patterns that test LRU behavior
-				// Access same keys multiple times (should be fast)
 				const hotKeys = testData.slice(0, 3);
-				hotKeys.forEach(item => cache.get(item.key));
-				hotKeys.forEach(item => cache.get(item.key)); // Second access
+				cache.get(hotKeys[0].key);
+				cache.get(hotKeys[1].key);
+				cache.get(hotKeys[2].key);
+				cache.get(hotKeys[0].key);
+				cache.get(hotKeys[1].key);
+				cache.get(hotKeys[2].key);
 			});
 
 		await bench.run();
@@ -210,6 +259,8 @@ async function runSpecialOperationsBenchmarks () {
 	const bench = new Bench(ITERATIONS);
 
 	const testData = generateRandomData(workloadSize);
+	const hitPattern = generateAccessPattern(20000, Math.floor(workloadSize * 0.8));
+	let cursor = 0;
 
 	// Test cache with different data types
 	const numberData = Array.from({length: workloadSize}, (_, i) => ({key: i, value: i * 2}));
@@ -227,7 +278,7 @@ async function runSpecialOperationsBenchmarks () {
 		.add("cache-delete", () => {
 			const cache = lru(cacheSize);
 			prepopulateCache(cache, testData);
-			const item = testData[Math.floor(Math.random() * Math.floor(workloadSize * 0.8))];
+			const item = testData[hitPattern[cursor++ % hitPattern.length]];
 			cache.delete(item.key);
 		})
 		.add("number-keys-values", () => {
@@ -245,7 +296,7 @@ async function runSpecialOperationsBenchmarks () {
 		.add("has-operation", () => {
 			const cache = lru(cacheSize);
 			prepopulateCache(cache, testData);
-			const item = testData[Math.floor(Math.random() * testData.length)];
+			const item = testData[hitPattern[cursor++ % hitPattern.length]];
 			cache.has(item.key);
 		})
 		.add("size-property", () => {

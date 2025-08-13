@@ -105,10 +105,15 @@ class LRUPerformanceProfiler {
 
 // Test data generation
 function generateTestData (size) {
-	return Array.from({ length: size }, (_, i) => ({
-		key: `key_${i}`,
-		value: `value_${i}_${"x".repeat(50)}` // Some realistic data size
-	}));
+	const out = new Array(size);
+	for (let i = 0; i < size; i++) {
+		out[i] = {
+			key: `key_${i}`,
+			value: `value_${i}_${"x".repeat(50)}`
+		};
+	}
+
+	return out;
 }
 
 async function runPerformanceObserverBenchmarks () {
@@ -152,22 +157,28 @@ async function runPerformanceObserverBenchmarks () {
 
 	// Phase 2: Mixed read/write operations
 	console.log("Phase 2: Mixed operations (realistic workload)");
+	// Deterministic mixed workload without Math.random in the loop
+	const choice = new Uint8Array(5000);
+	const indices = new Uint32Array(5000);
+	let a = 1103515245, c = 12345, m = 2 ** 31;
+	let seed = 42;
 	for (let i = 0; i < 5000; i++) {
-		const operation = Math.random();
-		const dataIndex = Math.floor(Math.random() * testData.length);
-
-		if (operation < 0.6) {
-			// 60% reads
-			getOperation(testData[dataIndex].key);
-		} else if (operation < 0.8) {
-			// 20% writes
-			setOperation(testData[dataIndex].key, testData[dataIndex].value);
-		} else if (operation < 0.95) {
-			// 15% has operations
-			hasOperation(testData[dataIndex].key);
+		seed = (a * seed + c) % m;
+		const r = seed >>> 0;
+		choice[i] = r % 100; // 0..99
+		indices[i] = r % testData.length;
+	}
+	for (let i = 0; i < 5000; i++) {
+		const pick = choice[i];
+		const idx = indices[i];
+		if (pick < 60) {
+			getOperation(testData[idx].key);
+		} else if (pick < 80) {
+			setOperation(testData[idx].key, testData[idx].value);
+		} else if (pick < 95) {
+			hasOperation(testData[idx].key);
 		} else {
-			// 5% delete operations
-			deleteOperation(testData[dataIndex].key);
+			deleteOperation(testData[idx].key);
 		}
 	}
 

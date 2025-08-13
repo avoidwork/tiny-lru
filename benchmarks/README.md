@@ -12,8 +12,8 @@ This directory contains modern benchmark implementations for the tiny-lru librar
 - **Features**:
   - Statistically analyzed latency and throughput values
   - Standard deviation, margin of error, variance calculations
-  - Proper warmup phases and statistical significance
-  - Realistic workload scenarios
+  - Deterministic access patterns (no `Math.random()` in hot paths)
+  - Realistic workload scenarios without measuring setup/teardown
 
 **Test Categories**:
 - SET operations (empty cache, full cache, eviction scenarios)
@@ -35,7 +35,8 @@ This directory contains modern benchmark implementations for the tiny-lru librar
   - Side-by-side performance comparison
   - Bundle size analysis and memory usage per item
   - TTL (Time-To-Live) support testing where available
-  - Statistical significance with warmup phases
+  - Deterministic, precomputed access patterns to eliminate randomness overhead
+  - Multiple operations per measured callback to reduce harness overhead
 
 **Test Categories**:
 - SET operations across all libraries
@@ -55,6 +56,7 @@ This directory contains modern benchmark implementations for the tiny-lru librar
   - PerformanceObserver for automatic measurement collection
   - Custom high-resolution timer implementations
   - Scalability testing across different cache sizes
+  - Deterministic mixed workloads (no `Math.random()` in measured loops)
 
 **Test Categories**:
 - Performance Observer based function timing
@@ -91,6 +93,7 @@ node benchmarks/performance-observer-benchmark.js
 # Run with garbage collection exposed (for memory analysis)
 node --expose-gc benchmarks/modern-benchmark.js
 node --expose-gc benchmarks/comparison-benchmark.js
+node --expose-gc benchmarks/performance-observer-benchmark.js
 ```
 
 ### Prerequisites for Comparison Benchmark
@@ -156,12 +159,21 @@ Tests cache write performance under various conditions:
 - **Empty cache**: Setting items in a fresh cache
 - **Full cache**: Setting items when cache is at capacity (triggers eviction)
 - **Random vs Sequential**: Different access patterns
+  
+Implementation details:
+- Deterministic keys/values are pre-generated once per run
+- Access indices are precomputed via a fast PRNG (xorshift) to avoid runtime randomness
+- Multiple operations are executed per benchmark callback to minimize harness overhead
 
 ### GET Operations  
 Tests cache read performance:
 - **Cache hits**: Reading existing items
 - **Cache misses**: Reading non-existent items
 - **Mixed patterns**: Realistic 80% hit / 20% miss scenarios
+  
+Implementation details:
+- Caches are pre-populated outside the measured section
+- Access indices are precomputed; no `Math.random()` inside measured loops
 
 ### Mixed Operations
 Real-world usage simulation:
@@ -169,6 +181,10 @@ Real-world usage simulation:
 - **Cache warming**: Sequential population scenarios
 - **High churn**: Frequent eviction scenarios
 - **LRU access patterns**: Testing LRU algorithm efficiency
+  
+Implementation details:
+- Choice and index streams are precomputed
+- No wall-clock calls (`Date.now`) inside hot paths
 
 ### Special Operations
 Edge cases and additional functionality:
@@ -176,18 +192,20 @@ Edge cases and additional functionality:
 - **Clear operations**: Complete cache clearing
 - **Different data types**: Numbers, objects, strings
 - **Memory usage**: Heap consumption analysis
+  
+Implementation details:
+- Delete benchmarks maintain a steady state by re-adding deleted keys to keep cardinality stable
 
 ## Best Practices Implemented
 
 ### 1. Statistical Significance
 - Minimum execution time (1 second) for reliable results
-- Multiple iterations (100+ minimum) for statistical validity
-- Warmup phases to avoid V8 optimization artifacts
+- Multiple iterations for statistical validity
 - Standard deviation and margin of error reporting
 
 ### 2. Realistic Test Data
 - Variable key/value sizes mimicking real applications
-- Random and sequential access patterns
+- Deterministic pseudo-random and sequential access patterns (precomputed)
 - Pre-population scenarios for realistic cache states
 
 ### 3. Multiple Measurement Approaches
@@ -200,6 +218,12 @@ Edge cases and additional functionality:
 - Various workload patterns
 - Memory consumption analysis
 - Edge case testing
+
+### 5. Methodology Improvements (Current)
+- Setup/teardown moved outside measured sections to avoid skewing results
+- Deterministic data and access patterns (no randomness in hot paths)
+- Batched operations per invocation reduce harness overhead reliably across tasks
+- Optional forced GC before/after memory measurements when `--expose-gc` is enabled
 
 ## Performance Tips
 
