@@ -59,17 +59,19 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 - **🌐 Universal Compatibility** - Works seamlessly in Node.js and browsers
 - **🛡️ Production Ready** - Battle-tested and reliable
 
-### Benchmark Comparison
+### Benchmark Comparison (Mean of 5 runs)
 
-| Library | SET ops/sec | GET ops/sec | UPDATE ops/sec | DELETE ops/sec | Bundle Size | Memory/Item |
-|---------|-------------|-------------|---------------|---------------|-------------|-------------|
-| **tiny-lru** | 43,022 | 113,531 | **348,829** 🥇 | 335,038 | 2.2 KiB | 185 bytes |
-| lru-cache | 27,819 | 96,739 | 133,706 | 149,700 | ~14.6 KiB | 114 bytes |
-| quick-lru | **52,200** 🥇 | 118,758 | 321,377 | **391,763** 🥇 | ~1.8 KiB | 176 bytes |
-| mnemonist | 29,933 | **192,073** 🥇 | 210,628 | N/A† | ~43.9 KiB | **99 bytes** 🥇 |
+| Library | SET ops/sec | GET ops/sec | UPDATE ops/sec | DELETE ops/sec |
+|---------|-------------|-------------|----------------|----------------|
+| **tiny-lru** | 404,753 | 1,768,449 | 1,703,716 | 298,770 |
+| lru-cache | 326,221 | 1,069,061 | 878,858 | 277,734 |
+| quick-lru | 591,683 | 1,298,487 | 935,481 | 359,600 |
+| mnemonist | 412,467 | 2,478,778 | 2,156,690 | 0 |
 
-† *mnemonist uses different method names for delete operations*  
-*Benchmarks run on Node.js v24.5.0, Apple Silicon (M4)*
+Notes:
+- Mean values computed from the Performance Summary across 5 consecutive runs of `npm run benchmark:comparison`.
+- mnemonist lacks a compatible delete method in this harness, so DELETE ops/sec is 0.
+- Environment: Node.js v24.5.0, macOS arm64.
 
 ## 📊 Performance Deep Dive
 
