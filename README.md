@@ -6,7 +6,7 @@
 [![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/ci.yml/badge.svg)](https://github.com/avoidwork/tiny-lru/actions)
 [![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/avoidwork/tiny-lru)
 
-A **high-performance, lightweight** LRU cache for JavaScript with **fastest UPDATES and competitive SET/GET/DELETE** and **compact bundle size**. Built for developers who need fast caching without compromising on features.
+A **high-performance, lightweight** LRU cache for JavaScript with **strong UPDATE performance and competitive SET/GET/DELETE**, and a **compact bundle size**. Built for developers who need fast caching without compromising on features.
 
 ## 📦 Installation
 
@@ -50,9 +50,9 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 
 ### Why Choose Tiny LRU?
 
-- **🔄 Excellent Cache Updates** - 348K UPDATE ops/sec, outperforming alternatives by 2.6x
-- **📦 Compact Bundle** - Just 2.2 KiB minified for a full-featured LRU library
-- **⚖️ Balanced Performance** - Strong across all operations with O(1) complexity
+- **🔄 Strong Cache Updates** - Excellent performance in update-heavy workloads
+- **📦 Compact Bundle** - Just ~2.2 KiB minified for a full-featured LRU library
+- **⚖️ Balanced Performance** - Competitive across all operations with O(1) complexity
 - **⏱️ TTL Support** - Optional time-to-live with automatic expiration
 - **🔄 Method Chaining** - Fluent API for better developer experience
 - **🎯 TypeScript Ready** - Full TypeScript support with complete type definitions
@@ -71,6 +71,7 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 Notes:
 - Mean values computed from the Performance Summary across 5 consecutive runs of `npm run benchmark:comparison`.
 - mnemonist lacks a compatible delete method in this harness, so DELETE ops/sec is 0.
+- Performance varies by hardware, Node.js version, and workload patterns; run the provided benchmarks locally to assess your specific use case.
 - Environment: Node.js v24.5.0, macOS arm64.
 
 ## 📊 Performance Deep Dive
