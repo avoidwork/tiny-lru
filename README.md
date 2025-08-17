@@ -39,7 +39,6 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 
 - [✨ Features & Benefits](#-features--benefits)
 - [📊 Performance Deep Dive](#-performance-deep-dive)
-- [🔢 Mathematical Representation](#-mathematical-representation)
 - [📖 API Reference](#-api-reference)
 - [🚀 Getting Started](#-getting-started)
 - [💡 Real-World Examples](#-real-world-examples)
@@ -310,7 +309,7 @@ class SessionManager {
   }
 
   getSession(sessionId) {
-    // get() does not extend TTL; to extend, set the session again when resetTtl is true
+    // get() does not extend TTL; to extend TTL, call set() again when resetTtl is true
     return this.sessions.get(sessionId);
   }
 
@@ -411,111 +410,7 @@ npm run build
 
 ---
 
-## 🔢 Mathematical Representation
 
-### Core Operations
-
-The LRU cache maintains a doubly-linked list $L$ and a hash table $H$ for O(1) operations:
-
-**Data Structure:**
-- $L = (first, last, size)$ - Doubly-linked list with head/tail pointers
-- $H: K \rightarrow V$ - Hash table mapping keys to values
-- $max \in \mathbb{N}_0$ - Maximum cache size (0 = unlimited)
-- $ttl \in \mathbb{N}_0$ - Time-to-live in milliseconds
-
-**Core Methods:**
-
-#### Set Operation: $set(k, v) \rightarrow \text{LRU}$
-$$\begin{align}
-set(k, v) &= \begin{cases}
-update(k, v) & \text{if } k \in H \\
-insert(k, v) & \text{if } k \notin H
-\end{cases} \\
-update(k, v) &= H[k].value \leftarrow v \land moveToEnd(H[k]) \\
-& \quad \land \begin{cases}
-H[k].expiry \leftarrow t_{now} + ttl & \text{if } resetTtl = true \land ttl > 0 \\
-\text{no-op} & \text{otherwise}
-\end{cases} \\
-insert(k, v) &= \begin{cases}
-evict() \land create(k, v) & \text{if } max > 0 \land size = max \\
-create(k, v) & \text{otherwise}
-\end{cases} \\
-create(k, v) &= H[k] \leftarrow \{key: k, value: v, prev: last, next: null, expiry: t_{now} + ttl\} \\
-& \quad \land last \leftarrow H[k] \land size \leftarrow size + 1 \\
-& \quad \land \begin{cases}
-first \leftarrow H[k] & \text{if } size = 1 \\
-last.next \leftarrow H[k] & \text{otherwise}
-\end{cases}
-\end{align}$$
-
-**Time Complexity:** $O(1)$ amortized
-
-#### Get Operation: $get(k) \rightarrow V \cup \{\bot\}$
-$$\begin{align}
-get(k) &= \begin{cases}
-cleanup(k) \land moveToEnd(H[k]) \land H[k].value & \text{if } k \in H \land (ttl = 0 \lor H[k].expiry > t_{now}) \\
-\bot & \text{otherwise}
-\end{cases}
-\end{align}$$
-
-**Time Complexity:** $O(1)$
-
-#### Delete Operation: $delete(k) \rightarrow \text{LRU}$
-$$\begin{align}
-delete(k) &= \begin{cases}
-removeFromList(H[k]) \land H \setminus \{k\} \land size \leftarrow size - 1 & \text{if } k \in H \\
-\text{no-op} & \text{otherwise}
-\end{cases}
-\end{align}$$
-
-**Time Complexity:** $O(1)$
-
-#### Move to End: $moveToEnd(item)$
-$$\begin{align}
-moveToEnd(item) &= \begin{cases}
-\text{no-op} & \text{if } item = last \\
-removeFromList(item) \land appendToList(item) & \text{otherwise}
-\end{cases}
-\end{align}$$
-
-**Time Complexity:** $O(1)$
-
-### Eviction Policy
-
-**LRU Eviction:** When $max > 0 \land size = max$ and inserting a new item:
-
-$$evict() = \begin{cases}
-first \leftarrow first.next \land first.prev \leftarrow null \land H \setminus \{first.key\} \land size \leftarrow size - 1 & \text{if } size > 0 \\
-\text{no-op} & \text{otherwise}
-\end{cases}$$
-
-### TTL Expiration
-
-**Expiration Check:** For any operation accessing key $k$:
-
-$$isExpired(k) = ttl > 0 \land H[k].expiry \leq t_{now}$$
-
-**Automatic Cleanup:** Expired items are removed on access:
-
-$$cleanup(k) = \begin{cases}
-delete(k) & \text{if } isExpired(k) \\
-\text{no-op} & \text{otherwise}
-\end{cases}$$
-
-### Space Complexity
-
-- **Worst Case:** $O(n)$ where $n = \min(size, max)$
-- **Hash Table:** $O(n)$ for key-value storage
-- **Linked List:** $O(n)$ for LRU ordering
-- **Per Item Overhead:** Constant space for prev/next pointers and metadata
-
-### Invariants
-
-1. **Size Constraint:** $0 \leq size \leq max$ (when $max > 0$)
-2. **List Consistency:** $first \neq null \iff last \neq null \iff size > 0$
-3. **Hash Consistency:** $|H| = size$
-4. **LRU Order:** Items in list are ordered from least to most recently used
-5. **TTL Validity:** $ttl = 0 \lor \forall k \in H: H[k].expiry > t_{now}$
 
 ## 📖 API Reference
 
@@ -529,6 +424,8 @@ Creates a new LRU cache instance using the factory function.
 - `max` `{Number}` - Maximum number of items to store (default: 1000; 0 = unlimited)
 - `ttl` `{Number}` - Time-to-live in milliseconds (default: 0; 0 = no expiration)  
 - `resetTtl` `{Boolean}` - Reset TTL when updating existing items via `set()` (default: false)
+
+**Note:** The `resetTtl` parameter only affects `set()` operations. `get()` operations never reset TTL, regardless of this setting.
 
 **Returns:** `{LRU}` New LRU cache instance
 
@@ -579,7 +476,9 @@ cache.max; // 500
 ```
 
 #### resetTtl
-`{Boolean}` - Whether to reset TTL when updating existing items via `set()`
+`{Boolean}` - Whether to reset TTL when updating existing items via `set()` operations
+
+**Note:** This setting only affects `set()` operations. `get()` operations never reset TTL, regardless of this setting.
 
 ```javascript
 const cache = lru(500, 5*6e4, true);
@@ -641,8 +540,11 @@ console.log(cache.entries()); // [['a', 1], ['b', 2]]
 console.log(cache.entries(['a'])); // [['a', 1]]
 ```
 
-#### evict()
+#### evict(bypass)
 Removes the least recently used item from cache.
+
+**Parameters:**
+- `bypass` `{Boolean}` - Whether to force eviction even when cache is empty (default: false)
 
 **Returns:** `{Object}` LRU instance
 
@@ -673,7 +575,7 @@ Retrieves cached item and promotes it to most recently used position.
 
 **Returns:** `{*}` Item value or undefined if not found/expired
 
-Note: `get()` does not reset or extend TTL. TTL is only reset on `set()` when `resetTtl` is `true`.
+**Note:** `get()` does not reset or extend TTL. TTL is only reset on `set()` operations when `resetTtl` is `true`. The `resetTtl` setting has no effect on `get()` operations.
 
 ```javascript
 cache.set('key1', 'value1');
@@ -706,12 +608,14 @@ cache.get('a'); // Move 'a' to most recent
 console.log(cache.keys()); // ['b', 'a']
 ```
 
-#### set(key, value)
+#### set(key, value, bypass, resetTtl)
 Stores item in cache as most recently used.
 
 **Parameters:**
 - `key` `{String}` - Item key
 - `value` `{*}` - Item value
+- `bypass` `{Boolean}` - Internal parameter for setWithEvicted method (default: false)
+- `resetTtl` `{Boolean}` - Whether to reset TTL for this operation (default: this.resetTtl)
 
 **Returns:** `{Object}` LRU instance
 
