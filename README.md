@@ -475,27 +475,24 @@ removeFromList(item) \land appendToList(item) & \text{otherwise}
 ### Eviction Policy
 
 **LRU Eviction:** When $size = max > 0$ and inserting a new item:
-$$\begin{align}
-evict() &= \begin{cases}
+
+$$evict() = \begin{cases}
 first \leftarrow first.next \land H \setminus \{first.key\} \land size \leftarrow size - 1 & \text{if } size > 0 \\
 \text{no-op} & \text{otherwise}
-\end{cases}
-\end{align}$$
+\end{cases}$$
 
 ### TTL Expiration
 
 **Expiration Check:** For any operation accessing key $k$:
-$$\begin{align}
-isExpired(k) &= ttl > 0 \land H[k].expiry \leq t_{now}
-\end{align}$$
+
+$$isExpired(k) = ttl > 0 \land H[k].expiry \leq t_{now}$$
 
 **Automatic Cleanup:** Expired items are removed on access:
-$$\begin{align}
-cleanup(k) &= \begin{cases}
+
+$$cleanup(k) = \begin{cases}
 delete(k) & \text{if } isExpired(k) \\
 \text{no-op} & \text{otherwise}
-\end{cases}
-\end{align}$$
+\end{cases}$$
 
 ### Space Complexity
 
