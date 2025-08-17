@@ -432,12 +432,20 @@ update(k, v) & \text{if } k \in H \\
 insert(k, v) & \text{if } k \notin H
 \end{cases} \\
 update(k, v) &= H[k].value \leftarrow v \land moveToEnd(H[k]) \\
+& \quad \land \begin{cases}
+H[k].expiry \leftarrow t_{now} + ttl & \text{if } resetTtl = true \land ttl > 0 \\
+\text{no-op} & \text{otherwise}
+\end{cases} \\
 insert(k, v) &= \begin{cases}
-evict() \land create(k, v) & \text{if } size = max > 0 \\
+evict() \land create(k, v) & \text{if } max > 0 \land size = max \\
 create(k, v) & \text{otherwise}
 \end{cases} \\
 create(k, v) &= H[k] \leftarrow \{key: k, value: v, prev: last, next: null, expiry: t_{now} + ttl\} \\
-& \quad \land last \leftarrow H[k] \land size \leftarrow size + 1
+& \quad \land last \leftarrow H[k] \land size \leftarrow size + 1 \\
+& \quad \land \begin{cases}
+first \leftarrow H[k] & \text{if } size = 1 \\
+last.next \leftarrow H[k] & \text{otherwise}
+\end{cases}
 \end{align}$$
 
 **Time Complexity:** $O(1)$ amortized
@@ -445,7 +453,7 @@ create(k, v) &= H[k] \leftarrow \{key: k, value: v, prev: last, next: null, expi
 #### Get Operation: $get(k) \rightarrow V \cup \{\bot\}$
 $$\begin{align}
 get(k) &= \begin{cases}
-moveToEnd(H[k]) \land H[k].value & \text{if } k \in H \land (ttl = 0 \lor H[k].expiry > t_{now}) \\
+cleanup(k) \land moveToEnd(H[k]) \land H[k].value & \text{if } k \in H \land (ttl = 0 \lor H[k].expiry > t_{now}) \\
 \bot & \text{otherwise}
 \end{cases}
 \end{align}$$
@@ -474,10 +482,10 @@ removeFromList(item) \land appendToList(item) & \text{otherwise}
 
 ### Eviction Policy
 
-**LRU Eviction:** When $size = max > 0$ and inserting a new item:
+**LRU Eviction:** When $max > 0 \land size = max$ and inserting a new item:
 
 $$evict() = \begin{cases}
-first \leftarrow first.next \land H \setminus \{first.key\} \land size \leftarrow size - 1 & \text{if } size > 0 \\
+first \leftarrow first.next \land first.prev \leftarrow null \land H \setminus \{first.key\} \land size \leftarrow size - 1 & \text{if } size > 0 \\
 \text{no-op} & \text{otherwise}
 \end{cases}$$
 
