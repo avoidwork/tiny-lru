@@ -39,6 +39,7 @@ tempCache.set('session', 'abc123'); // Automatically expires after 5 seconds
 
 - [✨ Features & Benefits](#-features--benefits)
 - [📊 Performance Deep Dive](#-performance-deep-dive)
+- [🔢 Mathematical Representation](#-mathematical-representation)
 - [📖 API Reference](#-api-reference)
 - [🚀 Getting Started](#-getting-started)
 - [💡 Real-World Examples](#-real-world-examples)
@@ -409,6 +410,107 @@ npm run build
 - **Commit Messages**: Use [Conventional Commits](https://conventionalcommits.org/) format
 
 ---
+
+## 🔢 Mathematical Representation
+
+### Core Operations
+
+The LRU cache maintains a doubly-linked list $L$ and a hash table $H$ for O(1) operations:
+
+**Data Structure:**
+- $L = (first, last, size)$ - Doubly-linked list with head/tail pointers
+- $H: K \rightarrow V$ - Hash table mapping keys to values
+- $max \in \mathbb{N}_0$ - Maximum cache size (0 = unlimited)
+- $ttl \in \mathbb{N}_0$ - Time-to-live in milliseconds
+
+**Core Methods:**
+
+#### Set Operation: $set(k, v) \rightarrow \text{LRU}$
+$$\begin{align}
+set(k, v) &= \begin{cases}
+update(k, v) & \text{if } k \in H \\
+insert(k, v) & \text{if } k \notin H
+\end{cases} \\
+update(k, v) &= H[k].value \leftarrow v \land moveToEnd(H[k]) \\
+insert(k, v) &= \begin{cases}
+evict() \land create(k, v) & \text{if } size = max > 0 \\
+create(k, v) & \text{otherwise}
+\end{cases} \\
+create(k, v) &= H[k] \leftarrow \{key: k, value: v, prev: last, next: null, expiry: t_{now} + ttl\} \\
+& \quad \land last \leftarrow H[k] \land size \leftarrow size + 1
+\end{align}$$
+
+**Time Complexity:** $O(1)$ amortized
+
+#### Get Operation: $get(k) \rightarrow V \cup \{\bot\}$
+$$\begin{align}
+get(k) &= \begin{cases}
+moveToEnd(H[k]) \land H[k].value & \text{if } k \in H \land (ttl = 0 \lor H[k].expiry > t_{now}) \\
+\bot & \text{otherwise}
+\end{cases}
+\end{align}$$
+
+**Time Complexity:** $O(1)$
+
+#### Delete Operation: $delete(k) \rightarrow \text{LRU}$
+$$\begin{align}
+delete(k) &= \begin{cases}
+removeFromList(H[k]) \land H \setminus \{k\} \land size \leftarrow size - 1 & \text{if } k \in H \\
+\text{no-op} & \text{otherwise}
+\end{cases}
+\end{align}$$
+
+**Time Complexity:** $O(1)$
+
+#### Move to End: $moveToEnd(item)$
+$$\begin{align}
+moveToEnd(item) &= \begin{cases}
+\text{no-op} & \text{if } item = last \\
+removeFromList(item) \land appendToList(item) & \text{otherwise}
+\end{cases}
+\end{align}$$
+
+**Time Complexity:** $O(1)$
+
+### Eviction Policy
+
+**LRU Eviction:** When $size = max > 0$ and inserting a new item:
+$$\begin{align}
+evict() &= \begin{cases}
+first \leftarrow first.next \land H \setminus \{first.key\} \land size \leftarrow size - 1 & \text{if } size > 0 \\
+\text{no-op} & \text{otherwise}
+\end{cases}
+\end{align}$$
+
+### TTL Expiration
+
+**Expiration Check:** For any operation accessing key $k$:
+$$\begin{align}
+isExpired(k) &= ttl > 0 \land H[k].expiry \leq t_{now}
+\end{align}$$
+
+**Automatic Cleanup:** Expired items are removed on access:
+$$\begin{align}
+cleanup(k) &= \begin{cases}
+delete(k) & \text{if } isExpired(k) \\
+\text{no-op} & \text{otherwise}
+\end{cases}
+\end{align}$$
+
+### Space Complexity
+
+- **Worst Case:** $O(n)$ where $n = \min(size, max)$
+- **Hash Table:** $O(n)$ for key-value storage
+- **Linked List:** $O(n)$ for LRU ordering
+- **Per Item Overhead:** Constant space for prev/next pointers and metadata
+
+### Invariants
+
+1. **Size Constraint:** $0 \leq size \leq max$ (when $max > 0$)
+2. **List Consistency:** $first \neq null \iff last \neq null \iff size > 0$
+3. **Hash Consistency:** $|H| = size$
+4. **LRU Order:** Items in list are ordered from least to most recently used
+5. **TTL Validity:** $ttl = 0 \lor \forall k \in H: H[k].expiry > t_{now}$
 
 ## 📖 API Reference
 
