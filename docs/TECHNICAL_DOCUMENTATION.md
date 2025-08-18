@@ -156,6 +156,8 @@ The LRU cache maintains a doubly-linked list $L$ and a hash table $H$ for O(1) o
 
 **Core Methods:**
 
+**Note:** The mathematical notation uses `create(k, v)` to represent the item creation logic that is inline in the actual implementation.
+
 #### Set Operation: $set(k, v, bypass = false, resetTtl = resetTtl) \rightarrow \text{LRU}$
 $$\begin{align}
 set(k, v, bypass, resetTtl) &= \begin{cases}
@@ -185,14 +187,16 @@ last.next \leftarrow H[k] & \text{otherwise}
 $$\begin{align}
 setWithEvicted(k, v, resetTtl) &= \begin{cases}
 set(k, v, true, resetTtl) \land \bot & \text{if } k \in H \\
-evicted \land insert(k, v) & \text{if } k \notin H \land max > 0 \land size = max \\
-\bot \land insert(k, v) & \text{if } k \notin H \land (max = 0 \lor size < max)
+evicted \land create(k, v) & \text{if } k \notin H \land max > 0 \land size = max \\
+\bot \land create(k, v) & \text{if } k \notin H \land (max = 0 \lor size < max)
 \end{cases} \\
 \text{where } evicted &= \begin{cases}
-\{...first\} & \text{if } size > 0 \\
+\{...this.first\} & \text{if } size > 0 \\
 \bot & \text{otherwise}
 \end{cases}
 \end{align}$$
+
+**Note:** `setWithEvicted()` always calls `set()` with `bypass = true`, which means TTL is never reset during `setWithEvicted()` operations, regardless of the `resetTtl` parameter.
 
 **Time Complexity:** $O(1)$ amortized
 
@@ -253,6 +257,7 @@ delete(k) & \text{if } isExpired(k) \\
 **TTL Reset Behavior:**
 - TTL is only reset during `set()` operations when `resetTtl = true` and `bypass = false`
 - `get()` operations never reset TTL, regardless of the `resetTtl` setting
+- `setWithEvicted()` operations never reset TTL because they always call `set()` with `bypass = true`
 
 ### Space Complexity
 
@@ -268,7 +273,7 @@ delete(k) & \text{if } isExpired(k) \\
 3. **Hash Consistency:** $|H| = size$
 4. **LRU Order:** Items in list are ordered from least to most recently used
 5. **TTL Validity:** $ttl = 0 \lor \forall k \in H: H[k].expiry > t_{now}$
-6. **TTL Reset Invariant:** TTL is only reset during `set()` operations, never during `get()` operations
+6. **TTL Reset Invariant:** TTL is only reset during `set()` operations when `bypass = false`, never during `get()` or `setWithEvicted()` operations
 
 ## TypeScript Support
 
