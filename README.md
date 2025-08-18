@@ -309,7 +309,7 @@ class SessionManager {
   }
 
   getSession(sessionId) {
-    // get() does not extend TTL; to extend TTL, call set() again when resetTtl is true
+    // get() does not extend TTL; to extend, set the session again when resetTtl is true
     return this.sessions.get(sessionId);
   }
 
@@ -410,8 +410,6 @@ npm run build
 
 ---
 
-
-
 ## 📖 API Reference
 
 ### Factory Function
@@ -424,8 +422,6 @@ Creates a new LRU cache instance using the factory function.
 - `max` `{Number}` - Maximum number of items to store (default: 1000; 0 = unlimited)
 - `ttl` `{Number}` - Time-to-live in milliseconds (default: 0; 0 = no expiration)  
 - `resetTtl` `{Boolean}` - Reset TTL when updating existing items via `set()` (default: false)
-
-**Note:** The `resetTtl` parameter only affects `set()` operations. `get()` operations never reset TTL, regardless of this setting.
 
 **Returns:** `{LRU}` New LRU cache instance
 
@@ -476,9 +472,7 @@ cache.max; // 500
 ```
 
 #### resetTtl
-`{Boolean}` - Whether to reset TTL when updating existing items via `set()` operations
-
-**Note:** This setting only affects `set()` operations. `get()` operations never reset TTL, regardless of this setting.
+`{Boolean}` - Whether to reset TTL when updating existing items via `set()`
 
 ```javascript
 const cache = lru(500, 5*6e4, true);
@@ -540,11 +534,8 @@ console.log(cache.entries()); // [['a', 1], ['b', 2]]
 console.log(cache.entries(['a'])); // [['a', 1]]
 ```
 
-#### evict(bypass)
+#### evict()
 Removes the least recently used item from cache.
-
-**Parameters:**
-- `bypass` `{Boolean}` - Whether to force eviction even when cache is empty (default: false)
 
 **Returns:** `{Object}` LRU instance
 
@@ -575,7 +566,7 @@ Retrieves cached item and promotes it to most recently used position.
 
 **Returns:** `{*}` Item value or undefined if not found/expired
 
-**Note:** `get()` does not reset or extend TTL. TTL is only reset on `set()` operations when `resetTtl` is `true`. The `resetTtl` setting has no effect on `get()` operations.
+Note: `get()` does not reset or extend TTL. TTL is only reset on `set()` when `resetTtl` is `true`.
 
 ```javascript
 cache.set('key1', 'value1');
@@ -608,14 +599,12 @@ cache.get('a'); // Move 'a' to most recent
 console.log(cache.keys()); // ['b', 'a']
 ```
 
-#### set(key, value, bypass, resetTtl)
+#### set(key, value)
 Stores item in cache as most recently used.
 
 **Parameters:**
 - `key` `{String}` - Item key
 - `value` `{*}` - Item value
-- `bypass` `{Boolean}` - Internal parameter for setWithEvicted method (default: false)
-- `resetTtl` `{Boolean}` - Whether to reset TTL for this operation (default: this.resetTtl)
 
 **Returns:** `{Object}` LRU instance
 
