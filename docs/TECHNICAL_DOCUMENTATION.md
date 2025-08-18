@@ -9,7 +9,7 @@ The tiny-lru library provides a high-performance, memory-efficient Least Recentl
 - [Architecture Overview](#architecture-overview)
 - [Data Flow](#data-flow)
 - [Core Operations](#core-operations)
-- [Mathematical Representation](#mathematical-representation)
+- [Mathematical Foundation](#mathematical-foundation)
 - [TypeScript Support](#typescript-support)
 - [Modern Usage Patterns](#modern-usage-patterns)
 - [Security Considerations](#security-considerations)
@@ -141,7 +141,7 @@ sequenceDiagram
 - **Base Overhead**: ~200 bytes (class instance + hash map)
 - **Total**: `base + (nodes × 120)` bytes approximately
 
-## Mathematical Representation
+## Mathematical Foundation
 
 ### Core Operations
 
