@@ -9,6 +9,7 @@ The tiny-lru library provides a high-performance, memory-efficient Least Recentl
 - [Architecture Overview](#architecture-overview)
 - [Data Flow](#data-flow)
 - [Core Operations](#core-operations)
+- [Mathematical Representation](#mathematical-representation)
 - [TypeScript Support](#typescript-support)
 - [Modern Usage Patterns](#modern-usage-patterns)
 - [Security Considerations](#security-considerations)
@@ -139,6 +140,140 @@ sequenceDiagram
 - **Per Node**: ~120 bytes (key + value + pointers + metadata)
 - **Base Overhead**: ~200 bytes (class instance + hash map)
 - **Total**: `base + (nodes × 120)` bytes approximately
+
+## Mathematical Representation
+
+### Core Operations
+
+The LRU cache maintains a doubly-linked list $L$ and a hash table $H$ for O(1) operations:
+
+**Data Structure:**
+- $L = (first, last, size)$ - Doubly-linked list with head/tail pointers
+- $H: K \rightarrow \{key: K, value: V, prev: Object, next: Object, expiry: \mathbb{N}_0\}$ - Hash table mapping keys to item objects
+- $max \in \mathbb{N}_0$ - Maximum cache size (0 = unlimited)
+- $ttl \in \mathbb{N}_0$ - Time-to-live in milliseconds
+- $resetTtl \in \{\text{true}, \text{false}\}$ - Whether to reset TTL on set() operations
+
+**Core Methods:**
+
+**Note:** The mathematical notation uses `create(k, v)` to represent the item creation logic that is inline in the actual implementation.
+
+#### Set Operation: $set(k, v, bypass = false, resetTtl = resetTtl) \rightarrow \text{LRU}$
+$$\begin{align}
+set(k, v, bypass, resetTtl) &= \begin{cases}
+update(k, v, bypass, resetTtl) & \text{if } k \in H \\
+insert(k, v) & \text{if } k \notin H
+\end{cases} \\
+update(k, v, bypass, resetTtl) &= H[k].value \leftarrow v \land moveToEnd(H[k]) \\
+& \quad \land \begin{cases}
+H[k].expiry \leftarrow t_{now} + ttl & \text{if } bypass = false \land resetTtl = true \land ttl > 0 \\
+\text{no-op} & \text{otherwise}
+\end{cases} \\
+insert(k, v) &= \begin{cases}
+evict() \land create(k, v) & \text{if } max > 0 \land size = max \\
+create(k, v) & \text{otherwise}
+\end{cases} \\
+create(k, v) &= H[k] \leftarrow \{key: k, value: v, prev: last, next: null, expiry: t_{now} + ttl\} \\
+& \quad \land last \leftarrow H[k] \land size \leftarrow size + 1 \\
+& \quad \land \begin{cases}
+first \leftarrow H[k] & \text{if } size = 1 \\
+last.next \leftarrow H[k] & \text{otherwise}
+\end{cases}
+\end{align}$$
+
+**Time Complexity:** $O(1)$ amortized
+
+#### Set With Evicted Operation: $setWithEvicted(k, v, resetTtl = resetTtl) \rightarrow \{key: K, value: V, expiry: \mathbb{N}_0, prev: Object, next: Object\} \cup \{\bot\}$
+$$\begin{align}
+setWithEvicted(k, v, resetTtl) &= \begin{cases}
+set(k, v, true, resetTtl) \land \bot & \text{if } k \in H \\
+evicted \land create(k, v) & \text{if } k \notin H \land max > 0 \land size = max \\
+\bot \land create(k, v) & \text{if } k \notin H \land (max = 0 \lor size < max)
+\end{cases} \\
+\text{where } evicted &= \begin{cases}
+\{...this.first\} & \text{if } size > 0 \\
+\bot & \text{otherwise}
+\end{cases}
+\end{align}$$
+
+**Note:** `setWithEvicted()` always calls `set()` with `bypass = true`, which means TTL is never reset during `setWithEvicted()` operations, regardless of the `resetTtl` parameter.
+
+**Time Complexity:** $O(1)$ amortized
+
+#### Get Operation: $get(k) \rightarrow V \cup \{\bot\}$
+$$\begin{align}
+get(k) &= \begin{cases}
+cleanup(k) \land moveToEnd(H[k]) \land H[k].value & \text{if } k \in H \land (ttl = 0 \lor H[k].expiry > t_{now}) \\
+\bot & \text{otherwise}
+\end{cases}
+\end{align}$$
+
+**Note:** `get()` operations never reset TTL, regardless of the `resetTtl` setting.
+
+**Time Complexity:** $O(1)$
+
+#### Delete Operation: $delete(k) \rightarrow \text{LRU}$
+$$\begin{align}
+delete(k) &= \begin{cases}
+removeFromList(H[k]) \land H \setminus \{k\} \land size \leftarrow size - 1 & \text{if } k \in H \\
+\text{no-op} & \text{otherwise}
+\end{cases}
+\end{align}$$
+
+**Time Complexity:** $O(1)$
+
+#### Move to End: $moveToEnd(item)$
+$$\begin{align}
+moveToEnd(item) &= \begin{cases}
+\text{no-op} & \text{if } item = last \\
+removeFromList(item) \land appendToList(item) & \text{otherwise}
+\end{cases}
+\end{align}$$
+
+**Time Complexity:** $O(1)$
+
+### Eviction Policy
+
+**LRU Eviction:** When $max > 0 \land size = max$ and inserting a new item:
+
+$$evict(bypass = false) = \begin{cases}
+first \leftarrow first.next \land first.prev \leftarrow null \land H \setminus \{first.key\} \land size \leftarrow size - 1 & \text{if } (bypass \lor size > 0) \\
+\text{no-op} & \text{otherwise}
+\end{cases}$$
+
+### TTL Expiration
+
+**Expiration Check:** For any operation accessing key $k$:
+
+$$isExpired(k) = ttl > 0 \land H[k].expiry \leq t_{now}$$
+
+**Automatic Cleanup:** Expired items are removed on access:
+
+$$cleanup(k) = \begin{cases}
+delete(k) & \text{if } isExpired(k) \\
+\text{no-op} & \text{otherwise}
+\end{cases}$$
+
+**TTL Reset Behavior:**
+- TTL is only reset during `set()` operations when `resetTtl = true` and `bypass = false`
+- `get()` operations never reset TTL, regardless of the `resetTtl` setting
+- `setWithEvicted()` operations never reset TTL because they always call `set()` with `bypass = true`
+
+### Space Complexity
+
+- **Worst Case:** $O(n)$ where $n = \min(size, max)$
+- **Hash Table:** $O(n)$ for key-value storage
+- **Linked List:** $O(n)$ for LRU ordering
+- **Per Item Overhead:** Constant space for prev/next pointers and metadata
+
+### Invariants
+
+1. **Size Constraint:** $0 \leq size \leq max$ (when $max > 0$)
+2. **List Consistency:** $first \neq null \iff last \neq null \iff size > 0$
+3. **Hash Consistency:** $|H| = size$
+4. **LRU Order:** Items in list are ordered from least to most recently used
+5. **TTL Validity:** $ttl = 0 \lor \forall k \in H: H[k].expiry > t_{now}$
+6. **TTL Reset Invariant:** TTL is only reset during `set()` operations when `bypass = false`, never during `get()` or `setWithEvicted()` operations
 
 ## TypeScript Support
 
