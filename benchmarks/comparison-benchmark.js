@@ -30,7 +30,7 @@ try {
 try {
 	// Import from mnemonist using the correct export pattern
 	const mnemonistModule = await import("mnemonist");
-	MnemonistLRU = mnemonistModule.LRUCache;
+	MnemonistLRU = mnemonistModule.LRUCacheWithDelete;
 } catch (error) {
 	console.error("mnemonist not found. Run: npm install --no-save mnemonist");
 	console.error("Error:", error.message);
