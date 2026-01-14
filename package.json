@@ -41,7 +41,7 @@
     "lint": "eslint --fix *.js src/*.js tests/**/*.js benchmarks/*.js",
     "mocha": "c8 mocha \"tests/**/*.js\"",
     "rollup": "rollup --config",
-    "test": "npm run mocha",
+    "test": "npm run lint && npm run mocha",
     "prepare": "husky"
   },
   "devDependencies": {

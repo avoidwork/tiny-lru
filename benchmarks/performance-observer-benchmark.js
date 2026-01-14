@@ -1,6 +1,70 @@
 import { performance } from "node:perf_hooks";
 import { lru } from "../dist/tiny-lru.js";
 
+// Custom high-resolution timer benchmark (alternative approach)
+class CustomTimer {
+	constructor () {
+		this.results = new Map();
+	}
+
+	async timeFunction (name, fn, iterations = 1000) {
+		const times = [];
+
+		// Warmup
+		for (let i = 0; i < Math.min(100, iterations / 10); i++) {
+			await fn();
+		}
+
+		// Actual measurement
+		for (let i = 0; i < iterations; i++) {
+			const start = performance.now();
+			await fn();
+			const end = performance.now();
+			times.push(end - start);
+		}
+
+		// Calculate statistics
+		const totalTime = times.reduce((a, b) => a + b, 0);
+		const avgTime = totalTime / iterations;
+		const minTime = Math.min(...times);
+		const maxTime = Math.max(...times);
+
+		const sorted = [...times].sort((a, b) => a - b);
+		const median = sorted[Math.floor(sorted.length / 2)];
+
+		const variance = times.reduce((acc, time) => acc + Math.pow(time - avgTime, 2), 0) / iterations;
+		const stdDev = Math.sqrt(variance);
+
+		this.results.set(name, {
+			name,
+			iterations,
+			avgTime,
+			minTime,
+			maxTime,
+			median,
+			stdDev,
+			opsPerSec: 1000 / avgTime // Convert ms to ops/sec
+		});
+	}
+
+	printResults () {
+		console.log("\n⏱️  Custom Timer Results");
+		console.log("========================");
+
+		const results = Array.from(this.results.values());
+		console.table(results.map(r => ({
+			"Operation": r.name,
+			"Iterations": r.iterations,
+			"Avg (ms)": r.avgTime.toFixed(6),
+			"Min (ms)": r.minTime.toFixed(6),
+			"Max (ms)": r.maxTime.toFixed(6),
+			"Median (ms)": r.median.toFixed(6),
+			"Std Dev": r.stdDev.toFixed(6),
+			"Ops/sec": Math.round(r.opsPerSec)
+		})));
+	}
+}
+
 // Test data generation
 function generateTestData (size) {
 	const out = new Array(size);
@@ -101,7 +165,7 @@ async function runPerformanceObserverBenchmarks () {
 		for (let i = 0; i < cacheSize; i++) {
 			phase3Cache.set(`evict_key_${i}`, `evict_value_${i}`);
 		}
-	}, 1000);
+	}, 10000);
 
 	// Phase 4: Some clear operations
 	console.log("Phase 4: Clear operations");
@@ -111,7 +175,7 @@ async function runPerformanceObserverBenchmarks () {
 			cache.set(`temp_${j}`, `temp_value_${j}`);
 		}
 		cache.clear();
-	}, 1000);
+	}, 10000);
 
 	// Print results with Performance Observer header
 	console.log("\n📊 Performance Observer Results");
@@ -128,70 +192,6 @@ async function runPerformanceObserverBenchmarks () {
 		"Std Dev": r.stdDev.toFixed(4),
 		"Ops/sec": Math.round(r.opsPerSec)
 	})));
-}
-
-// Custom high-resolution timer benchmark (alternative approach)
-class CustomTimer {
-	constructor () {
-		this.results = new Map();
-	}
-
-	async timeFunction (name, fn, iterations = 1000) {
-		const times = [];
-
-		// Warmup
-		for (let i = 0; i < Math.min(100, iterations / 10); i++) {
-			await fn();
-		}
-
-		// Actual measurement
-		for (let i = 0; i < iterations; i++) {
-			const start = performance.now();
-			await fn();
-			const end = performance.now();
-			times.push(end - start);
-		}
-
-		// Calculate statistics
-		const totalTime = times.reduce((a, b) => a + b, 0);
-		const avgTime = totalTime / iterations;
-		const minTime = Math.min(...times);
-		const maxTime = Math.max(...times);
-
-		const sorted = [...times].sort((a, b) => a - b);
-		const median = sorted[Math.floor(sorted.length / 2)];
-
-		const variance = times.reduce((acc, time) => acc + Math.pow(time - avgTime, 2), 0) / iterations;
-		const stdDev = Math.sqrt(variance);
-
-		this.results.set(name, {
-			name,
-			iterations,
-			avgTime,
-			minTime,
-			maxTime,
-			median,
-			stdDev,
-			opsPerSec: 1000 / avgTime // Convert ms to ops/sec
-		});
-	}
-
-	printResults () {
-		console.log("\n⏱️  Custom Timer Results");
-		console.log("========================");
-
-		const results = Array.from(this.results.values());
-		console.table(results.map(r => ({
-			"Operation": r.name,
-			"Iterations": r.iterations,
-			"Avg (ms)": r.avgTime.toFixed(6),
-			"Min (ms)": r.minTime.toFixed(6),
-			"Max (ms)": r.maxTime.toFixed(6),
-			"Median (ms)": r.median.toFixed(6),
-			"Std Dev": r.stdDev.toFixed(6),
-			"Ops/sec": Math.round(r.opsPerSec)
-		})));
-	}
 }
 
 async function runCustomTimerBenchmarks () {
