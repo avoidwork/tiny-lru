@@ -206,89 +206,104 @@ async function runCustomTimerBenchmarks () {
 
 	const timer = new CustomTimer();
 	const cacheSize = 1000;
-	const testData = generateTestData(cacheSize);
+	const iterations = 10000;
+	const testData = generateTestData(cacheSize * 2);
 
-	// Pre-populate cache for read tests
-	const readCache = lru(cacheSize);
-	testData.forEach(item => readCache.set(item.key, item.value));
+	console.log("Running operations...");
 
-	// Benchmark different operations
-	await timer.timeFunction("Empty Cache Set", () => {
+	// Phase 1: Fill cache with initial data
+	console.log("Phase 1: Initial cache population");
+	const phase1Cache = lru(cacheSize);
+	let phase1Index = 0;
+	await timer.timeFunction("lru.set (initial population)", () => {
+		const i = phase1Index % cacheSize;
+		phase1Cache.set(testData[i].key, testData[i].value);
+		phase1Index++;
+	}, iterations);
+
+	// Phase 2: Mixed read/write operations
+	console.log("Phase 2: Mixed operations (realistic workload)");
+	const phase2Cache = lru(cacheSize);
+	// Pre-populate for realistic workload
+	for (let i = 0; i < cacheSize; i++) {
+		phase2Cache.set(testData[i].key, testData[i].value);
+	}
+
+	// Deterministic mixed workload without Math.random in the loop
+	const choice = new Uint8Array(5000);
+	const indices = new Uint32Array(5000);
+	let a = 1103515245, c = 12345, m = 2 ** 31;
+	let seed = 42;
+	for (let i = 0; i < 5000; i++) {
+		seed = (a * seed + c) % m;
+		const r = seed >>> 0;
+		choice[i] = r % 100; // 0..99
+		indices[i] = r % testData.length;
+	}
+
+	let mixedGetIndex = 0;
+	await timer.timeFunction("lru.get (mixed workload)", () => {
+		const i = mixedGetIndex % choice.length;
+		const pick = choice[i];
+		if (pick < 60) {
+			const idx = indices[i];
+			phase2Cache.get(testData[idx].key);
+		}
+		mixedGetIndex++;
+	}, iterations);
+
+	let mixedSetIndex = 0;
+	await timer.timeFunction("lru.set (mixed workload)", () => {
+		const i = mixedSetIndex % choice.length;
+		const pick = choice[i];
+		if (pick >= 60 && pick < 80) {
+			const idx = indices[i];
+			phase2Cache.set(testData[idx].key, testData[idx].value);
+		}
+		mixedSetIndex++;
+	}, iterations);
+
+	let mixedHasIndex = 0;
+	await timer.timeFunction("lru.has (mixed workload)", () => {
+		const i = mixedHasIndex % choice.length;
+		const pick = choice[i];
+		if (pick >= 80 && pick < 95) {
+			const idx = indices[i];
+			phase2Cache.has(testData[idx].key);
+		}
+		mixedHasIndex++;
+	}, iterations);
+
+	let mixedDeleteIndex = 0;
+	await timer.timeFunction("lru.delete (mixed workload)", () => {
+		const i = mixedDeleteIndex % choice.length;
+		const pick = choice[i];
+		if (pick >= 95) {
+			const idx = indices[i];
+			phase2Cache.delete(testData[idx].key);
+		}
+		mixedDeleteIndex++;
+	}, iterations);
+
+	// Phase 3: Cache eviction stress test
+	console.log("Phase 3: Cache eviction stress test");
+	const phase3Cache = lru(cacheSize);
+	let phase3Index = 0;
+	await timer.timeFunction("lru.set (eviction stress)", () => {
+		const i = phase3Index;
+		phase3Cache.set(`evict_key_${i}`, `evict_value_${i}`);
+		phase3Index++;
+	}, iterations);
+
+	// Phase 4: Some clear operations
+	console.log("Phase 4: Clear operations");
+	await timer.timeFunction("lru.clear", () => {
 		const cache = lru(cacheSize);
-		const item = testData[Math.floor(Math.random() * testData.length)];
-		cache.set(item.key, item.value);
-	}, 10000);
-
-	await timer.timeFunction("Full Cache Set (eviction)", () => {
-		const cache = lru(100); // Smaller cache for guaranteed eviction
-		testData.slice(0, 100).forEach(item => cache.set(item.key, item.value));
-		// This will cause eviction
-		cache.set("new_key", "new_value");
-	}, 10000);
-
-	await timer.timeFunction("Cache Hit Get", () => {
-		const item = testData[Math.floor(Math.random() * testData.length)];
-		readCache.get(item.key);
-	}, 10000);
-
-	await timer.timeFunction("Cache Miss Get", () => {
-		readCache.get(`nonexistent_${Math.random()}`);
-	}, 10000);
-
-	await timer.timeFunction("Has Operation (hit)", () => {
-		const item = testData[Math.floor(Math.random() * testData.length)];
-		readCache.has(item.key);
-	}, 10000);
-
-	await timer.timeFunction("Has Operation (miss)", () => {
-		readCache.has(`nonexistent_${Math.random()}`);
-	}, 10000);
-
-	await timer.timeFunction("Delete Operation", () => {
-		const cache = lru(cacheSize);
-		testData.slice(0, 500).forEach(item => cache.set(item.key, item.value));
-		const item = testData[Math.floor(Math.random() * 500)];
-		cache.delete(item.key);
-	}, 10000);
-
-	await timer.timeFunction("Clear Operation", () => {
-		const cache = lru(cacheSize);
-		testData.slice(0, 500).forEach(item => cache.set(item.key, item.value));
+		for (let j = 0; j < 100; j++) {
+			cache.set(`temp_${j}`, `temp_value_${j}`);
+		}
 		cache.clear();
-	}, 10000);
-
-	// Additional benchmarks for remaining public API methods
-	await timer.timeFunction("Keys Operation", () => {
-		readCache.keys();
-	}, 10000);
-
-	await timer.timeFunction("Values Operation", () => {
-		readCache.values();
-	}, 10000);
-
-	await timer.timeFunction("Entries Operation", () => {
-		readCache.entries();
-	}, 10000);
-
-	await timer.timeFunction("Evict Operation", () => {
-		const cache = lru(100);
-		testData.slice(0, 100).forEach(item => cache.set(item.key, item.value));
-		cache.evict();
-	}, 10000);
-
-	await timer.timeFunction("SetWithEvicted Operation", () => {
-		const cache = lru(2);
-		cache.set(testData[0].key, testData[0].value);
-		cache.set(testData[1].key, testData[1].value);
-		cache.setWithEvicted("extra_key", "extra_value");
-	}, 10000);
-
-	await timer.timeFunction("ExpiresAt Operation", () => {
-		const cache = lru(cacheSize, 5000);
-		const item = testData[Math.floor(Math.random() * testData.length)];
-		cache.set(item.key, item.value);
-		cache.expiresAt(item.key);
-	}, 10000);
+	}, iterations);
 
 	timer.printResults();
 }
