@@ -321,8 +321,8 @@ async function runScalabilityTest () {
 		const testData = generateTestData(size);
 
 		// Test set performance
-		const setStart = performance.now();
 		const cache = lru(size);
+		const setStart = performance.now();
 		testData.forEach(item => cache.set(item.key, item.value));
 		const setEnd = performance.now();
 		const setTime = setEnd - setStart;
