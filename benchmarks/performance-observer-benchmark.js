@@ -161,12 +161,11 @@ async function runPerformanceObserverBenchmarks () {
 
 	// Phase 4: Some clear operations
 	console.log("Phase 4: Clear operations");
-	const phase4Cache = lru(cacheSize);
-	for (let j = 0; j < 100; j++) {
-		phase4Cache.set(`temp_${j}`, `temp_value_${j}`);
-	}
-
 	await timer.timeFunction("lru.clear", () => {
+		const phase4Cache = lru(cacheSize);
+		for (let j = 0; j < 100; j++) {
+			phase4Cache.set(`temp_${j}`, `temp_value_${j}`);
+		}
 		phase4Cache.clear();
 	}, 10000);
 
