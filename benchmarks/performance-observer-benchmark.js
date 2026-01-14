@@ -152,12 +152,11 @@ async function runPerformanceObserverBenchmarks () {
 
 	// Phase 3: Cache eviction stress test
 	console.log("Phase 3: Cache eviction stress test");
-	const phase3Cache = lru(cacheSize);
-	let phase3Index = 0;
+	const phase3Cache = lru(2);
+	let phase3Index = 1;
+	phase3Cache.set(`evict_key_${phase3Index}`, `evict__value_${phase3Index++}`);
 	await timer.timeFunction("lru.set (eviction stress)", () => {
-		const i = phase3Index;
-		phase3Cache.set(`evict_key_${i}`, `evict_value_${i}`);
-		phase3Index++;
+		phase3Cache.set(`evict_key_${phase3Index}`, `evict_value_${phase3Index++}`);
 	}, 10000);
 
 	// Phase 4: Some clear operations
