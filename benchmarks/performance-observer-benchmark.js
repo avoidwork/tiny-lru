@@ -92,10 +92,11 @@ async function runPerformanceObserverBenchmarks () {
 	// Phase 1: Fill cache with initial data
 	console.log("Phase 1: Initial cache population");
 	const phase1Cache = lru(cacheSize);
+	let phase1Index = 0;
 	await timer.timeFunction("lru.set (initial population)", () => {
-		for (let i = 0; i < cacheSize; i++) {
-			phase1Cache.set(testData[i].key, testData[i].value);
-		}
+		const i = phase1Index % cacheSize;
+		phase1Cache.set(testData[i].key, testData[i].value);
+		phase1Index++;
 	}, 10000);
 
 	// Phase 2: Mixed read/write operations
@@ -118,53 +119,58 @@ async function runPerformanceObserverBenchmarks () {
 		indices[i] = r % testData.length;
 	}
 
+	let mixedGetIndex = 0;
 	await timer.timeFunction("lru.get (mixed workload)", () => {
-		for (let i = 0; i < 5000; i++) {
-			const pick = choice[i];
-			if (pick < 60) {
-				const idx = indices[i];
-				phase2Cache.get(testData[idx].key);
-			}
+		const i = mixedGetIndex % choice.length;
+		const pick = choice[i];
+		if (pick < 60) {
+			const idx = indices[i];
+			phase2Cache.get(testData[idx].key);
 		}
+		mixedGetIndex++;
 	}, 10000);
 
+	let mixedSetIndex = 0;
 	await timer.timeFunction("lru.set (mixed workload)", () => {
-		for (let i = 0; i < 5000; i++) {
-			const pick = choice[i];
-			if (pick >= 60 && pick < 80) {
-				const idx = indices[i];
-				phase2Cache.set(testData[idx].key, testData[idx].value);
-			}
+		const i = mixedSetIndex % choice.length;
+		const pick = choice[i];
+		if (pick >= 60 && pick < 80) {
+			const idx = indices[i];
+			phase2Cache.set(testData[idx].key, testData[idx].value);
 		}
+		mixedSetIndex++;
 	}, 10000);
 
+	let mixedHasIndex = 0;
 	await timer.timeFunction("lru.has (mixed workload)", () => {
-		for (let i = 0; i < 5000; i++) {
-			const pick = choice[i];
-			if (pick >= 80 && pick < 95) {
-				const idx = indices[i];
-				phase2Cache.has(testData[idx].key);
-			}
+		const i = mixedHasIndex % choice.length;
+		const pick = choice[i];
+		if (pick >= 80 && pick < 95) {
+			const idx = indices[i];
+			phase2Cache.has(testData[idx].key);
 		}
+		mixedHasIndex++;
 	}, 10000);
 
+	let mixedDeleteIndex = 0;
 	await timer.timeFunction("lru.delete (mixed workload)", () => {
-		for (let i = 0; i < 5000; i++) {
-			const pick = choice[i];
-			if (pick >= 95) {
-				const idx = indices[i];
-				phase2Cache.delete(testData[idx].key);
-			}
+		const i = mixedDeleteIndex % choice.length;
+		const pick = choice[i];
+		if (pick >= 95) {
+			const idx = indices[i];
+			phase2Cache.delete(testData[idx].key);
 		}
+		mixedDeleteIndex++;
 	}, 10000);
 
 	// Phase 3: Cache eviction stress test
 	console.log("Phase 3: Cache eviction stress test");
 	const phase3Cache = lru(cacheSize);
+	let phase3Index = 0;
 	await timer.timeFunction("lru.set (eviction stress)", () => {
-		for (let i = 0; i < cacheSize; i++) {
-			phase3Cache.set(`evict_key_${i}`, `evict_value_${i}`);
-		}
+		const i = phase3Index;
+		phase3Cache.set(`evict_key_${i}`, `evict_value_${i}`);
+		phase3Index++;
 	}, 10000);
 
 	// Phase 4: Some clear operations
