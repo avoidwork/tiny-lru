@@ -78,7 +78,6 @@ export class LRU {
 	delete (key) {
 		const item = this.items[key];
 		if (item !== undefined) {
-			const item = this.items[key];
 
 			delete this.items[key];
 			this.size--;
