@@ -1,9 +1,9 @@
 /**
  * tiny-lru
  *
- * @copyright 2025 Jason Mulligan <jason.mulligan@avoidwork.com>
+ * @copyright 2026 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 11.4.5
+ * @version 11.4.6
  */
 'use strict';
 
@@ -128,7 +128,13 @@ class LRU {
 	 * @since 11.1.0
 	 */
 	entries (keys = this.keys()) {
-		return keys.map(key => [key, this.get(key)]);
+		const result = new Array(keys.length);
+		for (let i = 0; i < keys.length; i++) {
+			const key = keys[i];
+			result[i] = [key, this.get(key)];
+		}
+
+		return result;
 	}
 
 	/**
@@ -305,11 +311,12 @@ class LRU {
 	 * @since 9.0.0
 	 */
 	keys () {
-		const result = [];
+		const result = new Array(this.size);
 		let x = this.first;
+		let i = 0;
 
 		while (x !== null) {
-			result.push(x.key);
+			result[i++] = x.key;
 			x = x.next;
 		}
 
@@ -438,7 +445,12 @@ class LRU {
 	 * @since 11.1.0
 	 */
 	values (keys = this.keys()) {
-		return keys.map(key => this.get(key));
+		const result = new Array(keys.length);
+		for (let i = 0; i < keys.length; i++) {
+			result[i] = this.get(keys[i]);
+		}
+
+		return result;
 	}
 }
 
