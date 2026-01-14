@@ -48,7 +48,7 @@ class CustomTimer {
 	}
 
 	printResults () {
-		console.log("\n⏱️  Custom Timer Results");
+		console.log("\n⏱️  Performance Results");
 		console.log("========================");
 
 		const results = Array.from(this.results.values());
