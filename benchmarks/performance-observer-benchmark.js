@@ -92,9 +92,9 @@ async function runPerformanceObserverBenchmarks () {
 
 	// Phase 1: Fill cache with initial data
 	console.log("Phase 1: Initial cache population");
-	const phase1Cache = lru(cacheSize);
 	let phase1Index = 0;
 	await timer.timeFunction("lru.set (initial population)", () => {
+		const phase1Cache = lru(cacheSize);
 		const i = phase1Index % cacheSize;
 		phase1Cache.set(testData[i].key, testData[i].value);
 		phase1Index++;
