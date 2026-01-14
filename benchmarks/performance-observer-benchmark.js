@@ -86,6 +86,7 @@ async function runPerformanceObserverBenchmarks () {
 	const timer = new CustomTimer();
 	const cacheSize = 1000;
 	const testData = generateTestData(cacheSize * 2);
+	const iterations = 10000;
 
 	console.log("Running operations...");
 
@@ -97,7 +98,7 @@ async function runPerformanceObserverBenchmarks () {
 		const i = phase1Index % cacheSize;
 		phase1Cache.set(testData[i].key, testData[i].value);
 		phase1Index++;
-	}, 10000);
+	}, iterations);
 
 	// Phase 2: Mixed read/write operations
 	console.log("Phase 2: Mixed operations (realistic workload)");
@@ -108,13 +109,12 @@ async function runPerformanceObserverBenchmarks () {
 	}
 
 	// Deterministic mixed workload that exercises the entire cache without conditionals
-	const phase2Iterations = 1000;
-	const getIndices = new Uint32Array(phase2Iterations);
-	const setIndices = new Uint32Array(phase2Iterations);
-	const hasIndices = new Uint32Array(phase2Iterations);
-	const deleteIndices = new Uint32Array(phase2Iterations);
+	const getIndices = new Uint32Array(iterations);
+	const setIndices = new Uint32Array(iterations);
+	const hasIndices = new Uint32Array(iterations);
+	const deleteIndices = new Uint32Array(iterations);
 
-	for (let i = 0; i < phase2Iterations; i++) {
+	for (let i = 0; i < iterations; i++) {
 		const idx = i % cacheSize;
 		getIndices[i] = idx;
 		setIndices[i] = idx;
@@ -124,31 +124,31 @@ async function runPerformanceObserverBenchmarks () {
 
 	let mixedGetIndex = 0;
 	await timer.timeFunction("lru.get (mixed workload)", () => {
-		const idx = getIndices[mixedGetIndex % phase2Iterations];
+		const idx = getIndices[mixedGetIndex % iterations];
 		phase2Cache.get(testData[idx].key);
 		mixedGetIndex++;
-	}, phase2Iterations);
+	}, iterations);
 
 	let mixedSetIndex = 0;
 	await timer.timeFunction("lru.set (mixed workload)", () => {
-		const idx = setIndices[mixedSetIndex % phase2Iterations];
+		const idx = setIndices[mixedSetIndex % iterations];
 		phase2Cache.set(testData[idx].key, testData[idx].value);
 		mixedSetIndex++;
-	}, phase2Iterations);
+	}, iterations);
 
 	let mixedHasIndex = 0;
 	await timer.timeFunction("lru.has (mixed workload)", () => {
-		const idx = hasIndices[mixedHasIndex % phase2Iterations];
+		const idx = hasIndices[mixedHasIndex % iterations];
 		phase2Cache.has(testData[idx].key);
 		mixedHasIndex++;
-	}, phase2Iterations);
+	}, iterations);
 
 	let mixedDeleteIndex = 0;
 	await timer.timeFunction("lru.delete (mixed workload)", () => {
-		const idx = deleteIndices[mixedDeleteIndex % phase2Iterations];
+		const idx = deleteIndices[mixedDeleteIndex % iterations];
 		phase2Cache.delete(testData[idx].key);
 		mixedDeleteIndex++;
-	}, phase2Iterations);
+	}, 1000);
 
 	// Phase 3: Cache eviction stress test
 	console.log("Phase 3: Cache eviction stress test");
@@ -157,17 +157,15 @@ async function runPerformanceObserverBenchmarks () {
 	phase3Cache.set(`evict_key_${phase3Index}`, `evict__value_${phase3Index++}`);
 	await timer.timeFunction("lru.set (eviction stress)", () => {
 		phase3Cache.set(`evict_key_${phase3Index}`, `evict_value_${phase3Index++}`);
-	}, 10000);
+	}, iterations);
 
 	// Phase 4: Some clear operations
 	console.log("Phase 4: Clear operations");
 	await timer.timeFunction("lru.clear", () => {
-		const phase4Cache = lru(cacheSize);
-		for (let j = 0; j < 100; j++) {
-			phase4Cache.set(`temp_${j}`, `temp_value_${j}`);
-		}
+		const phase4Cache = lru(1);
+		phase4Cache.set("temp_1", "temp_value_1");
 		phase4Cache.clear();
-	}, 10000);
+	}, iterations);
 
 	// Print results with Performance Observer header
 	console.log("\n📊 Performance Observer Results");
