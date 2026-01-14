@@ -78,7 +78,7 @@ function generateTestData (size) {
 	return out;
 }
 
-async function runPerformanceObserverBenchmarks () {
+async function runPerformanceBenchmarks () {
 	console.log("🔬 LRU Performance Benchmarks");
 	console.log("==============================");
 	console.log("(Using CustomTimer for high-resolution function timing)");
@@ -257,7 +257,7 @@ async function runAllPerformanceTests () {
 	console.log(`Date: ${new Date().toISOString()}`);
 
 	try {
-		await runPerformanceObserverBenchmarks();
+		await runPerformanceBenchmarks();
 		await runScalabilityTest();
 
 		console.log("\n✅ Performance tests completed!");
@@ -278,7 +278,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
 export {
 	runAllPerformanceTests,
-	runPerformanceObserverBenchmarks,
+	runPerformanceBenchmarks,
 	runScalabilityTest,
 	CustomTimer
 };
