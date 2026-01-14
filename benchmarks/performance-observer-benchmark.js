@@ -101,7 +101,7 @@ async function runPerformanceObserverBenchmarks () {
 	}, iterations);
 
 	// Phase 2: Mixed read/write operations
-	console.log("Phase 2: Mixed operations (realistic workload)");
+	console.log("Phase 2: Mixed operations");
 	const phase2Cache = lru(cacheSize);
 	// Pre-populate for realistic workload
 	for (let i = 0; i < cacheSize; i++) {
@@ -123,28 +123,28 @@ async function runPerformanceObserverBenchmarks () {
 	}
 
 	let mixedGetIndex = 0;
-	await timer.timeFunction("lru.get (mixed workload)", () => {
+	await timer.timeFunction("lru.get", () => {
 		const idx = getIndices[mixedGetIndex % iterations];
 		phase2Cache.get(testData[idx].key);
 		mixedGetIndex++;
 	}, iterations);
 
 	let mixedSetIndex = 0;
-	await timer.timeFunction("lru.set (mixed workload)", () => {
+	await timer.timeFunction("lru.set", () => {
 		const idx = setIndices[mixedSetIndex % iterations];
 		phase2Cache.set(testData[idx].key, testData[idx].value);
 		mixedSetIndex++;
 	}, iterations);
 
 	let mixedHasIndex = 0;
-	await timer.timeFunction("lru.has (mixed workload)", () => {
+	await timer.timeFunction("lru.has", () => {
 		const idx = hasIndices[mixedHasIndex % iterations];
 		phase2Cache.has(testData[idx].key);
 		mixedHasIndex++;
 	}, iterations);
 
 	let mixedDeleteIndex = 0;
-	await timer.timeFunction("lru.delete (mixed workload)", () => {
+	await timer.timeFunction("lru.delete", () => {
 		const idx = deleteIndices[mixedDeleteIndex % iterations];
 		phase2Cache.delete(testData[idx].key);
 		mixedDeleteIndex++;
@@ -206,7 +206,7 @@ async function runCustomTimerBenchmarks () {
 	}, iterations);
 
 	// Phase 2: Mixed read/write operations
-	console.log("Phase 2: Mixed operations (realistic workload)");
+	console.log("Phase 2: Mixed operations");
 	const phase2Cache = lru(cacheSize);
 	// Pre-populate for realistic workload
 	for (let i = 0; i < cacheSize; i++) {
@@ -228,28 +228,28 @@ async function runCustomTimerBenchmarks () {
 	}
 
 	let mixedGetIndex = 0;
-	await timer.timeFunction("lru.get (mixed workload)", () => {
+	await timer.timeFunction("lru.get", () => {
 		const idx = getIndices[mixedGetIndex % iterations];
 		phase2Cache.get(testData[idx].key);
 		mixedGetIndex++;
 	}, iterations);
 
 	let mixedSetIndex = 0;
-	await timer.timeFunction("lru.set (mixed workload)", () => {
+	await timer.timeFunction("lru.set", () => {
 		const idx = setIndices[mixedSetIndex % iterations];
 		phase2Cache.set(testData[idx].key, testData[idx].value);
 		mixedSetIndex++;
 	}, iterations);
 
 	let mixedHasIndex = 0;
-	await timer.timeFunction("lru.has (mixed workload)", () => {
+	await timer.timeFunction("lru.has", () => {
 		const idx = hasIndices[mixedHasIndex % iterations];
 		phase2Cache.has(testData[idx].key);
 		mixedHasIndex++;
 	}, iterations);
 
 	let mixedDeleteIndex = 0;
-	await timer.timeFunction("lru.delete (mixed workload)", () => {
+	await timer.timeFunction("lru.delete", () => {
 		const idx = deleteIndices[mixedDeleteIndex % iterations];
 		phase2Cache.delete(testData[idx].key);
 		mixedDeleteIndex++;
@@ -273,6 +273,44 @@ async function runCustomTimerBenchmarks () {
 			cache.set(`temp_${j}`, `temp_value_${j}`);
 		}
 		cache.clear();
+	}, iterations);
+
+	// Phase 5: Additional API method benchmarks
+	console.log("Phase 5: Additional API method benchmarks");
+
+	// keys()
+	await timer.timeFunction("lru.keys", () => {
+		phase2Cache.keys();
+	}, iterations);
+
+	// values()
+	await timer.timeFunction("lru.values", () => {
+		phase2Cache.values();
+	}, iterations);
+
+	// entries()
+	await timer.timeFunction("lru.entries", () => {
+		phase2Cache.entries();
+	}, iterations);
+
+	// setWithEvicted()
+	const setWithEvictedCache = lru(2);
+	setWithEvictedCache.set("a", "value_a");
+	setWithEvictedCache.set("b", "value_b");
+	let setWithEvictedIndex = 0;
+	await timer.timeFunction("lru.setWithEvicted", () => {
+		const key = `extra_key_${setWithEvictedIndex}`;
+		const value = `extra_value_${setWithEvictedIndex}`;
+		setWithEvictedCache.setWithEvicted(key, value);
+		setWithEvictedIndex++;
+	}, iterations);
+
+	// expiresAt()
+	const expiresCache = lru(cacheSize, 5000);
+	const expiresKey = "expires_key";
+	expiresCache.set(expiresKey, "expires_value");
+	await timer.timeFunction("lru.expiresAt", () => {
+		expiresCache.expiresAt(expiresKey);
 	}, iterations);
 
 	timer.printResults();
