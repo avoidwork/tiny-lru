@@ -79,14 +79,14 @@ function generateTestData (size) {
 }
 
 async function runPerformanceObserverBenchmarks () {
-	console.log("🔬 Performance Observer Benchmarks");
-	console.log("===================================");
-	console.log("(Using CustomTimer for function-level timing)");
+	console.log("🔬 LRU Performance Benchmarks");
+	console.log("==============================");
+	console.log("(Using CustomTimer for high-resolution function timing)");
 
 	const timer = new CustomTimer();
 	const cacheSize = 1000;
-	const testData = generateTestData(cacheSize * 2);
 	const iterations = 10000;
+	const testData = generateTestData(cacheSize * 2);
 
 	console.log("Running operations...");
 
@@ -148,7 +148,7 @@ async function runPerformanceObserverBenchmarks () {
 		const idx = deleteIndices[mixedDeleteIndex % iterations];
 		phase2Cache.delete(testData[idx].key);
 		mixedDeleteIndex++;
-	}, 1000);
+	}, iterations);
 
 	// Phase 3: Cache eviction stress test
 	console.log("Phase 3: Cache eviction stress test");
@@ -165,114 +165,6 @@ async function runPerformanceObserverBenchmarks () {
 	await timer.timeFunction("lru.clear", () => {
 		phase4Cache.set("temp_1", "temp_value_1");
 		phase4Cache.clear();
-	}, iterations);
-
-	// Print results with Performance Observer header
-	console.log("\n📊 Performance Observer Results");
-	console.log("================================");
-
-	const results = Array.from(timer.results.values());
-	console.table(results.map(r => ({
-		"Function": r.name,
-		"Iterations": r.iterations,
-		"Avg (ms)": r.avgTime.toFixed(4),
-		"Min (ms)": r.minTime.toFixed(4),
-		"Max (ms)": r.maxTime.toFixed(4),
-		"Median (ms)": r.median.toFixed(4),
-		"Std Dev": r.stdDev.toFixed(4),
-		"Ops/sec": Math.round(r.opsPerSec)
-	})));
-}
-
-async function runCustomTimerBenchmarks () {
-	console.log("\n⚡ Custom Timer Benchmarks");
-	console.log("==========================");
-
-	const timer = new CustomTimer();
-	const cacheSize = 1000;
-	const iterations = 10000;
-	const testData = generateTestData(cacheSize * 2);
-
-	console.log("Running operations...");
-
-	// Phase 1: Fill cache with initial data
-	console.log("Phase 1: Initial cache population");
-	const phase1Cache = lru(cacheSize);
-	let phase1Index = 0;
-	await timer.timeFunction("lru.set (initial population)", () => {
-		const i = phase1Index % cacheSize;
-		phase1Cache.set(testData[i].key, testData[i].value);
-		phase1Index++;
-	}, iterations);
-
-	// Phase 2: Mixed read/write operations
-	console.log("Phase 2: Mixed operations");
-	const phase2Cache = lru(cacheSize);
-	// Pre-populate for realistic workload
-	for (let i = 0; i < cacheSize; i++) {
-		phase2Cache.set(testData[i].key, testData[i].value);
-	}
-
-	// Deterministic mixed workload that exercises the entire cache without conditionals
-	const getIndices = new Uint32Array(iterations);
-	const setIndices = new Uint32Array(iterations);
-	const hasIndices = new Uint32Array(iterations);
-	const deleteIndices = new Uint32Array(iterations);
-
-	for (let i = 0; i < iterations; i++) {
-		const idx = i % cacheSize;
-		getIndices[i] = idx;
-		setIndices[i] = idx;
-		hasIndices[i] = idx;
-		deleteIndices[i] = idx;
-	}
-
-	let mixedGetIndex = 0;
-	await timer.timeFunction("lru.get", () => {
-		const idx = getIndices[mixedGetIndex % iterations];
-		phase2Cache.get(testData[idx].key);
-		mixedGetIndex++;
-	}, iterations);
-
-	let mixedSetIndex = 0;
-	await timer.timeFunction("lru.set", () => {
-		const idx = setIndices[mixedSetIndex % iterations];
-		phase2Cache.set(testData[idx].key, testData[idx].value);
-		mixedSetIndex++;
-	}, iterations);
-
-	let mixedHasIndex = 0;
-	await timer.timeFunction("lru.has", () => {
-		const idx = hasIndices[mixedHasIndex % iterations];
-		phase2Cache.has(testData[idx].key);
-		mixedHasIndex++;
-	}, iterations);
-
-	let mixedDeleteIndex = 0;
-	await timer.timeFunction("lru.delete", () => {
-		const idx = deleteIndices[mixedDeleteIndex % iterations];
-		phase2Cache.delete(testData[idx].key);
-		mixedDeleteIndex++;
-	}, iterations);
-
-	// Phase 3: Cache eviction stress test
-	console.log("Phase 3: Cache eviction stress test");
-	const phase3Cache = lru(cacheSize);
-	let phase3Index = 0;
-	await timer.timeFunction("lru.set (eviction stress)", () => {
-		const i = phase3Index;
-		phase3Cache.set(`evict_key_${i}`, `evict_value_${i}`);
-		phase3Index++;
-	}, iterations);
-
-	// Phase 4: Some clear operations
-	console.log("Phase 4: Clear operations");
-	await timer.timeFunction("lru.clear", () => {
-		const cache = lru(cacheSize);
-		for (let j = 0; j < 100; j++) {
-			cache.set(`temp_${j}`, `temp_value_${j}`);
-		}
-		cache.clear();
 	}, iterations);
 
 	// Phase 5: Additional API method benchmarks
@@ -366,13 +258,11 @@ async function runAllPerformanceTests () {
 
 	try {
 		await runPerformanceObserverBenchmarks();
-		await runCustomTimerBenchmarks();
 		await runScalabilityTest();
 
 		console.log("\n✅ Performance tests completed!");
 		console.log("\n📋 Notes:");
-		console.log("- Performance Observer: Uses CustomTimer for function-level timing (PerformanceObserver function entries not supported in this Node.js version)");
-		console.log("- Custom Timer: High-resolution timing with statistical analysis");
+		console.log("- Benchmarks: High-resolution timing with statistical analysis using CustomTimer (based on performance.now())");
 		console.log("- Scalability Test: Shows how performance scales with cache size");
 
 	} catch (error) {
@@ -389,7 +279,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 export {
 	runAllPerformanceTests,
 	runPerformanceObserverBenchmarks,
-	runCustomTimerBenchmarks,
 	runScalabilityTest,
 	CustomTimer
 };
