@@ -76,7 +76,8 @@ export class LRU {
 	 * @since 1.0.0
 	 */
 	delete (key) {
-		if (this.has(key)) {
+		const item = this.items[key];
+		if (item !== undefined) {
 			const item = this.items[key];
 
 			delete this.items[key];
@@ -176,9 +177,9 @@ export class LRU {
 	 */
 	expiresAt (key) {
 		let result;
-
-		if (this.has(key)) {
-			result = this.items[key].expiry;
+		const item = this.items[key];
+		if (item !== undefined) {
+			result = item.expiry;
 		}
 
 		return result;
