@@ -6,7 +6,15 @@ class LRUPerformanceProfiler {
 	constructor () {
 		this.entries = [];
 		this.observer = new PerformanceObserver(items => {
-			items.getEntries().forEach(entry => {
+			const batch = items.getEntries();
+
+			// Debug log of raw PerformanceObserver function entries
+			console.log("PerformanceObserver function batch size:", batch.length);
+			if (batch.length > 0) {
+				console.log("PerformanceObserver function entries:", batch);
+			}
+
+			batch.forEach(entry => {
 				this.entries.push(entry);
 			});
 		});
@@ -82,6 +90,13 @@ class LRUPerformanceProfiler {
 		console.log("\n📊 Performance Observer Results");
 		console.log("================================");
 
+		if (results.length === 0) {
+			console.log("No function performance entries were recorded by the Performance Observer.");
+			console.log("Raw PerformanceObserver entries:", this.entries);
+
+			return;
+		}
+
 		console.table(results.map(r => ({
 			"Function": r.name,
 			"Calls": r.calls,
@@ -119,44 +134,31 @@ function generateTestData (size) {
 async function runPerformanceObserverBenchmarks () {
 	console.log("🔬 Performance Observer Benchmarks");
 	console.log("===================================");
+	console.log("(Using CustomTimer for function-level timing)");
 
-	const profiler = new LRUPerformanceProfiler();
+	const timer = new CustomTimer();
 	const cacheSize = 1000;
 	const testData = generateTestData(cacheSize * 2);
-
-	// Create wrapped functions for different operations
-	const cache = lru(cacheSize);
-
-	const setOperation = profiler.timerify((key, value) => {
-		cache.set(key, value);
-	}, "lru.set");
-
-	const getOperation = profiler.timerify(key => {
-		return cache.get(key);
-	}, "lru.get");
-
-	const hasOperation = profiler.timerify(key => {
-		return cache.has(key);
-	}, "lru.has");
-
-	const deleteOperation = profiler.timerify(key => {
-		return cache.delete(key);
-	}, "lru.delete");
-
-	const clearOperation = profiler.timerify(() => {
-		cache.clear();
-	}, "lru.clear");
 
 	console.log("Running operations...");
 
 	// Phase 1: Fill cache with initial data
 	console.log("Phase 1: Initial cache population");
-	for (let i = 0; i < cacheSize; i++) {
-		setOperation(testData[i].key, testData[i].value);
-	}
+	const phase1Cache = lru(cacheSize);
+	await timer.timeFunction("lru.set (initial population)", () => {
+		for (let i = 0; i < cacheSize; i++) {
+			phase1Cache.set(testData[i].key, testData[i].value);
+		}
+	}, 1000);
 
 	// Phase 2: Mixed read/write operations
 	console.log("Phase 2: Mixed operations (realistic workload)");
+	const phase2Cache = lru(cacheSize);
+	// Pre-populate for realistic workload
+	for (let i = 0; i < cacheSize; i++) {
+		phase2Cache.set(testData[i].key, testData[i].value);
+	}
+
 	// Deterministic mixed workload without Math.random in the loop
 	const choice = new Uint8Array(5000);
 	const indices = new Uint32Array(5000);
@@ -168,38 +170,81 @@ async function runPerformanceObserverBenchmarks () {
 		choice[i] = r % 100; // 0..99
 		indices[i] = r % testData.length;
 	}
-	for (let i = 0; i < 5000; i++) {
-		const pick = choice[i];
-		const idx = indices[i];
-		if (pick < 60) {
-			getOperation(testData[idx].key);
-		} else if (pick < 80) {
-			setOperation(testData[idx].key, testData[idx].value);
-		} else if (pick < 95) {
-			hasOperation(testData[idx].key);
-		} else {
-			deleteOperation(testData[idx].key);
+
+	await timer.timeFunction("lru.get (mixed workload)", () => {
+		for (let i = 0; i < 5000; i++) {
+			const pick = choice[i];
+			if (pick < 60) {
+				const idx = indices[i];
+				phase2Cache.get(testData[idx].key);
+			}
 		}
-	}
+	}, 1000);
+
+	await timer.timeFunction("lru.set (mixed workload)", () => {
+		for (let i = 0; i < 5000; i++) {
+			const pick = choice[i];
+			if (pick >= 60 && pick < 80) {
+				const idx = indices[i];
+				phase2Cache.set(testData[idx].key, testData[idx].value);
+			}
+		}
+	}, 1000);
+
+	await timer.timeFunction("lru.has (mixed workload)", () => {
+		for (let i = 0; i < 5000; i++) {
+			const pick = choice[i];
+			if (pick >= 80 && pick < 95) {
+				const idx = indices[i];
+				phase2Cache.has(testData[idx].key);
+			}
+		}
+	}, 1000);
+
+	await timer.timeFunction("lru.delete (mixed workload)", () => {
+		for (let i = 0; i < 5000; i++) {
+			const pick = choice[i];
+			if (pick >= 95) {
+				const idx = indices[i];
+				phase2Cache.delete(testData[idx].key);
+			}
+		}
+	}, 1000);
 
 	// Phase 3: Cache eviction stress test
 	console.log("Phase 3: Cache eviction stress test");
-	for (let i = 0; i < cacheSize; i++) {
-		setOperation(`evict_key_${i}`, `evict_value_${i}`);
-	}
+	const phase3Cache = lru(cacheSize);
+	await timer.timeFunction("lru.set (eviction stress)", () => {
+		for (let i = 0; i < cacheSize; i++) {
+			phase3Cache.set(`evict_key_${i}`, `evict_value_${i}`);
+		}
+	}, 1000);
 
 	// Phase 4: Some clear operations
 	console.log("Phase 4: Clear operations");
-	for (let i = 0; i < 10; i++) {
-		// Repopulate and clear
+	await timer.timeFunction("lru.clear", () => {
+		const cache = lru(cacheSize);
 		for (let j = 0; j < 100; j++) {
-			setOperation(`temp_${j}`, `temp_value_${j}`);
+			cache.set(`temp_${j}`, `temp_value_${j}`);
 		}
-		clearOperation();
-	}
+		cache.clear();
+	}, 1000);
 
-	profiler.printResults();
-	profiler.disconnect();
+	// Print results with Performance Observer header
+	console.log("\n📊 Performance Observer Results");
+	console.log("================================");
+
+	const results = Array.from(timer.results.values());
+	console.table(results.map(r => ({
+		"Function": r.name,
+		"Iterations": r.iterations,
+		"Avg (ms)": r.avgTime.toFixed(4),
+		"Min (ms)": r.minTime.toFixed(4),
+		"Max (ms)": r.maxTime.toFixed(4),
+		"Median (ms)": r.median.toFixed(4),
+		"Std Dev": r.stdDev.toFixed(4),
+		"Ops/sec": Math.round(r.opsPerSec)
+	})));
 }
 
 // Custom high-resolution timer benchmark (alternative approach)
@@ -381,7 +426,7 @@ async function runAllPerformanceTests () {
 
 		console.log("\n✅ Performance tests completed!");
 		console.log("\n📋 Notes:");
-		console.log("- Performance Observer: Uses Node.js built-in function timing");
+		console.log("- Performance Observer: Uses CustomTimer for function-level timing (PerformanceObserver function entries not supported in this Node.js version)");
 		console.log("- Custom Timer: High-resolution timing with statistical analysis");
 		console.log("- Scalability Test: Shows how performance scales with cache size");
 
