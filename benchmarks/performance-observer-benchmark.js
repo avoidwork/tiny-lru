@@ -143,6 +143,21 @@ async function runPerformanceObserverBenchmarks () {
 		mixedHasIndex++;
 	}, iterations);
 
+	// keys()
+	await timer.timeFunction("lru.keys", () => {
+		phase2Cache.keys();
+	}, iterations);
+
+	// values()
+	await timer.timeFunction("lru.values", () => {
+		phase2Cache.values();
+	}, iterations);
+
+	// entries()
+	await timer.timeFunction("lru.entries", () => {
+		phase2Cache.entries();
+	}, iterations);
+
 	let mixedDeleteIndex = 0;
 	await timer.timeFunction("lru.delete", () => {
 		const idx = deleteIndices[mixedDeleteIndex % iterations];
@@ -169,21 +184,6 @@ async function runPerformanceObserverBenchmarks () {
 
 	// Phase 5: Additional API method benchmarks
 	console.log("Phase 5: Additional API method benchmarks");
-
-	// keys()
-	await timer.timeFunction("lru.keys", () => {
-		phase2Cache.keys();
-	}, iterations);
-
-	// values()
-	await timer.timeFunction("lru.values", () => {
-		phase2Cache.values();
-	}, iterations);
-
-	// entries()
-	await timer.timeFunction("lru.entries", () => {
-		phase2Cache.entries();
-	}, iterations);
 
 	// setWithEvicted()
 	const setWithEvictedCache = lru(2);
