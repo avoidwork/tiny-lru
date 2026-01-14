@@ -107,61 +107,48 @@ async function runPerformanceObserverBenchmarks () {
 		phase2Cache.set(testData[i].key, testData[i].value);
 	}
 
-	// Deterministic mixed workload without Math.random in the loop
-	const choice = new Uint8Array(5000);
-	const indices = new Uint32Array(5000);
-	let a = 1103515245, c = 12345, m = 2 ** 31;
-	let seed = 42;
-	for (let i = 0; i < 5000; i++) {
-		seed = (a * seed + c) % m;
-		const r = seed >>> 0;
-		choice[i] = r % 100; // 0..99
-		indices[i] = r % testData.length;
+	// Deterministic mixed workload that exercises the entire cache without conditionals
+	const phase2Iterations = 10000;
+	const getIndices = new Uint32Array(phase2Iterations);
+	const setIndices = new Uint32Array(phase2Iterations);
+	const hasIndices = new Uint32Array(phase2Iterations);
+	const deleteIndices = new Uint32Array(phase2Iterations);
+
+	for (let i = 0; i < phase2Iterations; i++) {
+		const idx = i % cacheSize;
+		getIndices[i] = idx;
+		setIndices[i] = idx;
+		hasIndices[i] = idx;
+		deleteIndices[i] = idx;
 	}
 
 	let mixedGetIndex = 0;
 	await timer.timeFunction("lru.get (mixed workload)", () => {
-		const i = mixedGetIndex % choice.length;
-		const pick = choice[i];
-		if (pick < 60) {
-			const idx = indices[i];
-			phase2Cache.get(testData[idx].key);
-		}
+		const idx = getIndices[mixedGetIndex % phase2Iterations];
+		phase2Cache.get(testData[idx].key);
 		mixedGetIndex++;
-	}, 10000);
+	}, phase2Iterations);
 
 	let mixedSetIndex = 0;
 	await timer.timeFunction("lru.set (mixed workload)", () => {
-		const i = mixedSetIndex % choice.length;
-		const pick = choice[i];
-		if (pick >= 60 && pick < 80) {
-			const idx = indices[i];
-			phase2Cache.set(testData[idx].key, testData[idx].value);
-		}
+		const idx = setIndices[mixedSetIndex % phase2Iterations];
+		phase2Cache.set(testData[idx].key, testData[idx].value);
 		mixedSetIndex++;
-	}, 10000);
+	}, phase2Iterations);
 
 	let mixedHasIndex = 0;
 	await timer.timeFunction("lru.has (mixed workload)", () => {
-		const i = mixedHasIndex % choice.length;
-		const pick = choice[i];
-		if (pick >= 80 && pick < 95) {
-			const idx = indices[i];
-			phase2Cache.has(testData[idx].key);
-		}
+		const idx = hasIndices[mixedHasIndex % phase2Iterations];
+		phase2Cache.has(testData[idx].key);
 		mixedHasIndex++;
-	}, 10000);
+	}, phase2Iterations);
 
 	let mixedDeleteIndex = 0;
 	await timer.timeFunction("lru.delete (mixed workload)", () => {
-		const i = mixedDeleteIndex % choice.length;
-		const pick = choice[i];
-		if (pick >= 95) {
-			const idx = indices[i];
-			phase2Cache.delete(testData[idx].key);
-		}
+		const idx = deleteIndices[mixedDeleteIndex % phase2Iterations];
+		phase2Cache.delete(testData[idx].key);
 		mixedDeleteIndex++;
-	}, 10000);
+	}, phase2Iterations);
 
 	// Phase 3: Cache eviction stress test
 	console.log("Phase 3: Cache eviction stress test");
@@ -229,59 +216,45 @@ async function runCustomTimerBenchmarks () {
 		phase2Cache.set(testData[i].key, testData[i].value);
 	}
 
-	// Deterministic mixed workload without Math.random in the loop
-	const choice = new Uint8Array(5000);
-	const indices = new Uint32Array(5000);
-	let a = 1103515245, c = 12345, m = 2 ** 31;
-	let seed = 42;
-	for (let i = 0; i < 5000; i++) {
-		seed = (a * seed + c) % m;
-		const r = seed >>> 0;
-		choice[i] = r % 100; // 0..99
-		indices[i] = r % testData.length;
+	// Deterministic mixed workload that exercises the entire cache without conditionals
+	const getIndices = new Uint32Array(iterations);
+	const setIndices = new Uint32Array(iterations);
+	const hasIndices = new Uint32Array(iterations);
+	const deleteIndices = new Uint32Array(iterations);
+
+	for (let i = 0; i < iterations; i++) {
+		const idx = i % cacheSize;
+		getIndices[i] = idx;
+		setIndices[i] = idx;
+		hasIndices[i] = idx;
+		deleteIndices[i] = idx;
 	}
 
 	let mixedGetIndex = 0;
 	await timer.timeFunction("lru.get (mixed workload)", () => {
-		const i = mixedGetIndex % choice.length;
-		const pick = choice[i];
-		if (pick < 60) {
-			const idx = indices[i];
-			phase2Cache.get(testData[idx].key);
-		}
+		const idx = getIndices[mixedGetIndex % iterations];
+		phase2Cache.get(testData[idx].key);
 		mixedGetIndex++;
 	}, iterations);
 
 	let mixedSetIndex = 0;
 	await timer.timeFunction("lru.set (mixed workload)", () => {
-		const i = mixedSetIndex % choice.length;
-		const pick = choice[i];
-		if (pick >= 60 && pick < 80) {
-			const idx = indices[i];
-			phase2Cache.set(testData[idx].key, testData[idx].value);
-		}
+		const idx = setIndices[mixedSetIndex % iterations];
+		phase2Cache.set(testData[idx].key, testData[idx].value);
 		mixedSetIndex++;
 	}, iterations);
 
 	let mixedHasIndex = 0;
 	await timer.timeFunction("lru.has (mixed workload)", () => {
-		const i = mixedHasIndex % choice.length;
-		const pick = choice[i];
-		if (pick >= 80 && pick < 95) {
-			const idx = indices[i];
-			phase2Cache.has(testData[idx].key);
-		}
+		const idx = hasIndices[mixedHasIndex % iterations];
+		phase2Cache.has(testData[idx].key);
 		mixedHasIndex++;
 	}, iterations);
 
 	let mixedDeleteIndex = 0;
 	await timer.timeFunction("lru.delete (mixed workload)", () => {
-		const i = mixedDeleteIndex % choice.length;
-		const pick = choice[i];
-		if (pick >= 95) {
-			const idx = indices[i];
-			phase2Cache.delete(testData[idx].key);
-		}
+		const idx = deleteIndices[mixedDeleteIndex % iterations];
+		phase2Cache.delete(testData[idx].key);
 		mixedDeleteIndex++;
 	}, iterations);
 
