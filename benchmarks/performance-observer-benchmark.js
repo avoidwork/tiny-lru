@@ -149,7 +149,7 @@ async function runPerformanceObserverBenchmarks () {
 		for (let i = 0; i < cacheSize; i++) {
 			phase1Cache.set(testData[i].key, testData[i].value);
 		}
-	}, 1000);
+	}, 10000);
 
 	// Phase 2: Mixed read/write operations
 	console.log("Phase 2: Mixed operations (realistic workload)");
@@ -179,7 +179,7 @@ async function runPerformanceObserverBenchmarks () {
 				phase2Cache.get(testData[idx].key);
 			}
 		}
-	}, 1000);
+	}, 10000);
 
 	await timer.timeFunction("lru.set (mixed workload)", () => {
 		for (let i = 0; i < 5000; i++) {
@@ -189,7 +189,7 @@ async function runPerformanceObserverBenchmarks () {
 				phase2Cache.set(testData[idx].key, testData[idx].value);
 			}
 		}
-	}, 1000);
+	}, 10000);
 
 	await timer.timeFunction("lru.has (mixed workload)", () => {
 		for (let i = 0; i < 5000; i++) {
@@ -199,7 +199,7 @@ async function runPerformanceObserverBenchmarks () {
 				phase2Cache.has(testData[idx].key);
 			}
 		}
-	}, 1000);
+	}, 10000);
 
 	await timer.timeFunction("lru.delete (mixed workload)", () => {
 		for (let i = 0; i < 5000; i++) {
@@ -209,7 +209,7 @@ async function runPerformanceObserverBenchmarks () {
 				phase2Cache.delete(testData[idx].key);
 			}
 		}
-	}, 1000);
+	}, 10000);
 
 	// Phase 3: Cache eviction stress test
 	console.log("Phase 3: Cache eviction stress test");
@@ -335,7 +335,7 @@ async function runCustomTimerBenchmarks () {
 		testData.slice(0, 100).forEach(item => cache.set(item.key, item.value));
 		// This will cause eviction
 		cache.set("new_key", "new_value");
-	}, 1000);
+	}, 10000);
 
 	await timer.timeFunction("Cache Hit Get", () => {
 		const item = testData[Math.floor(Math.random() * testData.length)];
@@ -360,13 +360,46 @@ async function runCustomTimerBenchmarks () {
 		testData.slice(0, 500).forEach(item => cache.set(item.key, item.value));
 		const item = testData[Math.floor(Math.random() * 500)];
 		cache.delete(item.key);
-	}, 1000);
+	}, 10000);
 
 	await timer.timeFunction("Clear Operation", () => {
 		const cache = lru(cacheSize);
 		testData.slice(0, 500).forEach(item => cache.set(item.key, item.value));
 		cache.clear();
-	}, 1000);
+	}, 10000);
+
+	// Additional benchmarks for remaining public API methods
+	await timer.timeFunction("Keys Operation", () => {
+		readCache.keys();
+	}, 10000);
+
+	await timer.timeFunction("Values Operation", () => {
+		readCache.values();
+	}, 10000);
+
+	await timer.timeFunction("Entries Operation", () => {
+		readCache.entries();
+	}, 10000);
+
+	await timer.timeFunction("Evict Operation", () => {
+		const cache = lru(100);
+		testData.slice(0, 100).forEach(item => cache.set(item.key, item.value));
+		cache.evict();
+	}, 10000);
+
+	await timer.timeFunction("SetWithEvicted Operation", () => {
+		const cache = lru(2);
+		cache.set(testData[0].key, testData[0].value);
+		cache.set(testData[1].key, testData[1].value);
+		cache.setWithEvicted("extra_key", "extra_value");
+	}, 10000);
+
+	await timer.timeFunction("ExpiresAt Operation", () => {
+		const cache = lru(cacheSize, 5000);
+		const item = testData[Math.floor(Math.random() * testData.length)];
+		cache.set(item.key, item.value);
+		cache.expiresAt(item.key);
+	}, 10000);
 
 	timer.printResults();
 }
