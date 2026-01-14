@@ -108,7 +108,7 @@ async function runPerformanceObserverBenchmarks () {
 	}
 
 	// Deterministic mixed workload that exercises the entire cache without conditionals
-	const phase2Iterations = 10000;
+	const phase2Iterations = 1000;
 	const getIndices = new Uint32Array(phase2Iterations);
 	const setIndices = new Uint32Array(phase2Iterations);
 	const hasIndices = new Uint32Array(phase2Iterations);
