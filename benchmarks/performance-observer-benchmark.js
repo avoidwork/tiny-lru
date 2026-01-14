@@ -1,206 +1,5 @@
-import { performance, PerformanceObserver } from "node:perf_hooks";
+import { performance } from "node:perf_hooks";
 import { lru } from "../dist/tiny-lru.js";
-
-// Performance observer for function timing
-class LRUPerformanceProfiler {
-	constructor () {
-		this.entries = [];
-		this.observer = new PerformanceObserver(items => {
-			items.getEntries().forEach(entry => {
-				this.entries.push(entry);
-			});
-		});
-		this.observer.observe({ entryTypes: ["function"] });
-	}
-
-	timerify (fn, name) {
-		const wrappedFn = performance.timerify(fn);
-		// Override the name for better reporting (safely handle non-configurable name property)
-		try {
-			Object.defineProperty(wrappedFn, "name", { value: name, configurable: true });
-		} catch (error) { // eslint-disable-line no-unused-vars
-			// If we can't redefine the name property, create a wrapper with the desired name
-			const namedWrapper = {
-				[name]: (...args) => wrappedFn(...args)
-			}[name];
-
-			return namedWrapper;
-		}
-
-		return wrappedFn;
-	}
-
-	getResults () {
-		const results = new Map();
-
-		this.entries.forEach(entry => {
-			if (!results.has(entry.name)) {
-				results.set(entry.name, {
-					name: entry.name,
-					calls: 0,
-					totalTime: 0,
-					minTime: Infinity,
-					maxTime: 0,
-					times: []
-				});
-			}
-
-			const result = results.get(entry.name);
-			result.calls++;
-			result.totalTime += entry.duration;
-			result.minTime = Math.min(result.minTime, entry.duration);
-			result.maxTime = Math.max(result.maxTime, entry.duration);
-			result.times.push(entry.duration);
-		});
-
-		// Calculate statistics
-		results.forEach(result => {
-			result.avgTime = result.totalTime / result.calls;
-
-			// Calculate standard deviation
-			const variance = result.times.reduce((acc, time) => {
-				return acc + Math.pow(time - result.avgTime, 2);
-			}, 0) / result.calls;
-			result.stdDev = Math.sqrt(variance);
-
-			// Calculate median
-			const sorted = [...result.times].sort((a, b) => a - b);
-			const mid = Math.floor(sorted.length / 2);
-			result.median = sorted.length % 2 === 0 ?
-				(sorted[mid - 1] + sorted[mid]) / 2 :
-				sorted[mid];
-
-			// Operations per second (rough estimate)
-			result.opsPerSec = result.calls / (result.totalTime / 1000); // duration is in ms
-		});
-
-		return Array.from(results.values());
-	}
-
-	printResults () {
-		const results = this.getResults();
-		console.log("\n📊 Performance Observer Results");
-		console.log("================================");
-
-		console.table(results.map(r => ({
-			"Function": r.name,
-			"Calls": r.calls,
-			"Avg (ms)": r.avgTime.toFixed(4),
-			"Min (ms)": r.minTime.toFixed(4),
-			"Max (ms)": r.maxTime.toFixed(4),
-			"Median (ms)": r.median.toFixed(4),
-			"Std Dev": r.stdDev.toFixed(4),
-			"Ops/sec": Math.round(r.opsPerSec)
-		})));
-	}
-
-	disconnect () {
-		this.observer.disconnect();
-	}
-
-	reset () {
-		this.entries = [];
-	}
-}
-
-// Test data generation
-function generateTestData (size) {
-	const out = new Array(size);
-	for (let i = 0; i < size; i++) {
-		out[i] = {
-			key: `key_${i}`,
-			value: `value_${i}_${"x".repeat(50)}`
-		};
-	}
-
-	return out;
-}
-
-async function runPerformanceObserverBenchmarks () {
-	console.log("🔬 Performance Observer Benchmarks");
-	console.log("===================================");
-
-	const profiler = new LRUPerformanceProfiler();
-	const cacheSize = 1000;
-	const testData = generateTestData(cacheSize * 2);
-
-	// Create wrapped functions for different operations
-	const cache = lru(cacheSize);
-
-	const setOperation = profiler.timerify((key, value) => {
-		cache.set(key, value);
-	}, "lru.set");
-
-	const getOperation = profiler.timerify(key => {
-		return cache.get(key);
-	}, "lru.get");
-
-	const hasOperation = profiler.timerify(key => {
-		return cache.has(key);
-	}, "lru.has");
-
-	const deleteOperation = profiler.timerify(key => {
-		return cache.delete(key);
-	}, "lru.delete");
-
-	const clearOperation = profiler.timerify(() => {
-		cache.clear();
-	}, "lru.clear");
-
-	console.log("Running operations...");
-
-	// Phase 1: Fill cache with initial data
-	console.log("Phase 1: Initial cache population");
-	for (let i = 0; i < cacheSize; i++) {
-		setOperation(testData[i].key, testData[i].value);
-	}
-
-	// Phase 2: Mixed read/write operations
-	console.log("Phase 2: Mixed operations (realistic workload)");
-	// Deterministic mixed workload without Math.random in the loop
-	const choice = new Uint8Array(5000);
-	const indices = new Uint32Array(5000);
-	let a = 1103515245, c = 12345, m = 2 ** 31;
-	let seed = 42;
-	for (let i = 0; i < 5000; i++) {
-		seed = (a * seed + c) % m;
-		const r = seed >>> 0;
-		choice[i] = r % 100; // 0..99
-		indices[i] = r % testData.length;
-	}
-	for (let i = 0; i < 5000; i++) {
-		const pick = choice[i];
-		const idx = indices[i];
-		if (pick < 60) {
-			getOperation(testData[idx].key);
-		} else if (pick < 80) {
-			setOperation(testData[idx].key, testData[idx].value);
-		} else if (pick < 95) {
-			hasOperation(testData[idx].key);
-		} else {
-			deleteOperation(testData[idx].key);
-		}
-	}
-
-	// Phase 3: Cache eviction stress test
-	console.log("Phase 3: Cache eviction stress test");
-	for (let i = 0; i < cacheSize; i++) {
-		setOperation(`evict_key_${i}`, `evict_value_${i}`);
-	}
-
-	// Phase 4: Some clear operations
-	console.log("Phase 4: Clear operations");
-	for (let i = 0; i < 10; i++) {
-		// Repopulate and clear
-		for (let j = 0; j < 100; j++) {
-			setOperation(`temp_${j}`, `temp_value_${j}`);
-		}
-		clearOperation();
-	}
-
-	profiler.printResults();
-	profiler.disconnect();
-}
 
 // Custom high-resolution timer benchmark (alternative approach)
 class CustomTimer {
@@ -249,7 +48,7 @@ class CustomTimer {
 	}
 
 	printResults () {
-		console.log("\n⏱️  Custom Timer Results");
+		console.log("\n⏱️  Performance Results");
 		console.log("========================");
 
 		const results = Array.from(this.results.values());
@@ -266,62 +65,145 @@ class CustomTimer {
 	}
 }
 
-async function runCustomTimerBenchmarks () {
-	console.log("\n⚡ Custom Timer Benchmarks");
-	console.log("==========================");
+// Test data generation
+function generateTestData (size) {
+	const out = new Array(size);
+	for (let i = 0; i < size; i++) {
+		out[i] = {
+			key: `key_${i}`,
+			value: `value_${i}_${"x".repeat(50)}`
+		};
+	}
+
+	return out;
+}
+
+async function runPerformanceBenchmarks () {
+	console.log("🔬 LRU Performance Benchmarks");
+	console.log("==============================");
+	console.log("(Using CustomTimer for high-resolution function timing)");
 
 	const timer = new CustomTimer();
 	const cacheSize = 1000;
-	const testData = generateTestData(cacheSize);
+	const iterations = 10000;
+	const testData = generateTestData(cacheSize * 2);
 
-	// Pre-populate cache for read tests
-	const readCache = lru(cacheSize);
-	testData.forEach(item => readCache.set(item.key, item.value));
+	console.log("Running operations...");
 
-	// Benchmark different operations
-	await timer.timeFunction("Empty Cache Set", () => {
-		const cache = lru(cacheSize);
-		const item = testData[Math.floor(Math.random() * testData.length)];
-		cache.set(item.key, item.value);
-	}, 10000);
+	// Phase 1: Fill cache with initial data
+	console.log("Phase 1: Initial cache population");
+	const phase1Cache = lru(cacheSize);
+	let phase1Index = 0;
+	await timer.timeFunction("lru.set (initial population)", () => {
+		const i = phase1Index % cacheSize;
+		phase1Cache.set(testData[i].key, testData[i].value);
+		phase1Index++;
+	}, iterations);
 
-	await timer.timeFunction("Full Cache Set (eviction)", () => {
-		const cache = lru(100); // Smaller cache for guaranteed eviction
-		testData.slice(0, 100).forEach(item => cache.set(item.key, item.value));
-		// This will cause eviction
-		cache.set("new_key", "new_value");
-	}, 1000);
+	// Phase 2: Mixed read/write operations
+	console.log("Phase 2: Mixed operations");
+	const phase2Cache = lru(cacheSize);
+	// Pre-populate for realistic workload
+	for (let i = 0; i < cacheSize; i++) {
+		phase2Cache.set(testData[i].key, testData[i].value);
+	}
 
-	await timer.timeFunction("Cache Hit Get", () => {
-		const item = testData[Math.floor(Math.random() * testData.length)];
-		readCache.get(item.key);
-	}, 10000);
+	// Deterministic mixed workload that exercises the entire cache without conditionals
+	const getIndices = new Uint32Array(iterations);
+	const setIndices = new Uint32Array(iterations);
+	const hasIndices = new Uint32Array(iterations);
+	const deleteIndices = new Uint32Array(iterations);
 
-	await timer.timeFunction("Cache Miss Get", () => {
-		readCache.get(`nonexistent_${Math.random()}`);
-	}, 10000);
+	for (let i = 0; i < iterations; i++) {
+		const idx = i % cacheSize;
+		getIndices[i] = idx;
+		setIndices[i] = idx;
+		hasIndices[i] = idx;
+		deleteIndices[i] = idx;
+	}
 
-	await timer.timeFunction("Has Operation (hit)", () => {
-		const item = testData[Math.floor(Math.random() * testData.length)];
-		readCache.has(item.key);
-	}, 10000);
+	let mixedGetIndex = 0;
+	await timer.timeFunction("lru.get", () => {
+		const idx = getIndices[mixedGetIndex % iterations];
+		phase2Cache.get(testData[idx].key);
+		mixedGetIndex++;
+	}, iterations);
 
-	await timer.timeFunction("Has Operation (miss)", () => {
-		readCache.has(`nonexistent_${Math.random()}`);
-	}, 10000);
+	let mixedSetIndex = 0;
+	await timer.timeFunction("lru.set", () => {
+		const idx = setIndices[mixedSetIndex % iterations];
+		phase2Cache.set(testData[idx].key, testData[idx].value);
+		mixedSetIndex++;
+	}, iterations);
 
-	await timer.timeFunction("Delete Operation", () => {
-		const cache = lru(cacheSize);
-		testData.slice(0, 500).forEach(item => cache.set(item.key, item.value));
-		const item = testData[Math.floor(Math.random() * 500)];
-		cache.delete(item.key);
-	}, 1000);
+	let mixedHasIndex = 0;
+	await timer.timeFunction("lru.has", () => {
+		const idx = hasIndices[mixedHasIndex % iterations];
+		phase2Cache.has(testData[idx].key);
+		mixedHasIndex++;
+	}, iterations);
 
-	await timer.timeFunction("Clear Operation", () => {
-		const cache = lru(cacheSize);
-		testData.slice(0, 500).forEach(item => cache.set(item.key, item.value));
-		cache.clear();
-	}, 1000);
+	// keys()
+	await timer.timeFunction("lru.keys", () => {
+		phase2Cache.keys();
+	}, iterations);
+
+	// values()
+	await timer.timeFunction("lru.values", () => {
+		phase2Cache.values();
+	}, iterations);
+
+	// entries()
+	await timer.timeFunction("lru.entries", () => {
+		phase2Cache.entries();
+	}, iterations);
+
+	let mixedDeleteIndex = 0;
+	await timer.timeFunction("lru.delete", () => {
+		const idx = deleteIndices[mixedDeleteIndex % iterations];
+		phase2Cache.delete(testData[idx].key);
+		mixedDeleteIndex++;
+	}, iterations);
+
+	// Phase 3: Cache eviction stress test
+	console.log("Phase 3: Cache eviction stress test");
+	const phase3Cache = lru(2);
+	let phase3Index = 1;
+	phase3Cache.set(`evict_key_${phase3Index}`, `evict__value_${phase3Index++}`);
+	await timer.timeFunction("lru.set (eviction stress)", () => {
+		phase3Cache.set(`evict_key_${phase3Index}`, `evict_value_${phase3Index++}`);
+	}, iterations);
+
+	// Phase 4: Some clear operations
+	console.log("Phase 4: Clear operations");
+	const phase4Cache = lru(1);
+	await timer.timeFunction("lru.clear", () => {
+		phase4Cache.set("temp_1", "temp_value_1");
+		phase4Cache.clear();
+	}, iterations);
+
+	// Phase 5: Additional API method benchmarks
+	console.log("Phase 5: Additional API method benchmarks");
+
+	// setWithEvicted()
+	const setWithEvictedCache = lru(2);
+	setWithEvictedCache.set("a", "value_a");
+	setWithEvictedCache.set("b", "value_b");
+	let setWithEvictedIndex = 0;
+	await timer.timeFunction("lru.setWithEvicted", () => {
+		const key = `extra_key_${setWithEvictedIndex}`;
+		const value = `extra_value_${setWithEvictedIndex}`;
+		setWithEvictedCache.setWithEvicted(key, value);
+		setWithEvictedIndex++;
+	}, iterations);
+
+	// expiresAt()
+	const expiresCache = lru(cacheSize, 6e4);
+	const expiresKey = "expires_key";
+	expiresCache.set(expiresKey, "expires_value");
+	await timer.timeFunction("lru.expiresAt", () => {
+		expiresCache.expiresAt(expiresKey);
+	}, iterations);
 
 	timer.printResults();
 }
@@ -339,8 +221,8 @@ async function runScalabilityTest () {
 		const testData = generateTestData(size);
 
 		// Test set performance
-		const setStart = performance.now();
 		const cache = lru(size);
+		const setStart = performance.now();
 		testData.forEach(item => cache.set(item.key, item.value));
 		const setEnd = performance.now();
 		const setTime = setEnd - setStart;
@@ -375,14 +257,12 @@ async function runAllPerformanceTests () {
 	console.log(`Date: ${new Date().toISOString()}`);
 
 	try {
-		await runPerformanceObserverBenchmarks();
-		await runCustomTimerBenchmarks();
+		await runPerformanceBenchmarks();
 		await runScalabilityTest();
 
 		console.log("\n✅ Performance tests completed!");
 		console.log("\n📋 Notes:");
-		console.log("- Performance Observer: Uses Node.js built-in function timing");
-		console.log("- Custom Timer: High-resolution timing with statistical analysis");
+		console.log("- Benchmarks: High-resolution timing with statistical analysis using CustomTimer (based on performance.now())");
 		console.log("- Scalability Test: Shows how performance scales with cache size");
 
 	} catch (error) {
@@ -398,9 +278,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
 export {
 	runAllPerformanceTests,
-	runPerformanceObserverBenchmarks,
-	runCustomTimerBenchmarks,
+	runPerformanceBenchmarks,
 	runScalabilityTest,
-	LRUPerformanceProfiler,
 	CustomTimer
 };

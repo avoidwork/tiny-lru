@@ -92,7 +92,7 @@ npm run benchmark:all
 
 # Individual benchmark suites
 npm run benchmark:modern     # Comprehensive Tinybench suite
-npm run benchmark:perf       # Performance Observer measurements
+npm run benchmark:perf       # Performance measurements
 npm run benchmark:comparison # Compare against other LRU libraries
 ```
 
