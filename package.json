@@ -45,7 +45,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-terser": "^1.0.0",
     "auto-changelog": "^2.5.0",
     "c8": "^11.0.0",
     "eslint": "^9.29.0",
