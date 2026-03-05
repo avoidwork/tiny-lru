@@ -108,7 +108,7 @@ export class LRU {
 	 *
 	 * @method entries
 	 * @memberof LRU
-	 * @param {string[]} [keys=this.keys()] - Array of keys to get entries for. Defaults to all keys.
+	 * @param {string[]} [keys] - Array of keys to get entries for. If omitted, returns all keys.
 	 * @returns {Array<Array<*>>} Array of [key, value] pairs in LRU order.
 	 * @example
 	 * cache.set('a', 1).set('b', 2);
@@ -118,11 +118,22 @@ export class LRU {
 	 * @see {@link LRU#values}
 	 * @since 11.1.0
 	 */
-	entries (keys = this.keys()) {
+	entries (keys) {
+		if (keys === undefined) {
+			keys = this.keys();
+		}
+
+		const entryMap = Object.create(null);
+		let x = this.first;
+
+		while (x !== null) {
+			entryMap[x.key] = x.value;
+			x = x.next;
+		}
+
 		const result = new Array(keys.length);
 		for (let i = 0; i < keys.length; i++) {
-			const key = keys[i];
-			result[i] = [key, this.get(key)];
+			result[i] = [keys[i], entryMap[keys[i]]];
 		}
 
 		return result;
@@ -189,7 +200,7 @@ export class LRU {
 	 *
 	 * @method get
 	 * @memberof LRU
-	 * @param {string} key - The key to retrieve.
+	 * @param {any} key - The key to retrieve.
 	 * @returns {*} The value associated with the key, or undefined if not found or expired.
 	 * @example
 	 * cache.set('key1', 'value1');
@@ -203,7 +214,6 @@ export class LRU {
 		const item = this.items[key];
 
 		if (item !== undefined) {
-			// Check TTL only if enabled to avoid unnecessary Date.now() calls
 			if (this.ttl > 0) {
 				if (item.expiry <= Date.now()) {
 					this.delete(key);
@@ -212,7 +222,6 @@ export class LRU {
 				}
 			}
 
-			// Fast LRU update without full set() overhead
 			this.moveToEnd(item);
 
 			return item.value;
@@ -226,7 +235,7 @@ export class LRU {
 	 *
 	 * @method has
 	 * @memberof LRU
-	 * @param {string} key - The key to check for.
+	 * @param {any} key - The key to check for.
 	 * @returns {boolean} True if the key exists, false otherwise.
 	 * @example
 	 * cache.set('key1', 'value1');
@@ -307,7 +316,7 @@ export class LRU {
 		let i = 0;
 
 		while (x !== null) {
-			result[i++] = x.key;
+			result[i++] = String(x.key);
 			x = x.next;
 		}
 
@@ -425,7 +434,7 @@ export class LRU {
 	 *
 	 * @method values
 	 * @memberof LRU
-	 * @param {string[]} [keys=this.keys()] - Array of keys to get values for. Defaults to all keys.
+	 * @param {string[]} [keys] - Array of keys to get values for. If omitted, returns all values.
 	 * @returns {Array<*>} Array of values corresponding to the keys in LRU order.
 	 * @example
 	 * cache.set('a', 1).set('b', 2);
@@ -435,10 +444,22 @@ export class LRU {
 	 * @see {@link LRU#entries}
 	 * @since 11.1.0
 	 */
-	values (keys = this.keys()) {
+	values (keys) {
+		if (keys === undefined) {
+			keys = this.keys();
+		}
+
+		const entryMap = Object.create(null);
+		let x = this.first;
+
+		while (x !== null) {
+			entryMap[x.key] = x.value;
+			x = x.next;
+		}
+
 		const result = new Array(keys.length);
 		for (let i = 0; i < keys.length; i++) {
-			result[i] = this.get(keys[i]);
+			result[i] = entryMap[keys[i]];
 		}
 
 		return result;
