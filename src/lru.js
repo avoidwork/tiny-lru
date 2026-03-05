@@ -200,7 +200,7 @@ export class LRU {
 	 *
 	 * @method get
 	 * @memberof LRU
-	 * @param {any} key - The key to retrieve.
+	 * @param {string} key - The key to retrieve.
 	 * @returns {*} The value associated with the key, or undefined if not found or expired.
 	 * @example
 	 * cache.set('key1', 'value1');
@@ -214,6 +214,7 @@ export class LRU {
 		const item = this.items[key];
 
 		if (item !== undefined) {
+			// Check TTL only if enabled to avoid unnecessary Date.now() calls
 			if (this.ttl > 0) {
 				if (item.expiry <= Date.now()) {
 					this.delete(key);
@@ -222,6 +223,7 @@ export class LRU {
 				}
 			}
 
+			// Fast LRU update without full set() overhead
 			this.moveToEnd(item);
 
 			return item.value;
@@ -235,7 +237,7 @@ export class LRU {
 	 *
 	 * @method has
 	 * @memberof LRU
-	 * @param {any} key - The key to check for.
+	 * @param {string} key - The key to check for.
 	 * @returns {boolean} True if the key exists, false otherwise.
 	 * @example
 	 * cache.set('key1', 'value1');
@@ -316,7 +318,7 @@ export class LRU {
 		let i = 0;
 
 		while (x !== null) {
-			result[i++] = String(x.key);
+			result[i++] = x.key;
 			x = x.next;
 		}
 
