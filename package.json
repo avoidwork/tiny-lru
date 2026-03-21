@@ -38,7 +38,7 @@
     "benchmark:install-deps": "npm install --no-save lru-cache quick-lru mnemonist",
     "benchmark:all": "npm run benchmark:modern && npm run benchmark:perf && npm run benchmark:comparison",
     "changelog": "auto-changelog -p",
-    "fmt": "oxfmt --write *.js src/*.js tests/**/*.js benchmarks/*.js",
+    "fix": "oxlint --fix *.js benchmarks src tests/unit && oxfmt *.js benchmarks src tests/unit --write",
     "lint": "oxlint *.js benchmarks src tests/unit && oxfmt *.js benchmarks/*.js src/*.js tests/unit/*.js --check",
     "rollup": "rollup --config",
     "test": "npm run lint && node --test tests/**/*.js",
