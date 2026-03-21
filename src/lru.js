@@ -76,9 +76,9 @@ export class LRU {
 	 * @since 1.0.0
 	 */
 	delete (key) {
-		if (this.has(key)) {
-			const item = this.items[key];
+		const item = this.items[key];
 
+		if (item !== undefined) {
 			delete this.items[key];
 			this.size--;
 
@@ -118,7 +118,11 @@ export class LRU {
 	 * @see {@link LRU#values}
 	 * @since 11.1.0
 	 */
-	entries (keys = this.keys()) {
+	entries (keys) {
+		if (keys === undefined) {
+			keys = this.keys();
+		}
+
 		const result = Array.from({ length: keys.length });
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
@@ -144,6 +148,10 @@ export class LRU {
 	evict (bypass = false) {
 		if (bypass || this.size > 0) {
 			const item = this.first;
+
+			if (!item) {
+				return this;
+			}
 
 			delete this.items[item.key];
 
@@ -237,7 +245,8 @@ export class LRU {
 	 * @since 9.0.0
 	 */
 	has (key) {
-		return key in this.items;
+		const item = this.items[key];
+		return item !== undefined && (this.ttl === 0 || item.expiry > Date.now());
 	}
 
 	/**
@@ -338,7 +347,11 @@ export class LRU {
 			this.set(key, value, true, resetTtl);
 		} else {
 			if (this.max > 0 && this.size === this.max) {
-				evicted = {...this.first};
+				evicted = {
+					key: this.first.key,
+					value: this.first.value,
+					expiry: this.first.expiry
+				};
 				this.evict(true);
 			}
 
@@ -435,7 +448,11 @@ export class LRU {
 	 * @see {@link LRU#entries}
 	 * @since 11.1.0
 	 */
-	values (keys = this.keys()) {
+	values (keys) {
+		if (keys === undefined) {
+			keys = this.keys();
+		}
+
 		const result = Array.from({ length: keys.length });
 		for (let i = 0; i < keys.length; i++) {
 			result[i] = this.get(keys[i]);
