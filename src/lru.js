@@ -280,11 +280,7 @@ export class LRU {
 
 		item.prev = this.last;
 		item.next = null;
-
-		if (this.last !== null) {
-			this.last.next = item;
-		}
-
+		this.last.next = item;
 		this.last = item;
 	}
 
