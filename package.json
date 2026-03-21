@@ -41,7 +41,7 @@
     "fmt": "oxfmt --write *.js src/*.js tests/**/*.js benchmarks/*.js",
     "lint": "oxlint --fix *.js src/*.js tests/**/*.js benchmarks/*.js",
     "rollup": "rollup --config",
-    "test": "npm run lint",
+    "test": "npm run lint && node --test tests/**/*.js",
     "prepare": "husky"
   },
   "devDependencies": {

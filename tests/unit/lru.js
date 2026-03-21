@@ -1,5 +1,6 @@
 import {LRU, lru} from "../../src/lru.js";
-import {strict as assert} from "assert";
+import {describe, it, beforeEach} from "node:test";
+import assert from "node:assert";
 
 describe("LRU Cache", function () {
 	describe("Constructor", function () {
@@ -129,7 +130,7 @@ describe("LRU Cache", function () {
 			cache.set("key1", "value1");
 			cache.set("key2", "value2");
 			cache.set("key3", "value3");
-			cache.set("key4", "value4"); // Should evict key1
+			cache.set("key4", "value4");
 
 			assert.equal(cache.size, 3);
 			assert.equal(cache.has("key1"), false);
@@ -143,10 +144,9 @@ describe("LRU Cache", function () {
 			cache.set("key2", "value2");
 			cache.set("key3", "value3");
 
-			// Access key1 to make it most recently used
 			cache.get("key1");
 
-			cache.set("key4", "value4"); // Should evict key2, not key1
+			cache.set("key4", "value4");
 
 			assert.equal(cache.has("key1"), true);
 			assert.equal(cache.has("key2"), false);
@@ -162,7 +162,6 @@ describe("LRU Cache", function () {
 			let keys = cache.keys();
 			assert.deepEqual(keys, ["key1", "key2", "key3"]);
 
-			// Access key1 to move it to end
 			cache.get("key1");
 			keys = cache.keys();
 			assert.deepEqual(keys, ["key2", "key3", "key1"]);
@@ -300,7 +299,7 @@ describe("LRU Cache", function () {
 		let cache;
 
 		beforeEach(function () {
-			cache = new LRU(5, 100); // 100ms TTL
+			cache = new LRU(5, 100);
 		});
 
 		it("should set expiration time", function () {
@@ -309,23 +308,21 @@ describe("LRU Cache", function () {
 			const expiresAt = cache.expiresAt("key1");
 
 			assert.ok(expiresAt >= beforeTime + 100);
-			assert.ok(expiresAt <= beforeTime + 200); // Allow some margin
+			assert.ok(expiresAt <= beforeTime + 200);
 		});
 
 		it("should return undefined for non-existent key expiration", function () {
 			assert.equal(cache.expiresAt("nonexistent"), undefined);
 		});
 
-		it("should expire items after TTL", function (done) {
+		it("should expire items after TTL", async function () {
 			cache.set("key1", "value1");
 			assert.equal(cache.get("key1"), "value1");
 
-			setTimeout(() => {
-				assert.equal(cache.get("key1"), undefined);
-				assert.equal(cache.has("key1"), false);
-				assert.equal(cache.size, 0);
-				done();
-			}, 150);
+			await new Promise((resolve) => setTimeout(resolve, 150));
+			assert.equal(cache.get("key1"), undefined);
+			assert.equal(cache.has("key1"), false);
+			assert.equal(cache.size, 0);
 		});
 
 		it("should handle TTL = 0 (no expiration)", function () {
@@ -334,37 +331,28 @@ describe("LRU Cache", function () {
 			assert.equal(neverExpireCache.expiresAt("key1"), 0);
 		});
 
-		it("should reset TTL when accessing with resetTtl=true", function (done) {
+		it("should reset TTL when accessing with resetTtl=true", async function () {
 			const resetCache = new LRU(5, 1000, true);
 			resetCache.set("key1", "value1");
 
-			// Check that expiration timestamp changes when updating with resetTtl=true
 			const firstExpiry = resetCache.expiresAt("key1");
 
-			// Small delay to ensure timestamp difference
-			setTimeout(() => {
-				resetCache.set("key1", "value1", false, true); // This should reset TTL
-				const secondExpiry = resetCache.expiresAt("key1");
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			resetCache.set("key1", "value1", false, true);
+			const secondExpiry = resetCache.expiresAt("key1");
 
-				assert.ok(secondExpiry > firstExpiry, "TTL should be reset");
-				done();
-			}, 10);
+			assert.ok(secondExpiry > firstExpiry, "TTL should be reset");
 		});
 
-		it("should not reset TTL when resetTtl=false", function (done) {
+		it("should not reset TTL when resetTtl=false", async function () {
 			const noResetCache = new LRU(5, 100, false);
 			noResetCache.set("key1", "value1");
 
-			setTimeout(() => {
-				// Access the key but don't reset TTL
-				assert.equal(noResetCache.get("key1"), "value1");
+			await new Promise((resolve) => setTimeout(resolve, 50));
+			assert.equal(noResetCache.get("key1"), "value1");
 
-				// Check that it expires at original time
-				setTimeout(() => {
-					assert.equal(noResetCache.get("key1"), undefined);
-					done();
-				}, 75);
-			}, 50);
+			await new Promise((resolve) => setTimeout(resolve, 75));
+			assert.equal(noResetCache.get("key1"), undefined);
 		});
 	});
 
@@ -373,7 +361,7 @@ describe("LRU Cache", function () {
 			const cache = new LRU(3);
 			cache.set("key1", "value1");
 			cache.set("key2", "value2");
-			cache.set("key1", "newvalue1"); // Update existing key
+			cache.set("key1", "newvalue1");
 
 			assert.equal(cache.get("key1"), "newvalue1");
 			assert.equal(cache.size, 2);
@@ -385,15 +373,12 @@ describe("LRU Cache", function () {
 			cache.set("key2", "value2");
 			cache.set("key3", "value3");
 
-			// Delete middle item
 			cache.delete("key2");
 			assert.deepEqual(cache.keys(), ["key1", "key3"]);
 
-			// Delete first item
 			cache.delete("key1");
 			assert.deepEqual(cache.keys(), ["key3"]);
 
-			// Delete last item
 			cache.delete("key3");
 			assert.deepEqual(cache.keys(), []);
 			assert.equal(cache.first, null);
@@ -407,10 +392,9 @@ describe("LRU Cache", function () {
 			cache.set("c", 3);
 			cache.set("d", 4);
 
-			// Access items in different order
-			cache.set("b", 22); // Move b to end
-			cache.get("a"); // Move a to end
-			cache.set("c", 33); // Move c to end
+			cache.set("b", 22);
+			cache.get("a");
+			cache.set("c", 33);
 
 			assert.deepEqual(cache.keys(), ["d", "b", "a", "c"]);
 		});
@@ -420,7 +404,6 @@ describe("LRU Cache", function () {
 			cache.set("key1", "value1");
 			cache.set("key2", "value2");
 
-			// Set with bypass=true should not reposition but still updates to last
 			cache.set("key1", "newvalue1", true);
 			assert.deepEqual(cache.keys(), ["key2", "key1"]);
 		});
@@ -430,21 +413,18 @@ describe("LRU Cache", function () {
 			const beforeTime = Date.now();
 			cache.set("key1", "value1");
 
-			// Set with resetTtl=true should update expiry
 			cache.set("key1", "newvalue1", false, true);
 			const expiresAt = cache.expiresAt("key1");
-			assert.ok(expiresAt > beforeTime + 900); // Should be close to current time + TTL
+			assert.ok(expiresAt > beforeTime + 900);
 		});
 
 		it("should handle single item cache operations", function () {
 			const cache = new LRU(1);
 
-			// Set first item
 			cache.set("key1", "value1");
 			assert.equal(cache.first, cache.last);
 			assert.equal(cache.size, 1);
 
-			// Replace with second item
 			cache.set("key2", "value2");
 			assert.equal(cache.first, cache.last);
 			assert.equal(cache.size, 1);
@@ -455,13 +435,11 @@ describe("LRU Cache", function () {
 		it("should handle empty cache operations", function () {
 			const cache = new LRU(3);
 
-			// Operations on empty cache
 			assert.equal(cache.get("key1"), undefined);
 			assert.equal(cache.has("key1"), false);
-			cache.delete("key1"); // Should not throw
+			cache.delete("key1");
 			assert.equal(cache.expiresAt("key1"), undefined);
 
-			// Evict on empty cache
 			cache.evict();
 			assert.equal(cache.size, 0);
 		});
@@ -472,7 +450,6 @@ describe("LRU Cache", function () {
 			cache.set("key2", "value2");
 			cache.set("key3", "value3");
 
-			// Access the last item (should not change position)
 			cache.get("key3");
 			assert.deepEqual(cache.keys(), ["key1", "key2", "key3"]);
 		});
@@ -482,19 +459,16 @@ describe("LRU Cache", function () {
 		it("should handle large number of operations", function () {
 			const cache = new LRU(1000);
 
-			// Add 1000 items
 			for (let i = 0; i < 1000; i++) {
 				cache.set(`key${i}`, `value${i}`);
 			}
 			assert.equal(cache.size, 1000);
 
-			// Access random items
 			for (let i = 0; i < 100; i++) {
 				const key = `key${Math.floor(Math.random() * 1000)}`;
 				cache.get(key);
 			}
 
-			// Add more items to trigger eviction
 			for (let i = 1000; i < 1100; i++) {
 				cache.set(`key${i}`, `value${i}`);
 			}
@@ -515,7 +489,7 @@ describe("LRU Cache", function () {
 
 	describe("Additional coverage tests", function () {
 		it("should handle setWithEvicted with unlimited cache size", function () {
-			const cache = new LRU(0); // Unlimited size
+			const cache = new LRU(0);
 			const evicted = cache.setWithEvicted("key1", "value1");
 			assert.equal(evicted, null);
 			assert.equal(cache.size, 1);
@@ -533,31 +507,28 @@ describe("LRU Cache", function () {
 			cache.set("key1", "value1");
 			const originalExpiry = cache.expiresAt("key1");
 
-			// Call set with bypass=true, resetTtl=false
 			cache.set("key1", "newvalue1", true, false);
 			const newExpiry = cache.expiresAt("key1");
 
-			// TTL should not be reset
 			assert.equal(originalExpiry, newExpiry);
 		});
 
 		it("should set expiry when using setWithEvicted with ttl > 0", function () {
-			const cache = new LRU(2, 100); // ttl > 0
+			const cache = new LRU(2, 100);
 			const before = Date.now();
 			cache.set("a", 1);
 			cache.set("b", 2);
-			const evicted = cache.setWithEvicted("c", 3); // triggers eviction and new item creation
+			const evicted = cache.setWithEvicted("c", 3);
 			assert.notEqual(evicted, null);
 			const expiry = cache.expiresAt("c");
 			assert.ok(expiry >= before + 100);
-			assert.ok(expiry <= before + 250); // allow some margin
+			assert.ok(expiry <= before + 250);
 		});
 
 		it("should set expiry to 0 when resetTtl=true and ttl=0 on update", function () {
-			const cache = new LRU(2, 0); // ttl = 0
+			const cache = new LRU(2, 0);
 			cache.set("x", 1);
 			assert.equal(cache.expiresAt("x"), 0);
-			// update existing key with resetTtl=true to exercise branch in set()
 			cache.set("x", 2, false, true);
 			assert.equal(cache.expiresAt("x"), 0);
 		});
@@ -565,22 +536,12 @@ describe("LRU Cache", function () {
 		it("should handle moveToEnd edge case by direct method invocation", function () {
 			const cache = new LRU(1);
 
-			// Add a single item
 			cache.set("only", "value");
-
-			// Create a minimal test case that directly exercises the uncovered lines
-			// The edge case in moveToEnd (lines 275-276) occurs when:
-			// 1. An item is moved that was the first item (making first = item.next = null)
-			// 2. But the cache wasn't empty (last !== null)
-			// 3. The condition if (this.first === null) triggers to restore consistency
 
 			const item = cache.first;
 			assert.equal(cache.first, cache.last);
 			assert.equal(item, cache.last);
 
-			// Since moveToEnd has early return for item === last, we need to
-			// create a scenario where the item is first but not last
-			// Let's create a second dummy item and manipulate pointers
 			const dummyItem = {
 				key: "dummy",
 				value: "dummy",
@@ -589,34 +550,20 @@ describe("LRU Cache", function () {
 				expiry: 0
 			};
 
-			// Set up the linked list: item <-> dummyItem
 			item.next = dummyItem;
 			cache.last = dummyItem;
 
-			// Now item is first but not last, so moveToEnd won't early return
-			// When moveToEnd processes item:
-			// 1. Sets first = item.next (which is dummyItem)
-			// 2. Removes item from its position
-			// 3. But then we manipulate to make first = null to trigger the edge case
-
-			// Temporarily null out the next pointer to simulate the edge case
 			const originalNext = item.next;
 			item.next = null;
 
-			// This manipulation will cause first to become null in moveToEnd
-			// triggering the if (this.first === null) condition on lines 274-276
 			cache.first = null;
-			cache.last = dummyItem; // last is not null
+			cache.last = dummyItem;
 
-			// Now call moveToEnd - this should trigger the uncovered lines
 			cache.moveToEnd(item);
 
-			// Verify the edge case was handled correctly
 			assert.equal(cache.first, item);
 
-			// Restore the item for cleanup
 			item.next = originalNext;
 		});
 	});
 });
-
