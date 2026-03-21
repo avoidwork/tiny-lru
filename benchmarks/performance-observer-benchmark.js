@@ -67,7 +67,7 @@ class CustomTimer {
 
 // Test data generation
 function generateTestData (size) {
-	const out = new Array(size);
+	const out = Array.from({ length: size });
 	for (let i = 0; i < size; i++) {
 		out[i] = {
 			key: `key_${i}`,

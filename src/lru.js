@@ -119,7 +119,7 @@ export class LRU {
 	 * @since 11.1.0
 	 */
 	entries (keys = this.keys()) {
-		const result = new Array(keys.length);
+		const result = Array.from({ length: keys.length });
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
 			result[i] = [key, this.get(key)];
@@ -302,7 +302,7 @@ export class LRU {
 	 * @since 9.0.0
 	 */
 	keys () {
-		const result = new Array(this.size);
+		const result = Array.from({ length: this.size });
 		let x = this.first;
 		let i = 0;
 
@@ -436,7 +436,7 @@ export class LRU {
 	 * @since 11.1.0
 	 */
 	values (keys = this.keys()) {
-		const result = new Array(keys.length);
+		const result = Array.from({ length: keys.length });
 		for (let i = 0; i < keys.length; i++) {
 			result[i] = this.get(keys[i]);
 		}

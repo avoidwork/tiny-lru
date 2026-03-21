@@ -17,7 +17,7 @@ const ITERATIONS = {
  * @returns {Array<{key:string,value:string}>}
  */
 function generateRandomData (size) {
-	const data = new Array(size);
+	const data = Array.from({ length: size });
 	let x = 2463534242;
 	for (let i = 0; i < size; i++) {
 		// xorshift32
@@ -33,7 +33,7 @@ function generateRandomData (size) {
 }
 
 function generateSequentialData (size) {
-	const data = new Array(size);
+	const data = Array.from({ length: size });
 	for (let i = 0; i < size; i++) {
 		data[i] = {
 			key: `seq_key_${i}`,

@@ -50,8 +50,8 @@ const OPS_PER_INVOCATION = 50; // Do multiple ops per call to reduce harness ove
  * @returns {{keys: string[], values: Array<{id:number,data:string,nested:{foo:string,baz:number}}>} }
  */
 function generateTestData (count) {
-	const keys = new Array(count);
-	const values = new Array(count);
+	const keys = Array.from({ length: count });
+	const values = Array.from({ length: count });
 
 	for (let i = 0; i < count; i++) {
 		keys[i] = `key_${i}`;
