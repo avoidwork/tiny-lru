@@ -56,7 +56,7 @@ graph TD
   - `max`: Maximum cache size (0 = unlimited)
   - `size`: Current number of items
   - `ttl`: Time-to-live in milliseconds (0 = no expiration)
-  - `resetTtl`: Whether to reset TTL on access
+  - `resetTtl`: Whether to reset TTL on `set()` operations (not on `get()`)
 
 ## Data Flow
 
@@ -133,7 +133,7 @@ sequenceDiagram
 | `moveToEnd(item)` | O(1) | O(1) | O(1) | Internal: optimize LRU positioning |
 | `keys()` | O(n) | O(n) | O(n) | Array of all keys in LRU order |
 | `values(keys?)` | O(n) | O(n) | O(n) | Array of values for specified keys |
-| `entries(keys?)` | O(n) | O(n) | O(n) | Array of [key, value] pairs |
+| `entries([keys])` | O(n) | O(n) | O(n) | Array of [key, value] pairs |
 
 ### Memory Usage
 
@@ -183,7 +183,7 @@ last.next \leftarrow H[k] & \text{otherwise}
 
 **Time Complexity:** $O(1)$ amortized
 
-#### Set With Evicted Operation: $setWithEvicted(k, v, resetTtl = resetTtl) \rightarrow \{key: K, value: V, expiry: \mathbb{N}_0, prev: Object, next: Object\} \cup \{\bot\}$
+#### Set With Evicted Operation: $setWithEvicted(k, v, resetTtl = resetTtl) \rightarrow \{key: K, value: V, expiry: \mathbb{N}_0\} \cup \{\bot\}$
 $$\begin{align}
 setWithEvicted(k, v, resetTtl) &= \begin{cases}
 set(k, v, true, resetTtl) \land \bot & \text{if } k \in H \\
@@ -191,7 +191,7 @@ evicted \land create(k, v) & \text{if } k \notin H \land max > 0 \land size = ma
 \bot \land create(k, v) & \text{if } k \notin H \land (max = 0 \lor size < max)
 \end{cases} \\
 \text{where } evicted &= \begin{cases}
-\{...this.first\} & \text{if } size > 0 \\
+\{key: this.first.key, value: this.first.value, expiry: this.first.expiry\} & \text{if } size > 0 \\
 \bot & \text{otherwise}
 \end{cases}
 \end{align}$$
@@ -308,7 +308,7 @@ export class LRU<T> {
     has(key: any): boolean;
     keys(): any[];
     set(key: any, value: T, bypass?: boolean, resetTtl?: boolean): this;
-    setWithEvicted(key: any, value: T, resetTtl?: boolean): LRUItem<T> | null;
+    setWithEvicted(key: any, value: T, resetTtl?: boolean): { key: any; value: T; expiry: number } | null;
     values(keys?: any[]): T[];
 }
 
