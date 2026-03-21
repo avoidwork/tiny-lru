@@ -83,9 +83,9 @@ class LRU {
 	 * @since 1.0.0
 	 */
 	delete (key) {
-		if (this.has(key)) {
-			const item = this.items[key];
+		const item = this.items[key];
 
+		if (item !== undefined) {
 			delete this.items[key];
 			this.size--;
 
@@ -104,6 +104,9 @@ class LRU {
 			if (this.last === item) {
 				this.last = item.prev;
 			}
+
+			item.prev = null;
+			item.next = null;
 		}
 
 		return this;
@@ -125,11 +128,16 @@ class LRU {
 	 * @see {@link LRU#values}
 	 * @since 11.1.0
 	 */
-	entries (keys = this.keys()) {
-		const result = new Array(keys.length);
+	entries (keys) {
+		if (keys === undefined) {
+			keys = this.keys();
+		}
+
+		const result = Array.from({ length: keys.length });
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
-			result[i] = [key, this.get(key)];
+			const item = this.items[key];
+			result[i] = [key, item !== undefined ? item.value : undefined];
 		}
 
 		return result;
@@ -152,6 +160,10 @@ class LRU {
 		if (bypass || this.size > 0) {
 			const item = this.first;
 
+			if (!item) {
+				return this;
+			}
+
 			delete this.items[item.key];
 
 			if (--this.size === 0) {
@@ -161,6 +173,8 @@ class LRU {
 				this.first = item.next;
 				this.first.prev = null;
 			}
+
+			item.next = null;
 		}
 
 		return this;
@@ -182,13 +196,8 @@ class LRU {
 	 * @since 1.0.0
 	 */
 	expiresAt (key) {
-		let result;
-
-		if (this.has(key)) {
-			result = this.items[key].expiry;
-		}
-
-		return result;
+		const item = this.items[key];
+		return item !== undefined ? item.expiry : undefined;
 	}
 
 	/**
@@ -244,7 +253,8 @@ class LRU {
 	 * @since 9.0.0
 	 */
 	has (key) {
-		return key in this.items;
+		const item = this.items[key];
+		return item !== undefined && (this.ttl === 0 || item.expiry > Date.now());
 	}
 
 	/**
@@ -259,12 +269,10 @@ class LRU {
 	 * @since 11.3.5
 	 */
 	moveToEnd (item) {
-		// If already at the end, nothing to do
 		if (this.last === item) {
 			return;
 		}
 
-		// Remove item from current position in the list
 		if (item.prev !== null) {
 			item.prev.next = item.next;
 		}
@@ -273,12 +281,10 @@ class LRU {
 			item.next.prev = item.prev;
 		}
 
-		// Update first pointer if this was the first item
 		if (this.first === item) {
 			this.first = item.next;
 		}
 
-		// Add item to the end
 		item.prev = this.last;
 		item.next = null;
 
@@ -287,11 +293,6 @@ class LRU {
 		}
 
 		this.last = item;
-
-		// Handle edge case: if this was the only item, it's also first
-		if (this.first === null) {
-			this.first = item;
-		}
 	}
 
 	/**
@@ -309,7 +310,7 @@ class LRU {
 	 * @since 9.0.0
 	 */
 	keys () {
-		const result = new Array(this.size);
+		const result = Array.from({ length: this.size });
 		let x = this.first;
 		let i = 0;
 
@@ -340,16 +341,25 @@ class LRU {
 	 */
 	setWithEvicted (key, value, resetTtl = this.resetTtl) {
 		let evicted = null;
+		let item = this.items[key];
 
-		if (this.has(key)) {
-			this.set(key, value, true, resetTtl);
+		if (item !== undefined) {
+			item.value = value;
+			if (resetTtl) {
+				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
+			}
+			this.moveToEnd(item);
 		} else {
 			if (this.max > 0 && this.size === this.max) {
-				evicted = {...this.first};
+				evicted = {
+					key: this.first.key,
+					value: this.first.value,
+					expiry: this.first.expiry
+				};
 				this.evict(true);
 			}
 
-			let item = this.items[key] = {
+			item = this.items[key] = {
 				expiry: this.ttl > 0 ? Date.now() + this.ttl : this.ttl,
 				key: key,
 				prev: this.last,
@@ -442,10 +452,15 @@ class LRU {
 	 * @see {@link LRU#entries}
 	 * @since 11.1.0
 	 */
-	values (keys = this.keys()) {
-		const result = new Array(keys.length);
+	values (keys) {
+		if (keys === undefined) {
+			keys = this.keys();
+		}
+
+		const result = Array.from({ length: keys.length });
 		for (let i = 0; i < keys.length; i++) {
-			result[i] = this.get(keys[i]);
+			const item = this.items[keys[i]];
+			result[i] = item !== undefined ? item.value : undefined;
 		}
 
 		return result;

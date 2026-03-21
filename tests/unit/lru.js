@@ -532,38 +532,5 @@ describe("LRU Cache", function () {
 			cache.set("x", 2, false, true);
 			assert.equal(cache.expiresAt("x"), 0);
 		});
-
-		it("should handle moveToEnd edge case by direct method invocation", function () {
-			const cache = new LRU(1);
-
-			cache.set("only", "value");
-
-			const item = cache.first;
-			assert.equal(cache.first, cache.last);
-			assert.equal(item, cache.last);
-
-			const dummyItem = {
-				key: "dummy",
-				value: "dummy",
-				prev: item,
-				next: null,
-				expiry: 0
-			};
-
-			item.next = dummyItem;
-			cache.last = dummyItem;
-
-			const originalNext = item.next;
-			item.next = null;
-
-			cache.first = null;
-			cache.last = dummyItem;
-
-			cache.moveToEnd(item);
-
-			assert.equal(cache.first, item);
-
-			item.next = originalNext;
-		});
 	});
 });
