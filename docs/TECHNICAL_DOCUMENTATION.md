@@ -217,6 +217,12 @@ $$\begin{align}
 delete(k) &= \begin{cases}
 removeFromList(H[k]) \land H \setminus \{k\} \land size \leftarrow size - 1 & \text{if } k \in H \\
 \text{no-op} & \text{otherwise}
+\end{cases} \\
+removeFromList(item) &= \begin{cases}
+item.prev.next \leftarrow item.next \land item.next.prev \leftarrow item.prev \land first \leftarrow item.next \land last \leftarrow item.prev & \text{if } item.prev \neq null \land item.next \neq null \\
+item.prev.next \leftarrow item.next \land first \leftarrow item.next \land last \leftarrow null & \text{if } item.prev \neq null \land item.next = null \\
+item.next.prev \leftarrow item.prev \land first \leftarrow item.next \land last \leftarrow null & \text{if } item.prev = null \land item.next \neq null \\
+first \leftarrow null \land last \leftarrow null & \text{if } item.prev = null \land item.next = null
 \end{cases}
 \end{align}$$
 
@@ -226,9 +232,11 @@ removeFromList(H[k]) \land H \setminus \{k\} \land size \leftarrow size - 1 & \t
 $$\begin{align}
 moveToEnd(item) &= \begin{cases}
 \text{no-op} & \text{if } item = last \\
-removeFromList(item) \land appendToList(item) & \text{otherwise}
+item.prev.next \leftarrow item.next \land item.next.prev \leftarrow item.prev \land first \leftarrow item.next \land item.prev \leftarrow last \land last.next \leftarrow item \land last \leftarrow item \land first \leftarrow item \lor first & \text{if } item \neq last
 \end{cases}
 \end{align}$$
+
+**Edge Case:** When item is the only node in the list ($item.prev = null \land item.next = null$), the condition $item = last$ is true since $first = last = item$, so the operation is a no-op.
 
 **Time Complexity:** $O(1)$
 
@@ -272,7 +280,7 @@ delete(k) & \text{if } isExpired(k) \\
 2. **List Consistency:** $first \neq null \iff last \neq null \iff size > 0$
 3. **Hash Consistency:** $|H| = size$
 4. **LRU Order:** Items in list are ordered from least to most recently used
-5. **TTL Validity:** $ttl = 0 \lor \forall k \in H: H[k].expiry > t_{now}$
+5. **TTL Validity:** $(ttl = 0 \Rightarrow \forall k \in H: H[k].expiry = 0) \land (ttl > 0 \Rightarrow \forall k \in H: H[k].expiry > t_{now})$
 6. **TTL Reset Invariant:** TTL is only reset during `set()` operations when `bypass = false`, never during `get()` or `setWithEvicted()` operations
 
 ## TypeScript Support
