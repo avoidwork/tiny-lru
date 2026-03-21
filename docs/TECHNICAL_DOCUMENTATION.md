@@ -56,7 +56,7 @@ graph TD
   - `max`: Maximum cache size (0 = unlimited)
   - `size`: Current number of items
   - `ttl`: Time-to-live in milliseconds (0 = no expiration)
-  - `resetTtl`: Whether to reset TTL on access
+  - `resetTtl`: Whether to reset TTL on `set()` operations (not on `get()`)
 
 ## Data Flow
 
@@ -133,7 +133,7 @@ sequenceDiagram
 | `moveToEnd(item)` | O(1) | O(1) | O(1) | Internal: optimize LRU positioning |
 | `keys()` | O(n) | O(n) | O(n) | Array of all keys in LRU order |
 | `values(keys?)` | O(n) | O(n) | O(n) | Array of values for specified keys |
-| `entries(keys?)` | O(n) | O(n) | O(n) | Array of [key, value] pairs |
+| `entries([keys])` | O(n) | O(n) | O(n) | Array of [key, value] pairs |
 
 ### Memory Usage
 
@@ -183,20 +183,25 @@ last.next \leftarrow H[k] & \text{otherwise}
 
 **Time Complexity:** $O(1)$ amortized
 
-#### Set With Evicted Operation: $setWithEvicted(k, v, resetTtl = resetTtl) \rightarrow \{key: K, value: V, expiry: \mathbb{N}_0, prev: Object, next: Object\} \cup \{\bot\}$
+#### Set With Evicted Operation: $setWithEvicted(k, v, resetTtl = resetTtl) \rightarrow \{key: K, value: V, expiry: \mathbb{N}_0\} \cup \{\bot\}$
 $$\begin{align}
 setWithEvicted(k, v, resetTtl) &= \begin{cases}
-set(k, v, true, resetTtl) \land \bot & \text{if } k \in H \\
+update(k, v, resetTtl) \land \bot & \text{if } k \in H \\
 evicted \land create(k, v) & \text{if } k \notin H \land max > 0 \land size = max \\
 \bot \land create(k, v) & \text{if } k \notin H \land (max = 0 \lor size < max)
 \end{cases} \\
+update(k, v, resetTtl) &= H[k].value \leftarrow v \land moveToEnd(H[k]) \\
+& \quad \land \begin{cases}
+H[k].expiry \leftarrow t_{now} + ttl & \text{if } resetTtl = true \land ttl > 0 \\
+\text{no-op} & \text{otherwise}
+\end{cases} \\
 \text{where } evicted &= \begin{cases}
-\{...this.first\} & \text{if } size > 0 \\
+\{key: this.first.key, value: this.first.value, expiry: this.first.expiry\} & \text{if } size > 0 \\
 \bot & \text{otherwise}
 \end{cases}
 \end{align}$$
 
-**Note:** `setWithEvicted()` always calls `set()` with `bypass = true`, which means TTL is never reset during `setWithEvicted()` operations, regardless of the `resetTtl` parameter.
+**Note:** Unlike `set()`, `setWithEvicted()` does not use a `bypass` parameter, so TTL is reset when `resetTtl = true`.
 
 **Time Complexity:** $O(1)$ amortized
 
@@ -217,6 +222,12 @@ $$\begin{align}
 delete(k) &= \begin{cases}
 removeFromList(H[k]) \land H \setminus \{k\} \land size \leftarrow size - 1 & \text{if } k \in H \\
 \text{no-op} & \text{otherwise}
+\end{cases} \\
+removeFromList(item) &= \begin{cases}
+item.prev.next \leftarrow item.next \land item.next.prev \leftarrow item.prev \land first \leftarrow item.next \land last \leftarrow item.prev & \text{if } item.prev \neq null \land item.next \neq null \\
+item.prev.next \leftarrow item.next \land first \leftarrow item.next \land last \leftarrow null & \text{if } item.prev \neq null \land item.next = null \\
+item.next.prev \leftarrow item.prev \land first \leftarrow item.next \land last \leftarrow null & \text{if } item.prev = null \land item.next \neq null \\
+first \leftarrow null \land last \leftarrow null & \text{if } item.prev = null \land item.next = null
 \end{cases}
 \end{align}$$
 
@@ -226,9 +237,11 @@ removeFromList(H[k]) \land H \setminus \{k\} \land size \leftarrow size - 1 & \t
 $$\begin{align}
 moveToEnd(item) &= \begin{cases}
 \text{no-op} & \text{if } item = last \\
-removeFromList(item) \land appendToList(item) & \text{otherwise}
+item.prev.next \leftarrow item.next \land item.next.prev \leftarrow item.prev \land first \leftarrow item.next \land item.prev \leftarrow last \land last.next \leftarrow item \land last \leftarrow item & \text{if } item \neq last
 \end{cases}
 \end{align}$$
+
+**Edge Case:** When item is the only node in the list ($item.prev = null \land item.next = null$), the condition $item = last$ is true since $first = last = item$, so the operation is a no-op.
 
 **Time Complexity:** $O(1)$
 
@@ -257,7 +270,7 @@ delete(k) & \text{if } isExpired(k) \\
 **TTL Reset Behavior:**
 - TTL is only reset during `set()` operations when `resetTtl = true` and `bypass = false`
 - `get()` operations never reset TTL, regardless of the `resetTtl` setting
-- `setWithEvicted()` operations never reset TTL because they always call `set()` with `bypass = true`
+- `setWithEvicted()` operations reset TTL when `resetTtl = true` (does not use bypass parameter)
 
 ### Space Complexity
 
@@ -272,8 +285,8 @@ delete(k) & \text{if } isExpired(k) \\
 2. **List Consistency:** $first \neq null \iff last \neq null \iff size > 0$
 3. **Hash Consistency:** $|H| = size$
 4. **LRU Order:** Items in list are ordered from least to most recently used
-5. **TTL Validity:** $ttl = 0 \lor \forall k \in H: H[k].expiry > t_{now}$
-6. **TTL Reset Invariant:** TTL is only reset during `set()` operations when `bypass = false`, never during `get()` or `setWithEvicted()` operations
+5. **TTL Validity:** $(ttl = 0 \Rightarrow \forall k \in H: H[k].expiry = 0) \land (ttl > 0 \Rightarrow \forall k \in H: H[k].expiry \geq t_{now})$
+6. **TTL Reset Invariant:** TTL is only reset during `set()` operations when `bypass = false`, and during `setWithEvicted()` operations when `resetTtl = true`
 
 ## TypeScript Support
 
@@ -308,7 +321,7 @@ export class LRU<T> {
     has(key: any): boolean;
     keys(): any[];
     set(key: any, value: T, bypass?: boolean, resetTtl?: boolean): this;
-    setWithEvicted(key: any, value: T, resetTtl?: boolean): LRUItem<T> | null;
+    setWithEvicted(key: any, value: T, resetTtl?: boolean): { key: any; value: T; expiry: number } | null;
     values(keys?: any[]): T[];
 }
 
