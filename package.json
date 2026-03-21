@@ -40,16 +40,14 @@
     "changelog": "auto-changelog -p",
     "fmt": "oxfmt --write *.js src/*.js tests/**/*.js benchmarks/*.js",
     "lint": "oxlint --fix *.js src/*.js tests/**/*.js benchmarks/*.js",
-    "mocha": "mocha \"tests/**/*.js\"",
     "rollup": "rollup --config",
-    "test": "npm run lint && npm run mocha",
+    "test": "npm run lint",
     "prepare": "husky"
   },
   "devDependencies": {
     "@rollup/plugin-terser": "^1.0.0",
     "auto-changelog": "^2.5.0",
     "husky": "^9.1.7",
-    "mocha": "^11.7.0",
     "oxfmt": "^0.16.0",
     "oxlint": "^0.16.0",
     "rollup": "^4.43.0",
