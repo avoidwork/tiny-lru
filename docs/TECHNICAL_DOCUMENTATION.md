@@ -186,9 +186,14 @@ last.next \leftarrow H[k] & \text{otherwise}
 #### Set With Evicted Operation: $setWithEvicted(k, v, resetTtl = resetTtl) \rightarrow \{key: K, value: V, expiry: \mathbb{N}_0\} \cup \{\bot\}$
 $$\begin{align}
 setWithEvicted(k, v, resetTtl) &= \begin{cases}
-set(k, v, true, resetTtl) \land \bot & \text{if } k \in H \\
+update(k, v, resetTtl) \land \bot & \text{if } k \in H \\
 evicted \land create(k, v) & \text{if } k \notin H \land max > 0 \land size = max \\
 \bot \land create(k, v) & \text{if } k \notin H \land (max = 0 \lor size < max)
+\end{cases} \\
+update(k, v, resetTtl) &= H[k].value \leftarrow v \land moveToEnd(H[k]) \\
+& \quad \land \begin{cases}
+H[k].expiry \leftarrow t_{now} + ttl & \text{if } resetTtl = true \land ttl > 0 \\
+\text{no-op} & \text{otherwise}
 \end{cases} \\
 \text{where } evicted &= \begin{cases}
 \{key: this.first.key, value: this.first.value, expiry: this.first.expiry\} & \text{if } size > 0 \\
@@ -196,7 +201,7 @@ evicted \land create(k, v) & \text{if } k \notin H \land max > 0 \land size = ma
 \end{cases}
 \end{align}$$
 
-**Note:** `setWithEvicted()` always calls `set()` with `bypass = true`, which means TTL is never reset during `setWithEvicted()` operations, regardless of the `resetTtl` parameter.
+**Note:** Unlike `set()`, `setWithEvicted()` does not use a `bypass` parameter, so TTL is reset when `resetTtl = true`.
 
 **Time Complexity:** $O(1)$ amortized
 
@@ -232,7 +237,7 @@ first \leftarrow null \land last \leftarrow null & \text{if } item.prev = null \
 $$\begin{align}
 moveToEnd(item) &= \begin{cases}
 \text{no-op} & \text{if } item = last \\
-item.prev.next \leftarrow item.next \land item.next.prev \leftarrow item.prev \land first \leftarrow item.next \land item.prev \leftarrow last \land last.next \leftarrow item \land last \leftarrow item \land first \leftarrow item \lor first & \text{if } item \neq last
+item.prev.next \leftarrow item.next \land item.next.prev \leftarrow item.prev \land first \leftarrow item.next \land item.prev \leftarrow last \land last.next \leftarrow item \land last \leftarrow item & \text{if } item \neq last
 \end{cases}
 \end{align}$$
 
@@ -265,7 +270,7 @@ delete(k) & \text{if } isExpired(k) \\
 **TTL Reset Behavior:**
 - TTL is only reset during `set()` operations when `resetTtl = true` and `bypass = false`
 - `get()` operations never reset TTL, regardless of the `resetTtl` setting
-- `setWithEvicted()` operations never reset TTL because they always call `set()` with `bypass = true`
+- `setWithEvicted()` operations reset TTL when `resetTtl = true` (does not use bypass parameter)
 
 ### Space Complexity
 
@@ -280,8 +285,8 @@ delete(k) & \text{if } isExpired(k) \\
 2. **List Consistency:** $first \neq null \iff last \neq null \iff size > 0$
 3. **Hash Consistency:** $|H| = size$
 4. **LRU Order:** Items in list are ordered from least to most recently used
-5. **TTL Validity:** $(ttl = 0 \Rightarrow \forall k \in H: H[k].expiry = 0) \land (ttl > 0 \Rightarrow \forall k \in H: H[k].expiry > t_{now})$
-6. **TTL Reset Invariant:** TTL is only reset during `set()` operations when `bypass = false`, never during `get()` or `setWithEvicted()` operations
+5. **TTL Validity:** $(ttl = 0 \Rightarrow \forall k \in H: H[k].expiry = 0) \land (ttl > 0 \Rightarrow \forall k \in H: H[k].expiry \geq t_{now})$
+6. **TTL Reset Invariant:** TTL is only reset during `set()` operations when `bypass = false`, and during `setWithEvicted()` operations when `resetTtl = true`
 
 ## TypeScript Support
 
