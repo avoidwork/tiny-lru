@@ -216,10 +216,19 @@ All core operations are O(1):
 ```bash
 npm install           # Install dependencies
 npm test             # Run lint and tests
-npm run lint         # Lint code
-npm run fmt          # Format code
+npm run lint         # Lint and check formatting
+npm run fix          # Fix lint and formatting issues
 npm run build        # Build distribution files
+npm run coverage     # Generate test coverage report
 ```
+
+## Test Coverage
+
+| Metric | Coverage |
+|--------|----------|
+| Lines | 100% |
+| Branches | 95% |
+| Functions | 100% |
 
 ## License
 
