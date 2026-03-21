@@ -532,5 +532,21 @@ describe("LRU Cache", function () {
       cache.set("x", 2, false, true);
       assert.equal(cache.expiresAt("x"), 0);
     });
+
+    it("should handle evict with bypass on empty cache", function () {
+      const cache = new LRU(3);
+      cache.evict(true);
+      assert.equal(cache.size, 0);
+      assert.equal(cache.first, null);
+      assert.equal(cache.last, null);
+    });
+
+    it("should set expiry to 0 when resetTtl=true and ttl=0 on setWithEvicted", function () {
+      const cache = new LRU(2, 0);
+      cache.set("x", 1);
+      assert.equal(cache.expiresAt("x"), 0);
+      cache.setWithEvicted("x", 2, true);
+      assert.equal(cache.expiresAt("x"), 0);
+    });
   });
 });
