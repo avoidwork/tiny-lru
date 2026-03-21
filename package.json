@@ -39,7 +39,7 @@
     "benchmark:all": "npm run benchmark:modern && npm run benchmark:perf && npm run benchmark:comparison",
     "changelog": "auto-changelog -p",
     "fmt": "oxfmt --write *.js src/*.js tests/**/*.js benchmarks/*.js",
-    "lint": "oxlint --fix *.js src/*.js tests/**/*.js benchmarks/*.js",
+    "lint": "oxlint *.js benchmarks src tests/unit && oxfmt *.js benchmarks/*.js src/*.js tests/unit/*.js --check",
     "rollup": "rollup --config",
     "test": "npm run lint && node --test tests/**/*.js",
     "prepare": "husky"
