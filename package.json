@@ -40,6 +40,7 @@
     "changelog": "auto-changelog -p",
     "fix": "oxlint --fix *.js benchmarks src tests/unit && oxfmt *.js benchmarks src tests/unit --write",
     "lint": "oxlint *.js benchmarks src tests/unit && oxfmt *.js benchmarks/*.js src/*.js tests/unit/*.js --check",
+    "coverage": "node --test --experimental-test-coverage --test-coverage-exclude=dist/** --test-coverage-exclude=tests/** --test-reporter=spec tests/**/*.test.js 2>&1 | grep -A 1000 \"start of coverage report\" > coverage.txt",
     "rollup": "rollup --config",
     "test": "npm run lint && node --test tests/**/*.js",
     "prepare": "husky"
