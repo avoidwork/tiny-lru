@@ -185,6 +185,13 @@ if (isNaN(max) || max < 0) {
 }
 ```
 
+## Testing and Coverage
+
+- All tests must pass before merging
+- 100% line coverage required
+- Run tests with `npm test` (includes linting)
+- Generate coverage report with `npm run coverage`
+
 ## Lint Configuration
 
 The project uses oxlint. Run `npm run lint` to check code style.

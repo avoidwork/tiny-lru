@@ -32,6 +32,9 @@ Source code is in `src/`.
 ├── tests/              # Test files
 ├── benchmarks/          # Performance benchmarks
 ├── dist/               # Built distribution files
+│   ├── tiny-lru.js     # ES Modules
+│   ├── tiny-lru.cjs    # CommonJS
+│   └── tiny-lru.min.js # Minified ESM
 ├── types/              # TypeScript definitions
 ├── docs/               # Documentation
 ├── rollup.config.js    # Build configuration
@@ -56,16 +59,19 @@ Source code is in `src/`.
 
 - `lru(max, ttl, resetTtl)` - Factory function to create cache
 - `LRU` class - Direct instantiation with `new LRU(max, ttl, resetTtl)`
-- Key methods: `get()`, `set()`, `delete()`, `has()`, `clear()`, `evict()`
+- Core methods: `get()`, `set()`, `peek()`, `delete()`, `has()`, `clear()`, `evict()`
 - Array methods: `keys()`, `values()`, `entries()`
+- Utility methods: `forEach()`, `getMany()`, `hasAll()`, `hasAny()`, `cleanup()`, `toJSON()`, `stats()`, `onEvict()`, `sizeByTTL()`, `keysByTTL()`, `valuesByTTL()`
 - Properties: `first`, `last`, `max`, `size`, `ttl`, `resetTtl`
+- `peek(key)` - Retrieve value without moving it (no LRU update, no TTL check)
 
 ## Testing
 
 - Framework: Node.js built-in test runner (`node --test`)
-- Coverage: 100%
+- Tests: 149 tests across 26 suites
+- Coverage: 100% lines, 99.28% branches, 100% functions
 - Test pattern: `tests/**/*.js`
-- All tests must pass with 100% coverage before merging
+- All tests must pass with 100% line coverage before merging
 - Run: `npm test` (lint + tests) or `npm run coverage` for coverage report
 
 ## Common Issues to Avoid

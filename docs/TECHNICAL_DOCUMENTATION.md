@@ -56,7 +56,7 @@ graph TD
   - `max`: Maximum cache size (0 = unlimited)
   - `size`: Current number of items
   - `ttl`: Time-to-live in milliseconds (0 = no expiration)
-  - `resetTtl`: Whether to reset TTL on `set()` and `setWithEvicted()` operations (not on `get()`)
+   - `resetTTL`: Whether to reset TTL on `set()` and `setWithEvicted()` operations (not on `get()`)
 
 ## Data Flow
 
@@ -127,7 +127,8 @@ sequenceDiagram
 | `setWithEvicted(key, value)` | O(1)         | O(1)       | O(1)  | Store value, return evicted item   |
 | `delete(key)`                | O(1)         | O(1)       | O(1)  | Remove item from cache             |
 | `has(key)`                   | O(1)         | O(1)       | O(1)  | Check key existence                |
-| `clear()`                    | O(1)         | O(1)       | O(1)  | Reset all pointers                 |
+| `peek(key)`                  | O(1)         | O(1)       | O(1)  | Retrieve value without LRU update  |
+| `clear()`                    | O(n)         | O(n)       | O(1)  | Reset all pointers, nullify node links             |
 | `evict()`                    | O(1)         | O(1)       | O(1)  | Remove least recently used item    |
 | `expiresAt(key)`             | O(1)         | O(1)       | O(1)  | Get expiration timestamp           |
 | `moveToEnd(item)`            | O(1)         | O(1)       | O(1)  | Internal: optimize LRU positioning |
@@ -338,6 +339,7 @@ export class LRU<T> {
 	get(key: any): T | undefined;
 	has(key: any): boolean;
 	keys(): any[];
+	peek(key: any): T | undefined;
 	set(key: any, value: T): this;
 	setWithEvicted(key: any, value: T): EvictedItem<T> | null;
 	values(keys?: any[]): (T | undefined)[];
@@ -1082,10 +1084,6 @@ export default [
 			{ format: "esm", file: "dist/tiny-lru.js" },
 			// Minified ES Modules
 			{ format: "esm", file: "dist/tiny-lru.min.js", plugins: [terser()] },
-			// UMD for browsers
-			{ format: "umd", file: "dist/tiny-lru.umd.js", name: "lru" },
-			// Minified UMD
-			{ format: "umd", file: "dist/tiny-lru.umd.min.js", name: "lru", plugins: [terser()] },
 		],
 	},
 ];
@@ -1111,8 +1109,7 @@ export default [
 
 - **ESM**: `dist/tiny-lru.js` - ES Modules for modern bundlers
 - **CommonJS**: `dist/tiny-lru.cjs` - Node.js compatible format
-- **UMD**: `dist/tiny-lru.umd.js` - Universal format for browsers
-- **Minified**: All formats available with `.min.js` extension
+- **Minified**: `dist/tiny-lru.min.js` - Minified ESM
 - **TypeScript**: `types/lru.d.ts` - Complete type definitions
 
 ### Development Commands
@@ -1142,9 +1139,7 @@ tiny-lru/
 ├── dist/                   # Built distributions (generated)
 │   ├── tiny-lru.js        # ES Modules
 │   ├── tiny-lru.cjs       # CommonJS
-│   ├── tiny-lru.min.js    # Minified ESM
-│   ├── tiny-lru.umd.js    # UMD
-│   └── tiny-lru.umd.min.js # Minified UMD
+│   └── tiny-lru.min.js    # Minified ESM
 ├── tests/
 │   ├── unit/              # Unit tests with Node.js built-in test runner
 │   └── integration/       # Integration tests
