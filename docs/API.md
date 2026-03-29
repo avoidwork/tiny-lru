@@ -572,7 +572,7 @@ console.log(cache.stats());
 **Returns:** `Object` - Statistics object with the following properties:
 - `hits` - Number of successful get() calls
 - `misses` - Number of failed get() calls
-- `sets` - Number of set() calls
+- `sets` - Number of set() and setWithEvicted() calls
 - `deletes` - Number of delete() calls
 - `evictions` - Number of evicted items
 
