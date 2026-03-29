@@ -116,12 +116,13 @@ class LRU {
 
 	/**
 	 * Returns an array of [key, value] pairs for the specified keys.
-	 * Order follows LRU order (least to most recently used).
+	 * When no keys provided, returns all entries in LRU order.
+	 * When keys provided, order matches the input array.
 	 *
 	 * @method entries
 	 * @memberof LRU
 	 * @param {string[]} [keys=this.keys()] - Array of keys to get entries for. Defaults to all keys.
-	 * @returns {Array<Array<*>>} Array of [key, value] pairs in LRU order.
+	 * @returns {Array<Array<*>>} Array of [key, value] pairs.
 	 * @example
 	 * cache.set('a', 1).set('b', 2);
 	 * console.log(cache.entries()); // [['a', 1], ['b', 2]]
@@ -436,12 +437,13 @@ class LRU {
 
 	/**
 	 * Returns an array of all values in the cache for the specified keys.
-	 * Order follows LRU order (least to most recently used).
+	 * When no keys provided, returns all values in LRU order.
+	 * When keys provided, order matches the input array.
 	 *
 	 * @method values
 	 * @memberof LRU
 	 * @param {string[]} [keys=this.keys()] - Array of keys to get values for. Defaults to all keys.
-	 * @returns {Array<*>} Array of values corresponding to the keys in LRU order.
+	 * @returns {Array<*>} Array of values corresponding to the keys.
 	 * @example
 	 * cache.set('a', 1).set('b', 2);
 	 * console.log(cache.values()); // [1, 2]
