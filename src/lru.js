@@ -24,7 +24,7 @@ export class LRU {
 	 * @constructor
 	 * @param {number} [max=0] - Maximum number of items to store. 0 means unlimited.
 	 * @param {number} [ttl=0] - Time to live in milliseconds. 0 means no expiration.
-	 * @param {boolean} [resetTtl=false] - Whether to reset TTL when accessing existing items via get().
+	 * @param {boolean} [resetTtl=false] - Whether to reset TTL when updating existing items via set().
 	 * @example
 	 * const cache = new LRU(1000, 60000, true); // 1000 items, 1 minute TTL, reset on access
 	 * @see {@link lru} For parameter validation
@@ -320,7 +320,7 @@ export class LRU {
 	 * @memberof LRU
 	 * @param {string} key - The key to set.
 	 * @param {*} value - The value to store.
-	 * @returns {Object|null} The evicted item (if any) with shape {key, value, expiry, prev, next}, or null.
+	 * @returns {Object|null} The evicted item (if any) with shape {key, value, expiry}, or null.
 	 * @example
 	 * const cache = new LRU(2);
 	 * cache.set('a', 1).set('b', 2);
