@@ -459,7 +459,7 @@ export class LRU {
 		let removed = 0;
 
 		for (let x = this.first; x !== null; x = x.next) {
-			if (x.expiry <= now) {
+			if (x.expiry !== 0 && x.expiry <= now) {
 				const key = x.key;
 				if (this.items[key] !== undefined) {
 					delete this.items[key];
