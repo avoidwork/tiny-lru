@@ -156,20 +156,19 @@ const cache = new LRU(100, 5000);
 | `first`   | `object` \| `null`  | Least recently used item (node with `key`, `value`, `prev`, `next`, `expiry`) |
 | `last`    | `object` \| `null`  | Most recently used item (node with `key`, `value`, `prev`, `next`, `expiry`) |
 | `max`     | `number`         | Maximum items allowed                      |
+| `resetTtl`| `boolean`        | Whether TTL resets on `set()` updates      |
 | `size`    | `number`         | Current number of items                    |
 | `ttl`     | `number`         | Time-to-live in milliseconds               |
-| `resetTtl`| `boolean`        | Whether TTL resets on `set()` updates      |
 
 ### Methods
 
 | Method                      | Description                                    |
 | --------------------------- | ---------------------------------------------- |
-| `cleanup()`                 | Remove expired items without LRU update. Returns count of removed items. |
 | `clear()`                   | Remove all items. Returns `this` for chaining. |
+| `cleanup()`                 | Remove expired items without LRU update. Returns count of removed items. |
 | `delete(key)`               | Remove an item by key. Returns `this` for chaining. |
 | `entries(keys?)`            | Get `[key, value]` pairs. Without keys: LRU order. With keys: input array order. |
 | `evict()`                   | Remove the least recently used item. Returns `this` for chaining. |
-| `expiresAt(key)`            | Get expiration timestamp for a key. Returns `number | undefined`. |
 | `forEach(callback, thisArg?)` | Iterate over items in LRU order. Returns `this` for chaining. |
 | `get(key)`                  | Retrieve a value. Moves item to most recent. Returns value or `undefined`. |
 | `getMany(keys)`             | Batch retrieve multiple items. Returns object mapping keys to values. |
@@ -178,6 +177,7 @@ const cache = new LRU(100, 5000);
 | `hasAny(keys)`              | Check if ANY key exists. Returns `boolean`.    |
 | `keys()`                    | Get all keys in LRU order (oldest first). Returns `string[]`. |
 | `keysByTTL()`               | Get keys by TTL status. Returns `{valid, expired, noTTL}`. |
+| `onEvict(callback)`         | Register eviction callback (triggers on `evict()` or when `set()`/`setWithEvicted()` evicts). Returns `this` for chaining. |
 | `peek(key)`                 | Retrieve a value without LRU update. Returns value or `undefined`. |
 | `set(key, value)`           | Store a value. Returns `this` for chaining.    |
 | `setWithEvicted(key, value)` | Store value, return evicted item if full. Returns `{key, value, expiry} | null`. |
@@ -186,7 +186,7 @@ const cache = new LRU(100, 5000);
 | `toJSON()`                  | Serialize cache to JSON format. Returns array of items. |
 | `values(keys?)`             | Get all values, or values for specific keys. Returns array of values. |
 | `valuesByTTL()`             | Get values by TTL status. Returns `{valid, expired, noTTL}`. |
-| `onEvict(callback)`         | Register eviction callback (triggers on `evict()` or when `set()`/`setWithEvicted()` evicts). Returns `this` for chaining. |
+| `expiresAt(key)`            | Get expiration timestamp for a key. Returns `number | undefined`. |
 
 ## Common Patterns
 
