@@ -1292,6 +1292,17 @@ describe("LRU Cache", function () {
 			assert.equal(evictedItems[1].key, "b");
 			assert.equal(evictedItems[2].key, "c");
 		});
+
+		it("should throw TypeError if callback is not a function", function () {
+			assert.throws(() => cache.onEvict(undefined), {
+				message: "onEvict callback must be a function",
+			});
+			assert.throws(() => cache.onEvict(null), { message: "onEvict callback must be a function" });
+			assert.throws(() => cache.onEvict("not a function"), {
+				message: "onEvict callback must be a function",
+			});
+			assert.throws(() => cache.onEvict({}), { message: "onEvict callback must be a function" });
+		});
 	});
 
 	describe("sizeByTTL method", function () {
