@@ -194,11 +194,6 @@ describe("LRU Cache", function () {
 			assert.equal(cache.has("key3"), true);
 		});
 
-		it("should evict with bypass flag", function () {
-			cache.evict(true);
-			assert.equal(cache.size, 2);
-		});
-
 		it("should handle evict on empty cache", function () {
 			cache.clear();
 			cache.evict();
@@ -331,14 +326,14 @@ describe("LRU Cache", function () {
 			assert.equal(neverExpireCache.expiresAt("key1"), 0);
 		});
 
-		it("should reset TTL when accessing with resetTtl=true", async function () {
+		it("should reset TTL when updating with resetTtl=true", async function () {
 			const resetCache = new LRU(5, 1000, true);
 			resetCache.set("key1", "value1");
 
 			const firstExpiry = resetCache.expiresAt("key1");
 
 			await new Promise((resolve) => setTimeout(resolve, 10));
-			resetCache.set("key1", "value1", true);
+			resetCache.set("key1", "value1");
 			const secondExpiry = resetCache.expiresAt("key1");
 
 			assert.ok(secondExpiry > firstExpiry, "TTL should be reset");
@@ -353,6 +348,20 @@ describe("LRU Cache", function () {
 
 			await new Promise((resolve) => setTimeout(resolve, 75));
 			assert.equal(noResetCache.get("key1"), undefined);
+		});
+
+		it("should not reset TTL on get() even with resetTtl=true", async function () {
+			const resetCache = new LRU(5, 100, true);
+			resetCache.set("key1", "value1");
+
+			const firstExpiry = resetCache.expiresAt("key1");
+
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			resetCache.get("key1");
+			const secondExpiry = resetCache.expiresAt("key1");
+
+			// TTL should NOT be reset by get()
+			assert.ok(secondExpiry <= firstExpiry + 15, "TTL should not be reset by get()");
 		});
 	});
 
@@ -399,25 +408,6 @@ describe("LRU Cache", function () {
 			assert.deepEqual(cache.keys(), ["d", "b", "a", "c"]);
 		});
 
-		it("should handle set with bypass parameter", function () {
-			const cache = new LRU(3);
-			cache.set("key1", "value1");
-			cache.set("key2", "value2");
-
-			cache.set("key1", "newvalue1", true);
-			assert.deepEqual(cache.keys(), ["key2", "key1"]);
-		});
-
-		it("should handle resetTtl parameter in set method", function () {
-			const cache = new LRU(3, 1000, false);
-			const beforeTime = Date.now();
-			cache.set("key1", "value1");
-
-			cache.set("key1", "newvalue1", false, true);
-			const expiresAt = cache.expiresAt("key1");
-			assert.ok(expiresAt > beforeTime + 900);
-		});
-
 		it("should handle single item cache operations", function () {
 			const cache = new LRU(1);
 
@@ -452,6 +442,149 @@ describe("LRU Cache", function () {
 
 			cache.get("key3");
 			assert.deepEqual(cache.keys(), ["key1", "key2", "key3"]);
+		});
+
+		it("should clear prev/next pointers on eviction for garbage collection", function () {
+			const cache = new LRU(2);
+			cache.set("key1", "value1");
+			cache.set("key2", "value2");
+
+			const firstItem = cache.first;
+			cache.set("key3", "value3");
+
+			// Evicted item should have nullified pointers
+			assert.equal(firstItem.prev, null);
+			assert.equal(firstItem.next, null);
+		});
+
+		it("should clear prev/next pointers on delete for garbage collection", function () {
+			const cache = new LRU(3);
+			cache.set("key1", "value1");
+			cache.set("key2", "value2");
+			cache.set("key3", "value3");
+
+			const middleItem = cache.items["key2"];
+			cache.delete("key2");
+
+			assert.equal(middleItem.prev, null);
+			assert.equal(middleItem.next, null);
+		});
+
+		it("should handle first/last consistency after middle deletion", function () {
+			const cache = new LRU(3);
+			cache.set("a", 1);
+			cache.set("b", 2);
+			cache.set("c", 3);
+
+			cache.delete("b");
+
+			assert.equal(cache.first.key, "a");
+			assert.equal(cache.last.key, "c");
+			assert.equal(cache.first.next.key, "c");
+			assert.equal(cache.last.prev.key, "a");
+		});
+
+		it("should handle first/last consistency after first deletion", function () {
+			const cache = new LRU(3);
+			cache.set("a", 1);
+			cache.set("b", 2);
+			cache.set("c", 3);
+
+			cache.delete("a");
+
+			assert.equal(cache.first.key, "b");
+			assert.equal(cache.last.key, "c");
+			assert.equal(cache.first.prev, null);
+		});
+
+		it("should handle first/last consistency after last deletion", function () {
+			const cache = new LRU(3);
+			cache.set("a", 1);
+			cache.set("b", 2);
+			cache.set("c", 3);
+
+			cache.delete("c");
+
+			assert.equal(cache.first.key, "a");
+			assert.equal(cache.last.key, "b");
+			assert.equal(cache.last.next, null);
+		});
+	});
+
+	describe("Different key types", function () {
+		it("should handle number keys", function () {
+			const cache = new LRU(3);
+			cache.set(1, "one");
+			cache.set(2, "two");
+			cache.set(3, "three");
+
+			assert.equal(cache.get(1), "one");
+			assert.equal(cache.get(2), "two");
+			assert.equal(cache.has(3), true);
+		});
+
+		it("should handle null as key value", function () {
+			const cache = new LRU(3);
+			cache.set("key1", null);
+			assert.equal(cache.get("key1"), null);
+			assert.equal(cache.has("key1"), true);
+		});
+
+		it("should handle undefined as key value", function () {
+			const cache = new LRU(3);
+			cache.set("key1", undefined);
+			assert.equal(cache.get("key1"), undefined);
+			assert.equal(cache.has("key1"), true);
+		});
+
+		it("should handle function values", function () {
+			const cache = new LRU(3);
+			const fn = () => "hello";
+			cache.set("key1", fn);
+
+			const retrieved = cache.get("key1");
+			assert.equal(retrieved(), "hello");
+		});
+
+		it("should handle object values", function () {
+			const cache = new LRU(3);
+			const obj = { nested: { value: 42 } };
+			cache.set("key1", obj);
+
+			const retrieved = cache.get("key1");
+			assert.equal(retrieved.nested.value, 42);
+		});
+
+		it("should handle array values", function () {
+			const cache = new LRU(3);
+			const arr = [1, 2, 3, 4, 5];
+			cache.set("key1", arr);
+
+			const retrieved = cache.get("key1");
+			assert.deepEqual(retrieved, [1, 2, 3, 4, 5]);
+		});
+	});
+
+	describe("Unlimited cache (max=0) edge cases", function () {
+		it("should never evict with unlimited size", function () {
+			const cache = new LRU(0);
+			for (let i = 0; i < 10000; i++) {
+				cache.set(`key${i}`, `value${i}`);
+			}
+			assert.equal(cache.size, 10000);
+			assert.equal(cache.has("key0"), true);
+			assert.equal(cache.has("key9999"), true);
+		});
+
+		it("should maintain LRU order with unlimited size", function () {
+			const cache = new LRU(0);
+			cache.set("a", 1);
+			cache.set("b", 2);
+			cache.set("c", 3);
+
+			cache.get("a");
+
+			assert.deepEqual(cache.keys(), ["b", "c", "a"]);
 		});
 	});
 
@@ -502,17 +635,6 @@ describe("LRU Cache", function () {
 			assert.equal(cache.first, cache.last);
 		});
 
-		it("should handle bypass parameter with resetTtl false", function () {
-			const cache = new LRU(3, 1000, false);
-			cache.set("key1", "value1");
-			const originalExpiry = cache.expiresAt("key1");
-
-			cache.set("key1", "newvalue1", true, false);
-			const newExpiry = cache.expiresAt("key1");
-
-			assert.equal(originalExpiry, newExpiry);
-		});
-
 		it("should set expiry when using setWithEvicted with ttl > 0", function () {
 			const cache = new LRU(2, 100);
 			const before = Date.now();
@@ -526,27 +648,84 @@ describe("LRU Cache", function () {
 		});
 
 		it("should set expiry to 0 when resetTtl=true and ttl=0 on update", function () {
-			const cache = new LRU(2, 0);
+			const cache = new LRU(2, 0, true);
 			cache.set("x", 1);
 			assert.equal(cache.expiresAt("x"), 0);
-			cache.set("x", 2, false, true);
+			cache.set("x", 2);
 			assert.equal(cache.expiresAt("x"), 0);
 		});
 
-		it("should handle evict with bypass on empty cache", function () {
+		it("should set expiry to 0 when resetTtl=true and ttl=0 on setWithEvicted", function () {
+			const cache = new LRU(2, 0, true);
+			cache.set("x", 1);
+			assert.equal(cache.expiresAt("x"), 0);
+			cache.setWithEvicted("x", 2);
+			assert.equal(cache.expiresAt("x"), 0);
+		});
+
+		it("should handle evict on empty cache without errors", function () {
 			const cache = new LRU(3);
-			cache.evict(true);
+			cache.evict();
 			assert.equal(cache.size, 0);
 			assert.equal(cache.first, null);
 			assert.equal(cache.last, null);
 		});
 
-		it("should set expiry to 0 when resetTtl=true and ttl=0 on setWithEvicted", function () {
-			const cache = new LRU(2, 0);
-			cache.set("x", 1);
-			assert.equal(cache.expiresAt("x"), 0);
-			cache.setWithEvicted("x", 2, true);
-			assert.equal(cache.expiresAt("x"), 0);
+		it("should handle updating first item with setWithEvicted", function () {
+			const cache = new LRU(2);
+			cache.set("a", 1);
+			cache.set("b", 2);
+
+			const evicted = cache.setWithEvicted("a", 10);
+			assert.equal(evicted, null);
+			assert.equal(cache.get("a"), 10);
+			assert.deepEqual(cache.keys(), ["b", "a"]);
+		});
+
+		it("should handle updating last item with setWithEvicted", function () {
+			const cache = new LRU(2);
+			cache.set("a", 1);
+			cache.set("b", 2);
+
+			const evicted = cache.setWithEvicted("b", 20);
+			assert.equal(evicted, null);
+			assert.equal(cache.get("b"), 20);
+			assert.deepEqual(cache.keys(), ["a", "b"]);
+		});
+
+		it("should return correct evicted item shape", function () {
+			const cache = new LRU(1, 1000);
+			cache.set("old", "value");
+			const firstExpiry = cache.expiresAt("old");
+
+			const evicted = cache.setWithEvicted("new", "newvalue");
+
+			assert.equal(evicted.key, "old");
+			assert.equal(evicted.value, "value");
+			assert.equal(evicted.expiry, firstExpiry);
+			assert.equal(typeof evicted.expiry, "number");
+		});
+
+		it("should handle entries() with non-existent keys", function () {
+			const cache = new LRU(3);
+			cache.set("a", 1);
+			cache.set("b", 2);
+
+			const entries = cache.entries(["a", "nonexistent", "b"]);
+			assert.deepEqual(entries, [
+				["a", 1],
+				["nonexistent", undefined],
+				["b", 2],
+			]);
+		});
+
+		it("should handle values() with non-existent keys", function () {
+			const cache = new LRU(3);
+			cache.set("a", 1);
+			cache.set("b", 2);
+
+			const values = cache.values(["a", "nonexistent", "b"]);
+			assert.deepEqual(values, [1, undefined, 2]);
 		});
 	});
 });
