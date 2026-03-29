@@ -422,7 +422,7 @@ Build produces multiple module formats:
 | Metric    | Coverage |
 | --------- | -------- |
 | Lines     | 100%     |
-| Branches  | 99.25%   |
+| Branches  | 99.28%   |
 | Functions | 100%     |
 
 ## Contributing
