@@ -539,6 +539,10 @@ class LRU {
 	 * @returns {LRU} The LRU instance for method chaining.
 	 */
 	onEvict(callback) {
+		if (typeof callback !== "function") {
+			throw new TypeError("onEvict callback must be a function");
+		}
+
 		this.#onEvict = callback;
 
 		return this;
