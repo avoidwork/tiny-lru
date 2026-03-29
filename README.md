@@ -7,13 +7,22 @@
 [![Node.js version](https://img.shields.io/node/v/tiny-lru.svg)](https://www.npmjs.com/package/tiny-lru)
 [![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/avoidwork/tiny-lru/actions?query=branch%3Amaster)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://app.codecov.io/gh/avoidwork/tiny-lru)
+
 [![npm](https://nodei.co/npm/tiny-lru.png?downloads=true&stars=true)](https://www.npmjs.com/package/tiny-lru)
 
-A fast, lightweight LRU (Least Recently Used) cache for JavaScript with O(1) operations and optional TTL support.
+A high-performance, lightweight LRU (Least Recently Used) cache for JavaScript with O(1) operations and optional TTL support.
 
 ## What is an LRU Cache?
 
 Think of an LRU cache like a limited-size bookshelf. When you add a new book and the shelf is full, you remove the **least recently used** book to make room. Every time you read a book, it moves to the front. This pattern is perfect for caching where you want to keep the most frequently accessed items.
+
+The tiny-lru library provides:
+- **O(1)** operations for get, set, delete, and has
+- Optional **TTL (Time-To-Live)** support for automatic expiration
+- **Zero dependencies** - pure JavaScript
+- **100% test coverage** - fully tested and reliable
+- **TypeScript support** - full type definitions included
+- **~2.2 KB** minified and gzipped (compared to ~15 KB for lru-cache)
 
 ## Installation
 
@@ -88,6 +97,8 @@ cache.set("key", "new value"); // TTL resets
 - Function memoization
 - Session storage with expiration
 - Rate limiting
+- LLM response caching
+- Database query result caching
 - Any scenario where you want to limit memory usage
 
 **Not ideal for:**
@@ -99,6 +110,8 @@ cache.set("key", "new value"); // TTL resets
 
 ### Factory Function: `lru(max?, ttl?, resetTtl?)`
 
+Creates a new LRU cache instance with parameter validation.
+
 ```javascript
 import { lru } from "tiny-lru";
 
@@ -108,7 +121,19 @@ const cache3 = lru(100, 30000); // 100 items, 30s TTL
 const cache4 = lru(100, 60000, true); // with resetTtl enabled
 ```
 
+**Parameters:**
+
+| Name       | Type      | Default | Description                                                      |
+| ---------- | --------- | ------- | ---------------------------------------------------------------- |
+| `max`      | `number`  | `1000`  | Maximum items. `0` = unlimited. Must be >= 0.                    |
+| `ttl`      | `number`  | `0`     | Time-to-live in milliseconds. `0` = no expiration. Must be >= 0. |
+| `resetTtl` | `boolean` | `false` | Reset TTL when updating existing items via `set()`               |
+
+**Throws:** `TypeError` if parameters are invalid
+
 ### Class: `new LRU(max?, ttl?, resetTtl?)`
+
+Creates an LRU cache instance without parameter validation.
 
 ```javascript
 import { LRU } from "tiny-lru";
@@ -116,58 +141,52 @@ import { LRU } from "tiny-lru";
 const cache = new LRU(100, 5000);
 ```
 
-### TypeScript
+**Parameters:**
 
-```typescript
-import { LRU } from "tiny-lru";
-
-interface User {
-  id: number;
-  name: string;
-}
-
-const cache = new LRU<User>(100);
-cache.set("user:1", { id: 1, name: "Alice" });
-const user: User | undefined = cache.get("user:1");
-```
-
-### Methods
-
-| Method                  | Description                                    |
-| ----------------------- | ---------------------------------------------- |
-| `cleanup()`             | Remove expired items without LRU update.       |
-| `clear()`               | Remove all items. Returns `this` for chaining. |
-| `delete(key)`           | Remove an item. Returns `this` for chaining.   |
-| `entries(keys?)`        | Get `[key, value]` pairs in LRU order.         |
-| `evict()`               | Remove the least recently used item.           |
-| `expiresAt(key)`        | Get expiration timestamp for a key.            |
-| `forEach(callback, thisArg?)` | Iterate over items in LRU order.         |
-| `get(key)`              | Retrieve a value. Moves item to most recent.   |
-| `getMany(keys)`         | Batch retrieve multiple items.                 |
-| `has(key)`              | Check if key exists and is not expired.        |
-| `hasAll(keys)`          | Check if ALL keys exist.                       |
-| `hasAny(keys)`          | Check if ANY key exists.                       |
-| `keys()`                | Get all keys in LRU order (oldest first).      |
-| `keysByTTL()`           | Get keys by TTL status.                        |
-| `peek(key)`             | Retrieve a value without LRU update.           |
-| `set(key, value)`       | Store a value. Returns `this` for chaining.    |
-| `setWithEvicted(key, value)` | Store value, return evicted item if full. |
-| `sizeByTTL()`           | Get counts by TTL status.                      |
-| `stats()`               | Get cache statistics.                          |
-| `toJSON()`              | Serialize cache to JSON format.                |
-| `values(keys?)`         | Get all values, or values for specific keys.   |
-| `valuesByTTL()`         | Get values by TTL status.                      |
-| `onEvict(callback)`     | Register eviction callback.                    |
+| Name       | Type      | Default | Description                                        |
+| ---------- | --------- | ------- | -------------------------------------------------- |
+| `max`      | `number`  | `0`     | Maximum items. `0` = unlimited.                    |
+| `ttl`      | `number`  | `0`     | Time-to-live in milliseconds. `0` = no expiration. |
+| `resetTtl` | `boolean` | `false` | Reset TTL when updating via `set()`                |
 
 ### Properties
 
-| Property | Type   | Description                  |
-| -------- | ------ | ---------------------------- |
-| `first`  | object | Least recently used item     |
-| `last`   | object | Most recently used item      |
-| `max`    | number | Maximum items allowed        |
-| `size`   | number | Current number of items      |
-| `ttl`    | number | Time-to-live in milliseconds |
+| Property  | Type             | Description                                |
+| --------- | ---------------- | ------------------------------------------ |
+| `first`   | `object | null`  | Least recently used item (node with `key`, `value`, `prev`, `next`, `expiry`) |
+| `last`    | `object | null`  | Most recently used item                    |
+| `max`     | `number`         | Maximum items allowed                      |
+| `size`    | `number`         | Current number of items                    |
+| `ttl`     | `number`         | Time-to-live in milliseconds               |
+| `resetTtl`| `boolean`        | Whether TTL resets on `set()` updates      |
+
+### Methods
+
+| Method                      | Description                                    |
+| --------------------------- | ---------------------------------------------- |
+| `cleanup()`                 | Remove expired items without LRU update. Returns count of removed items. |
+| `clear()`                   | Remove all items. Returns `this` for chaining. |
+| `delete(key)`               | Remove an item by key. Returns `this` for chaining. |
+| `entries(keys?)`            | Get `[key, value]` pairs in LRU order.         |
+| `evict()`                   | Remove the least recently used item. Returns `this` for chaining. |
+| `expiresAt(key)`            | Get expiration timestamp for a key. Returns `number | undefined`. |
+| `forEach(callback, thisArg?)` | Iterate over items in LRU order. Returns `this` for chaining. |
+| `get(key)`                  | Retrieve a value. Moves item to most recent. Returns value or `undefined`. |
+| `getMany(keys)`             | Batch retrieve multiple items. Returns object mapping keys to values. |
+| `has(key)`                  | Check if key exists and is not expired. Returns `boolean`. |
+| `hasAll(keys)`              | Check if ALL keys exist. Returns `boolean`.    |
+| `hasAny(keys)`              | Check if ANY key exists. Returns `boolean`.    |
+| `keys()`                    | Get all keys in LRU order (oldest first). Returns `string[]`. |
+| `keysByTTL()`               | Get keys by TTL status. Returns `{valid, expired, noTTL}`. |
+| `peek(key)`                 | Retrieve a value without LRU update. Returns value or `undefined`. |
+| `set(key, value)`           | Store a value. Returns `this` for chaining.    |
+| `setWithEvicted(key, value)` | Store value, return evicted item if full. Returns `{key, value, expiry} | null`. |
+| `sizeByTTL()`               | Get counts by TTL status. Returns `{valid, expired, noTTL}`. |
+| `stats()`                   | Get cache statistics. Returns `{hits, misses, sets, deletes, evictions}`. |
+| `toJSON()`                  | Serialize cache to JSON format. Returns array of items. |
+| `values(keys?)`             | Get all values, or values for specific keys. Returns array of values. |
+| `valuesByTTL()`             | Get values by TTL status. Returns `{valid, expired, noTTL}`. |
+| `onEvict(callback)`         | Register eviction callback. Returns `this` for chaining. |
 
 ## Common Patterns
 
@@ -175,19 +194,19 @@ const user: User | undefined = cache.get("user:1");
 
 ```javascript
 function memoize(fn, maxSize = 100) {
-	const cache = lru(maxSize);
+  const cache = lru(maxSize);
 
-	return function (...args) {
-		const key = JSON.stringify(args);
+  return function (...args) {
+    const key = JSON.stringify(args);
 
-		if (cache.has(key)) {
-			return cache.get(key);
-		}
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
 
-		const result = fn(...args);
-		cache.set(key, result);
-		return result;
-	};
+    const result = fn(...args);
+    cache.set(key, result);
+    return result;
+  };
 }
 
 // Cache expensive computations
@@ -200,21 +219,21 @@ fib(100); // even faster - from cache
 
 ```javascript
 async function getUser(userId) {
-	const cache = lru(1000, 60000); // 1 minute cache
+  const cache = lru(1000, 60000); // 1 minute cache
 
-	// Check cache first
-	const cached = cache.get(`user:${userId}`);
-	if (cached) {
-		return cached;
-	}
+  // Check cache first
+  const cached = cache.get(`user:${userId}`);
+  if (cached) {
+    return cached;
+  }
 
-	// Fetch from database
-	const user = await db.users.findById(userId);
+  // Fetch from database
+  const user = await db.users.findById(userId);
 
-	// Store in cache
-	cache.set(`user:${userId}`, user);
+  // Store in cache
+  cache.set(`user:${userId}`, user);
 
-	return user;
+  return user;
 }
 ```
 
@@ -257,15 +276,103 @@ const slowFunc = _.memoize(expensiveOperation);
 slowFunc.cache.max = 100; // Configure cache size
 ```
 
+### Session and Authentication Caching
+
+```javascript
+import { LRU } from "tiny-lru";
+
+class AuthCache {
+  constructor() {
+    // Session cache: 30 minutes with TTL reset on access
+    this.sessions = new LRU(10000, 1800000, true);
+    // Token validation cache: 5 minutes, no reset
+    this.tokens = new LRU(5000, 300000, false);
+    // Permission cache: 15 minutes
+    this.permissions = new LRU(5000, 900000);
+  }
+
+  cacheSession(sessionId, userData, domain = "app") {
+    const key = `${domain}:session:${sessionId}`;
+    this.sessions.set(key, {
+      userId: userData.userId,
+      permissions: userData.permissions,
+      loginTime: Date.now(),
+      lastActivity: Date.now(),
+    });
+  }
+
+  getSession(sessionId, domain = "app") {
+    const key = `${domain}:session:${sessionId}`;
+    return this.sessions.get(key);
+  }
+}
+```
+
+### LLM Response Caching
+
+```javascript
+import { LRU } from "tiny-lru";
+
+class LLMCache {
+  constructor() {
+    // Cache up to 1000 responses for 1 hour
+    this.cache = new LRU(1000, 3600000); // 1 hour TTL
+  }
+
+  async getResponse(model, prompt, params = {}) {
+    const key = this.generateKey(model, prompt, params);
+
+    // Check cache first
+    const cached = this.cache.get(key);
+    if (cached) {
+      return { ...cached, fromCache: true };
+    }
+
+    // Make expensive API call
+    const response = await this.callLLMAPI(model, prompt, params);
+
+    // Cache the response
+    this.cache.set(key, {
+      response: response.text,
+      tokens: response.tokens,
+      timestamp: Date.now(),
+    });
+
+    return { ...response, fromCache: false };
+  }
+
+  generateKey(model, prompt, params = {}) {
+    const paramsHash = this.hashObject(params);
+    const promptHash = this.hashString(prompt);
+    return `llm:${model}:${promptHash}:${paramsHash}`;
+  }
+
+  hashString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash).toString(36);
+  }
+
+  hashObject(obj) {
+    return this.hashString(JSON.stringify(obj, Object.keys(obj).sort()));
+  }
+}
+```
+
 ## Why Tiny LRU?
 
-| Feature          | tiny-lru     | lru-cache |
-| ---------------- | ------------ | --------- |
-| Bundle size      | ~2.2 KB      | ~15 KB    |
-| O(1) operations  | ✅           | ✅        |
-| TTL support      | ✅           | ✅        |
-| TypeScript       | ✅           | ✅        |
-| Zero dependencies| ✅           | ❌        |
+| Feature          | tiny-lru     | lru-cache | quick-lru   |
+| ---------------- | ------------ | --------- | ----------- |
+| Bundle size      | ~2.2 KB      | ~15 KB    | ~1.8 KB     |
+| O(1) operations  | ✅           | ✅        | ✅          |
+| TTL support      | ✅           | ✅        | ❌          |
+| TypeScript       | ✅           | ✅        | ✅          |
+| Zero dependencies| ✅           | ❌        | ✅          |
+| 100% coverage    | ✅           | ❌        | ❌          |
 
 ## Performance
 
@@ -275,6 +382,16 @@ All core operations are O(1):
 - **Get**: Retrieve and promote to most recent
 - **Delete**: Remove items
 - **Has**: Quick existence check
+
+### Benchmarks
+
+Run our comprehensive benchmark suite to see performance characteristics:
+
+```bash
+npm run benchmark:all
+```
+
+See [benchmarks/README.md](benchmarks/README.md) for more details.
 
 ## Development
 
@@ -286,6 +403,16 @@ npm run fix          # Fix lint and formatting issues
 npm run build        # Build distribution files
 npm run coverage     # Generate test coverage report
 ```
+
+### Build Output
+
+Build produces multiple module formats:
+- `dist/tiny-lru.js` - ES Modules
+- `dist/tiny-lru.cjs` - CommonJS
+- `dist/tiny-lru.min.js` - Minified ESM
+- `dist/tiny-lru.umd.js` - UMD
+- `dist/tiny-lru.umd.min.js` - Minified UMD
+- `types/lru.d.ts` - TypeScript definitions
 
 ## Test Coverage
 
@@ -303,6 +430,28 @@ npm run coverage     # Generate test coverage report
 4. Commit your changes (`git commit -m 'Add amazing feature'`)
 5. Push to the branch (`git push origin feature/amazing-feature`)
 6. Open a Pull Request
+
+## Security
+
+### Multi-Domain Key Convention
+
+Implement a hierarchical key naming convention to prevent cross-domain data leakage:
+
+```
+{domain}:{service}:{resource}:{identifier}[:{version}]
+```
+
+Example domains:
+- User-related: `usr:profile:data:12345`
+- Authentication: `auth:login:session:abc123`
+- External API: `api:response:endpoint:hash`
+- Database: `db:query:sqlhash:paramshash`
+- Application: `app:cache:feature:value`
+- System: `sys:config:feature:version`
+- Analytics: `analytics:event:user:session`
+- ML/AI: `ml:llm:response:gpt4-hash`
+
+See [docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md) for more security best practices.
 
 ## License
 
