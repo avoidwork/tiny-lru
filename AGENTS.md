@@ -45,6 +45,13 @@ Source code is in `src/`.
 - Semicolons: Required
 - Array constructor: Avoid `new Array()` (oxlint will warn)
 
+## Development Principles
+
+- **DRY (Don't Repeat Yourself)**: Extract common logic into reusable functions; avoid duplication
+- **YAGNI (You Ain't Gonna Need It)**: Implement only what's needed; avoid over-engineering
+- **SOLID**: Follow single responsibility, open/closed, and interface segregation principles
+- **OWASP**: Prioritize security; avoid unsafe operations, validate inputs, prevent injection risks
+
 ## API Reference
 
 - `lru(max, ttl, resetTtl)` - Factory function to create cache
