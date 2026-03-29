@@ -218,9 +218,10 @@ fib(100); // even faster - from cache
 ### Cache-Aside Pattern
 
 ```javascript
-async function getUser(userId) {
-  const cache = lru(1000, 60000); // 1 minute cache
+// Cache instance shared across calls (outside the function)
+const cache = lru(1000, 60000); // 1 minute cache
 
+async function getUser(userId) {
   // Check cache first
   const cached = cache.get(`user:${userId}`);
   if (cached) {
