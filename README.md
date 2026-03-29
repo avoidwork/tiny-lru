@@ -8,8 +8,6 @@
 [![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/ci.yml/badge.svg)](https://github.com/avoidwork/tiny-lru/actions?query=workflow%3Aci)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://app.codecov.io/gh/avoidwork/tiny-lru)
 
-[![npm](https://nodei.co/npm/tiny-lru.png?downloads=true&stars=true)](https://www.npmjs.com/package/tiny-lru)
-
 A high-performance, lightweight LRU (Least Recently Used) cache for JavaScript with O(1) operations and optional TTL support.
 
 ## What is an LRU Cache?
