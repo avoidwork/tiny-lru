@@ -451,7 +451,11 @@ Example domains:
 - Analytics: `analytics:event:user:session`
 - ML/AI: `ml:llm:response:gpt4-hash`
 
-See [docs/TECHNICAL_DOCUMENTATION.md](https://github.com/avoidwork/tiny-lru/blob/master/docs/TECHNICAL_DOCUMENTATION.md) for more security best practices.
+## Documentation
+
+- [API Reference](https://github.com/avoidwork/tiny-lru/blob/master/docs/API.md) - Complete API documentation
+- [Technical Documentation](https://github.com/avoidwork/tiny-lru/blob/master/docs/TECHNICAL_DOCUMENTATION.md) - Architecture, performance, and security
+- [Code Style Guide](https://github.com/avoidwork/tiny-lru/blob/master/docs/CODE_STYLE_GUIDE.md) - Contributing guidelines
 
 ## License
 
