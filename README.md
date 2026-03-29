@@ -186,9 +186,9 @@ cache.set("users:1", { name: "Alice" });
 cache.set("users:2", { name: "Bob" });
 cache.set("users:3", { name: "Carol" });
 
-// Get values for specific keys
+// Get values for specific keys (order matches input array)
 const values = cache.values(["users:3", "users:1"]);
-// ['Carol', 'Alice'] - maintains LRU order
+// ['Carol', 'Alice'] - matches input key order
 ```
 
 ### Interop with Lodash
