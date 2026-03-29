@@ -639,7 +639,7 @@ console.log(cache.valuesByTTL());
 **Returns:** `Object` - Object with three properties:
 - `valid` - Array of valid (non-expired) values
 - `expired` - Array of expired values
-- `noTTL` - Array of values without TTL (when `ttl=0`)
+- `noTTL` - Array of values without TTL (`expiry === 0`, regardless of cache `ttl` setting)
 
 ---
 
