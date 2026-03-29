@@ -185,6 +185,6 @@ if (isNaN(max) || max < 0) {
 }
 ```
 
-## ESLint Configuration
+## Lint Configuration
 
 The project uses oxlint. Run `npm run lint` to check code style.
