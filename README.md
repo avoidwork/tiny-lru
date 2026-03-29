@@ -2,8 +2,12 @@
 
 [![npm version](https://img.shields.io/npm/v/tiny-lru.svg)](https://www.npmjs.com/package/tiny-lru)
 [![npm downloads](https://img.shields.io/npm/dm/tiny-lru.svg)](https://www.npmjs.com/package/tiny-lru)
-[![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/ci.yml/badge.svg)](https://github.com/avoidwork/tiny-lru/actions)
-[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/avoidwork/tiny-lru)
+[![GitHub stars](https://img.shields.io/github/stars/avoidwork/tiny-lru.svg)](https://github.com/avoidwork/tiny-lru/stargazers)
+[![License](https://img.shields.io/npm/l/tiny-lru.svg)](https://github.com/avoidwork/tiny-lru/blob/master/LICENSE)
+[![Node.js version](https://img.shields.io/node/v/tiny-lru.svg)](https://www.npmjs.com/package/tiny-lru)
+[![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/avoidwork/tiny-lru/actions?query=branch%3Amaster)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://app.codecov.io/gh/avoidwork/tiny-lru)
+[![npm](https://nodei.co/npm/tiny-lru.png?downloads=true&stars=true)](https://www.npmjs.com/package/tiny-lru)
 
 A fast, lightweight LRU (Least Recently Used) cache for JavaScript with O(1) operations and optional TTL support.
 
@@ -38,6 +42,21 @@ cache.set("a", 1).set("b", 2).set("c", 3);
 cache.has("a"); // true
 cache.size; // 3
 cache.keys(); // ['a', 'b', 'c'] (LRU order)
+```
+
+### TypeScript
+
+```typescript
+import { LRU } from "tiny-lru";
+
+interface User {
+  id: number;
+  name: string;
+}
+
+const cache = new LRU<User>(100);
+cache.set("user:1", { id: 1, name: "Alice" });
+const user: User | undefined = cache.get("user:1");
 ```
 
 ## With TTL (Time-to-Live)
