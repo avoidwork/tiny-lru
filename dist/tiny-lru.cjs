@@ -179,8 +179,8 @@ class LRU {
 		const item = this.items[key];
 
 		if (item !== undefined) {
-			// Check TTL only if enabled to avoid unnecessary Date.now() calls
-			if (this.ttl > 0) {
+			// Check TTL only if item has expiration set
+			if (this.ttl > 0 && item.expiry !== 0) {
 				if (item.expiry <= Date.now()) {
 					this.delete(key);
 					this.#stats.misses++;
