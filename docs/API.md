@@ -573,7 +573,7 @@ console.log(cache.stats());
 - `hits` - Number of successful get() calls
 - `misses` - Number of failed get() calls
 - `sets` - Number of set() and setWithEvicted() calls
-- `deletes` - Number of delete() calls
+- `deletes` - Number of delete() calls plus internal removal of expired items by get()
 - `evictions` - Number of evicted items
 
 ---
