@@ -462,7 +462,7 @@ cache.set("a", 1).set("b", 2).set("c", 3).set("d", 4);
 
 **Returns:** `LRU` - this instance (for chaining)
 
-**Note:** Only the last registered callback will be used. Only triggers on explicit eviction via `set()` or `setWithEvicted()` when cache is full, not on TTL expiry.
+**Note:** Only the last registered callback will be used. Triggers on explicit eviction via `evict()` or when `set()`/`setWithEvicted()` evicts items due to cache being full. Does not trigger on TTL expiry (items are silently removed).
 
 ---
 
