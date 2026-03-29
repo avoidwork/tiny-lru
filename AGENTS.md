@@ -21,9 +21,9 @@ npm run lint         # Lint code with oxlint
 Source code is in `src/`.
 
 - **lint**: Check and fix linting issues with oxlint
-- **fmt**: Format code with oxfmt
+- **fix**: Fix linting and formatting issues
 - **build**: Lint + rollup build
-- **mocha**: Run test suite with coverage reporting
+- **coverage**: Run test suite with coverage reporting
 
 ## Project Structure
 
@@ -63,10 +63,10 @@ Source code is in `src/`.
 ## Testing
 
 - Framework: Node.js built-in test runner (`node --test`)
-- Coverage: 100% (c8)
+- Coverage: 100%
 - Test pattern: `tests/**/*.js`
 - All tests must pass with 100% coverage before merging
-- Run: `npm test` (lint + tests)
+- Run: `npm test` (lint + tests) or `npm run coverage` for coverage report
 
 ## Common Issues to Avoid
 
