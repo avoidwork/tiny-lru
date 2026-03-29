@@ -56,7 +56,7 @@ graph TD
   - `max`: Maximum cache size (0 = unlimited)
   - `size`: Current number of items
   - `ttl`: Time-to-live in milliseconds (0 = no expiration)
-  - `resetTtl`: Whether to reset TTL on `set()` operations (not on `get()`)
+  - `resetTtl`: Whether to reset TTL on `set()` and `setWithEvicted()` operations (not on `get()`)
 
 ## Data Flow
 
@@ -176,7 +176,7 @@ insert(k, v) &= \begin{cases}
 evict() \land create(k, v) & \text{if } max > 0 \land size = max \\
 create(k, v) & \text{otherwise}
 \end{cases} \\
-create(k, v) &= H[k] \leftarrow \{key: k, value: v, prev: last, next: null, expiry: t_{now} + ttl\} \\
+create(k, v) &= H[k] \leftarrow \{key: k, value: v, prev: last, next: null, expiry: ttl > 0 ? t_{now} + ttl : 0\} \\
 & \quad \land last \leftarrow H[k] \land size \leftarrow size + 1 \\
 & \quad \land \begin{cases}
 first \leftarrow H[k] & \text{if } size = 1 \\
@@ -304,7 +304,7 @@ $$
 3. **Hash Consistency:** $|H| = size$
 4. **LRU Order:** Items in list are ordered from least to most recently used
 5. **TTL Validity:** $(ttl = 0 \Rightarrow \forall k \in H: H[k].expiry = 0) \land (ttl > 0 \Rightarrow \forall k \in H: H[k].expiry \geq t_{now})$
-6. **TTL Reset Invariant:** TTL is only reset during `set()` operations when `bypass = false`, and during `setWithEvicted()` operations when `resetTtl = true`
+6. **TTL Reset Invariant**: TTL is only reset during `set()` and `setWithEvicted()` operations when `resetTtl = true`
 
 ## TypeScript Support
 
