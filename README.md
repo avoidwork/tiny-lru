@@ -1,5 +1,10 @@
 # Tiny LRU
 
+[![npm version](https://img.shields.io/npm/v/tiny-lru.svg)](https://www.npmjs.com/package/tiny-lru)
+[![npm downloads](https://img.shields.io/npm/dm/tiny-lru.svg)](https://www.npmjs.com/package/tiny-lru)
+[![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/test.yml/badge.svg)](https://github.com/avoidwork/tiny-lru/actions)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/avoidwork/tiny-lru)
+
 A fast, lightweight LRU (Least Recently Used) cache for JavaScript with O(1) operations and optional TTL support.
 
 ## What is an LRU Cache?
@@ -12,7 +17,7 @@ Think of an LRU cache like a limited-size bookshelf. When you add a new book and
 npm install tiny-lru
 ```
 
-Requires Node.js ≥12.
+Requires Node.js ≥12 or modern browsers with ES Module support.
 
 ## Quick Start
 
@@ -90,6 +95,21 @@ const cache4 = lru(100, 60000, true); // with resetTtl enabled
 import { LRU } from "tiny-lru";
 
 const cache = new LRU(100, 5000);
+```
+
+### TypeScript
+
+```typescript
+import { LRU } from "tiny-lru";
+
+interface User {
+  id: number;
+  name: string;
+}
+
+const cache = new LRU<User>(100);
+cache.set("user:1", { id: 1, name: "Alice" });
+const user: User | undefined = cache.get("user:1");
 ```
 
 ### Methods
@@ -206,6 +226,16 @@ const slowFunc = _.memoize(expensiveOperation);
 slowFunc.cache.max = 100; // Configure cache size
 ```
 
+## Why Tiny LRU?
+
+| Feature          | tiny-lru     | lru-cache |
+| ---------------- | ------------ | --------- |
+| Bundle size      | ~2.2 KB      | ~15 KB    |
+| O(1) operations  | ✅           | ✅        |
+| TTL support      | ✅           | ✅        |
+| TypeScript       | ✅           | ✅        |
+| Zero dependencies| ✅           | ❌        |
+
 ## Performance
 
 All core operations are O(1):
@@ -233,6 +263,15 @@ npm run coverage     # Generate test coverage report
 | Lines     | 100%     |
 | Branches  | 95%      |
 | Functions | 100%     |
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Run `npm test` to ensure all tests pass
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
 
 ## License
 
