@@ -408,11 +408,12 @@ npm run coverage     # Generate test coverage report
 
 ### Build Output
 
-Build produces multiple module formats:
+Build produces multiple module formats. When you install from npm, you'll get:
 - `dist/tiny-lru.js` - ES Modules
 - `dist/tiny-lru.cjs` - CommonJS
-- `dist/tiny-lru.min.js` - Minified ESM
 - `types/lru.d.ts` - TypeScript definitions
+
+The minified version (`dist/tiny-lru.min.js`) is available in the repository for local testing but is not shipped via npm.
 
 ## Tests
 
