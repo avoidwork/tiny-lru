@@ -2,7 +2,7 @@
  * Factory function to create a new LRU cache instance with parameter validation.
  * @param max Maximum number of items to store (default: 1000, 0 = unlimited)
  * @param ttl Time to live in milliseconds (default: 0, 0 = no expiration)
- * @param resetTtl Whether to reset TTL when accessing existing items via get() (default: false)
+ * @param resetTtl Whether to reset TTL when updating existing items via set() (default: false)
  * @returns A new LRU cache instance
  * @throws TypeError when parameters are invalid (negative numbers or wrong types)
  */
@@ -46,24 +46,24 @@ export class LRU<T = any> {
 	 * Note: Constructor does not validate parameters. Use lru() factory function for parameter validation.
 	 * @param max Maximum number of items to store (default: 0, 0 = unlimited)
 	 * @param ttl Time to live in milliseconds (default: 0, 0 = no expiration)
-	 * @param resetTtl Whether to reset TTL when accessing existing items via get() (default: false)
+	 * @param resetTtl Whether to reset TTL when updating existing items via set() (default: false)
 	 */
 	constructor(max?: number, ttl?: number, resetTtl?: boolean);
 
 	/** Pointer to the least recently used item (first to be evicted) */
-	readonly first: LRUItem<T> | null;
+	first: LRUItem<T> | null;
 	/** Hash map for O(1) key-based access to cache nodes */
-	readonly items: Record<any, LRUItem<T>>;
+	items: Record<any, LRUItem<T>>;
 	/** Pointer to the most recently used item */
-	readonly last: LRUItem<T> | null;
+	last: LRUItem<T> | null;
 	/** Maximum number of items to store (0 = unlimited) */
-	readonly max: number;
+	max: number;
 	/** Whether to reset TTL on set() operations */
-	readonly resetTtl: boolean;
+	resetTtl: boolean;
 	/** Current number of items in the cache */
-	readonly size: number;
+	size: number;
 	/** Time-to-live in milliseconds (0 = no expiration) */
-	readonly ttl: number;
+	ttl: number;
 
 	/**
 	 * Removes all items from the cache.
