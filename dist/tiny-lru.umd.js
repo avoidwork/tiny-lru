@@ -31,7 +31,7 @@ class LRU {
 	 * @constructor
 	 * @param {number} [max=0] - Maximum number of items to store. 0 means unlimited.
 	 * @param {number} [ttl=0] - Time to live in milliseconds. 0 means no expiration.
-	 * @param {boolean} [resetTtl=false] - Whether to reset TTL when accessing existing items via get().
+	 * @param {boolean} [resetTtl=false] - Whether to reset TTL when updating existing items via set().
 	 * @example
 	 * const cache = new LRU(1000, 60000, true); // 1000 items, 1 minute TTL, reset on access
 	 * @see {@link lru} For parameter validation
@@ -135,7 +135,6 @@ class LRU {
 	 *
 	 * @method evict
 	 * @memberof LRU
-	 * @param {boolean} [bypass=false] - Whether to force eviction even when cache is empty.
 	 * @returns {LRU} The LRU instance for method chaining.
 	 * @example
 	 * cache.set('old', 'value').set('new', 'value');
@@ -143,25 +142,23 @@ class LRU {
 	 * @see {@link LRU#setWithEvicted}
 	 * @since 1.0.0
 	 */
-	evict(bypass = false) {
-		if (bypass || this.size > 0) {
-			const item = this.first;
-
-			if (!item) {
-				return this;
-			}
-
-			delete this.items[item.key];
-
-			if (--this.size === 0) {
-				this.first = null;
-				this.last = null;
-			} else {
-				this.unlink(item);
-			}
-
-			item.next = null;
+	evict() {
+		if (this.size === 0) {
+			return this;
 		}
+
+		const item = this.first;
+
+		delete this.items[item.key];
+
+		if (--this.size === 0) {
+			this.first = null;
+			this.last = null;
+		} else {
+			this.unlink(item);
+		}
+
+		item.next = null;
 
 		return this;
 	}
@@ -330,7 +327,7 @@ class LRU {
 	 * @memberof LRU
 	 * @param {string} key - The key to set.
 	 * @param {*} value - The value to store.
-	 * @returns {Object|null} The evicted item (if any) with shape {key, value, expiry, prev, next}, or null.
+	 * @returns {Object|null} The evicted item (if any) with shape {key, value, expiry}, or null.
 	 * @example
 	 * const cache = new LRU(2);
 	 * cache.set('a', 1).set('b', 2);
@@ -356,7 +353,7 @@ class LRU {
 					value: this.first.value,
 					expiry: this.first.expiry,
 				};
-				this.evict(true);
+				this.evict();
 			}
 
 			item = this.items[key] = {
@@ -408,7 +405,7 @@ class LRU {
 			this.moveToEnd(item);
 		} else {
 			if (this.max > 0 && this.size === this.max) {
-				this.evict(true);
+				this.evict();
 			}
 
 			item = this.items[key] = {
