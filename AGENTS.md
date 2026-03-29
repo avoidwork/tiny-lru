@@ -68,9 +68,9 @@ Source code is in `src/`.
 ## Testing
 
 - Framework: Node.js built-in test runner (`node --test`)
-- Coverage: 100%
+- Coverage: 100% lines, 99.25% branches, 100% functions
 - Test pattern: `tests/**/*.js`
-- All tests must pass with 100% coverage before merging
+- All tests must pass with 100% line coverage before merging
 - Run: `npm test` (lint + tests) or `npm run coverage` for coverage report
 
 ## Common Issues to Avoid
