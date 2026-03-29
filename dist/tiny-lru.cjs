@@ -158,6 +158,21 @@ class LRU {
 	}
 
 	/**
+	 * Checks if an item has expired.
+	 *
+	 * @param {Object} item - The cache item to check.
+	 * @returns {boolean} True if the item has expired, false otherwise.
+	 * @private
+	 */
+	#isExpired(item) {
+		if (this.ttl === 0 || item.expiry === 0) {
+			return false;
+		}
+
+		return item.expiry <= Date.now();
+	}
+
+	/**
 	 * Retrieves a value from the cache by key without updating LRU order.
 	 * Note: Does not perform TTL checks or remove expired items.
 	 *
@@ -179,21 +194,15 @@ class LRU {
 		const item = this.items[key];
 
 		if (item !== undefined) {
-			// Check TTL only if item has expiration set
-			if (this.ttl > 0 && item.expiry !== 0) {
-				if (item.expiry <= Date.now()) {
-					this.delete(key);
-					this.#stats.misses++;
-
-					return undefined;
-				}
+			if (!this.#isExpired(item)) {
+				this.moveToEnd(item);
+				this.#stats.hits++;
+				return item.value;
 			}
 
-			// Fast LRU update without full set() overhead
-			this.moveToEnd(item);
-			this.#stats.hits++;
-
-			return item.value;
+			this.delete(key);
+			this.#stats.misses++;
+			return undefined;
 		}
 
 		this.#stats.misses++;
@@ -471,12 +480,11 @@ class LRU {
 			return 0;
 		}
 
-		const now = Date.now();
 		let removed = 0;
 
 		for (let x = this.first; x !== null; ) {
 			const next = x.next;
-			if (x.expiry !== 0 && x.expiry <= now) {
+			if (this.#isExpired(x)) {
 				const key = x.key;
 				if (this.items[key] !== undefined) {
 					delete this.items[key];
