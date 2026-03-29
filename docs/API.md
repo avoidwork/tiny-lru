@@ -324,7 +324,7 @@ Expired items are deleted and return `undefined`.
 
 ### `getMany(keys)`
 
-Batch retrieves multiple items.
+Batch retrieves multiple items. Calls `get()` for each key, so it updates LRU order and may remove expired items.
 
 ```javascript
 cache.set("a", 1).set("b", 2).set("c", 3);
@@ -340,7 +340,7 @@ console.log(result); // { a: 1, c: 3 }
 
 **Returns:** `Object` - Object mapping keys to values (undefined for missing/expired keys)
 
-**Note:** Returns `undefined` for non-existent or expired keys.
+**Note:** Returns `undefined` for non-existent or expired keys. This method is NOT read-only - it updates LRU order (items move to most recently used) and may delete expired items, affecting `hits`, `misses`, and `deletes` stats.
 
 ---
 
