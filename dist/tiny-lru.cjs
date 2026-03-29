@@ -467,15 +467,20 @@ class LRU {
 		const now = Date.now();
 		let removed = 0;
 
-		for (let x = this.first; x !== null; x = x.next) {
+		for (let x = this.first; x !== null; ) {
+			const next = x.next;
 			if (x.expiry !== 0 && x.expiry <= now) {
 				const key = x.key;
 				if (this.items[key] !== undefined) {
 					delete this.items[key];
 					this.size--;
 					removed++;
+					this.#unlink(x);
+					x.prev = null;
+					x.next = null;
 				}
 			}
+			x = next;
 		}
 
 		if (removed > 0) {
