@@ -1331,6 +1331,21 @@ describe("LRU Cache", function () {
 			assert.deepEqual(noTtlCache.sizeByTTL(), { valid: 2, expired: 0, noTTL: 2 });
 		});
 
+		it("should handle items with expiry=0 when ttl>0 (manual expiry set)", function () {
+			const cache = new LRU(10, 100);
+			cache.set("a", 1);
+			cache.set("b", 2);
+			cache.set("c", 3);
+
+			cache.items["a"].expiry = 0;
+			cache.items["b"].expiry = 0;
+
+			const counts = cache.sizeByTTL();
+			assert.equal(counts.valid, 3);
+			assert.equal(counts.expired, 0);
+			assert.equal(counts.noTTL, 2);
+		});
+
 		it("should handle mixed expired and valid items", async function () {
 			cache.set("a", 1);
 			cache.set("b", 2);
@@ -1402,6 +1417,24 @@ describe("LRU Cache", function () {
 			assert.deepEqual(result.noTTL.sort(), ["a", "b"]);
 		});
 
+		it("should handle items with expiry=0 when ttl>0 (manual expiry set)", function () {
+			const cache = new LRU(10, 100);
+			cache.set("a", 1);
+			cache.set("b", 2);
+			cache.set("c", 3);
+
+			cache.items["a"].expiry = 0;
+			cache.items["b"].expiry = 0;
+
+			const result = cache.keysByTTL();
+			assert.equal(result.valid.length, 3);
+			assert.equal(result.expired.length, 0);
+			assert.deepEqual(result.noTTL.sort(), ["a", "b"]);
+			assert.ok(result.valid.includes("a"));
+			assert.ok(result.valid.includes("b"));
+			assert.ok(result.valid.includes("c"));
+		});
+
 		it("should return empty arrays for empty cache", function () {
 			cache.clear();
 			const result = cache.keysByTTL();
@@ -1457,6 +1490,24 @@ describe("LRU Cache", function () {
 			const result = cache.valuesByTTL();
 			assert.deepEqual(result.valid, [1, 2, 3]);
 			assert.deepEqual(result.expired, []);
+		});
+
+		it("should handle items with expiry=0 when ttl>0 (manual expiry set)", function () {
+			const cache = new LRU(10, 100);
+			cache.set("a", 1);
+			cache.set("b", 2);
+			cache.set("c", 3);
+
+			cache.items["a"].expiry = 0;
+			cache.items["b"].expiry = 0;
+
+			const result = cache.valuesByTTL();
+			assert.equal(result.valid.length, 3);
+			assert.equal(result.expired.length, 0);
+			assert.deepEqual(result.noTTL.sort(), [1, 2]);
+			assert.ok(result.valid.includes(1));
+			assert.ok(result.valid.includes(2));
+			assert.ok(result.valid.includes(3));
 		});
 
 		it("should return correct expired values after TTL", async function () {
