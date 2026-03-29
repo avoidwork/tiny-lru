@@ -812,14 +812,11 @@ describe("LRU Cache", function () {
 			assert.deepEqual(cache.keys(), ["a", "b", "c"]);
 		});
 
-		it("should not modify LRU order when calling get() during forEach", function () {
+		it("should not modify LRU order when calling peek() during forEach", function () {
 			const result = [];
 			cache.forEach((value, key) => {
 				result.push(key);
-				// Note: calling get() during forEach modifies the linked list
-				// which breaks the traversal - this is expected behavior
-				// Users should avoid modifying the cache during iteration
-				cache.peek(key); // Use peek instead of get to avoid modification
+				cache.peek(key);
 			});
 
 			assert.deepEqual(result, ["a", "b", "c"]);
