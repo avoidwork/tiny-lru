@@ -433,7 +433,7 @@ console.log(cache.keysByTTL());
 **Returns:** `Object` - Object with three properties:
 - `valid` - Array of valid (non-expired) keys
 - `expired` - Array of expired keys
-- `noTTL` - Array of keys without TTL (when `ttl=0`)
+- `noTTL` - Array of keys without TTL (`expiry === 0`)
 
 ---
 
@@ -544,7 +544,7 @@ console.log(cache.sizeByTTL());
 **Returns:** `Object` - Object with three properties:
 - `valid` - Number of items that haven't expired
 - `expired` - Number of expired items
-- `noTTL` - Number of items without TTL (when `ttl=0`)
+- `noTTL` - Number of items without TTL (`expiry === 0`)
 
 **Note:** Items without TTL (expiry === 0) count as both valid and noTTL.
 
