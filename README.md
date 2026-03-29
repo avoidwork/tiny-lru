@@ -76,10 +76,10 @@ cache.set("key", "new value"); // TTL resets
 ```javascript
 import { lru } from "tiny-lru";
 
-const cache = lru();                    // 1000 items, no TTL
-const cache = lru(500);                // 500 items, no TTL
-const cache = lru(100, 30000);         // 100 items, 30s TTL
-const cache = lru(100, 60000, true);  // with resetTtl enabled
+const cache1 = lru();                    // 1000 items, no TTL
+const cache2 = lru(500);                 // 500 items, no TTL
+const cache3 = lru(100, 30000);          // 100 items, 30s TTL
+const cache4 = lru(100, 60000, true);   // with resetTtl enabled
 ```
 
 ### Class: `new LRU(max?, ttl?, resetTtl?)`
