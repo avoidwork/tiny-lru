@@ -284,7 +284,7 @@ import { LRU } from "tiny-lru";
 
 class AuthCache {
   constructor() {
-    // Session cache: 30 minutes with TTL reset on access
+    // Session cache: 30 minutes with TTL reset on update
     this.sessions = new LRU(10000, 1800000, true);
     // Token validation cache: 5 minutes, no reset
     this.tokens = new LRU(5000, 300000, false);
