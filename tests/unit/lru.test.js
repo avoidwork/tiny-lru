@@ -338,7 +338,7 @@ describe("LRU Cache", function () {
 			const firstExpiry = resetCache.expiresAt("key1");
 
 			await new Promise((resolve) => setTimeout(resolve, 10));
-			resetCache.set("key1", "value1", false, true);
+			resetCache.set("key1", "value1", true);
 			const secondExpiry = resetCache.expiresAt("key1");
 
 			assert.ok(secondExpiry > firstExpiry, "TTL should be reset");

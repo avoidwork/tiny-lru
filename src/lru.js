@@ -380,7 +380,6 @@ export class LRU {
 	 * @memberof LRU
 	 * @param {string} key - The key to set.
 	 * @param {*} value - The value to store.
-	 * @param {boolean} [bypass=false] - Internal parameter for setWithEvicted method.
 	 * @param {boolean} [resetTtl=this.resetTtl] - Whether to reset the TTL for this operation.
 	 * @returns {LRU} The LRU instance for method chaining.
 	 * @example
@@ -391,21 +390,18 @@ export class LRU {
 	 * @see {@link LRU#setWithEvicted}
 	 * @since 1.0.0
 	 */
-	set(key, value, bypass = false, resetTtl = this.resetTtl) {
+	set(key, value, resetTtl = this.resetTtl) {
 		let item = this.items[key];
 
-		if (bypass || item !== undefined) {
-			// Existing item: update value and position
+		if (item !== undefined) {
 			item.value = value;
 
-			if (bypass === false && resetTtl) {
+			if (resetTtl) {
 				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
 			}
 
-			// Always move to end, but the bypass parameter affects TTL reset behavior
 			this.moveToEnd(item);
 		} else {
-			// New item: check for eviction and create
 			if (this.max > 0 && this.size === this.max) {
 				this.evict(true);
 			}
