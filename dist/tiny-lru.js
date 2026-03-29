@@ -501,5 +501,4 @@ function lru(max = 1000, ttl = 0, resetTtl = false) {
 	}
 
 	return new LRU(max, ttl, resetTtl);
-}
-export { LRU, lru };
+}export{LRU,lru};

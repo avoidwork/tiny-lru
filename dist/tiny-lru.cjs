@@ -5,7 +5,7 @@
  * @license BSD-3-Clause
  * @version 11.4.7
  */
-"use strict";
+'use strict';
 
 /**
  * A high-performance Least Recently Used (LRU) cache implementation with optional TTL support.
