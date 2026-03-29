@@ -164,11 +164,12 @@ const cache = new LRU(100, 5000);
 
 | Method                      | Description                                    |
 | --------------------------- | ---------------------------------------------- |
-| `clear()`                   | Remove all items. Returns `this` for chaining. |
 | `cleanup()`                 | Remove expired items without LRU update. Returns count of removed items. |
+| `clear()`                   | Remove all items. Returns `this` for chaining. |
 | `delete(key)`               | Remove an item by key. Returns `this` for chaining. |
 | `entries(keys?)`            | Get `[key, value]` pairs. Without keys: LRU order. With keys: input array order. |
 | `evict()`                   | Remove the least recently used item. Returns `this` for chaining. |
+| `expiresAt(key)`            | Get expiration timestamp for a key. Returns `number | undefined`. |
 | `forEach(callback, thisArg?)` | Iterate over items in LRU order. Returns `this` for chaining. |
 | `get(key)`                  | Retrieve a value. Moves item to most recent. Returns value or `undefined`. |
 | `getMany(keys)`             | Batch retrieve multiple items. Returns object mapping keys to values. |
@@ -186,7 +187,6 @@ const cache = new LRU(100, 5000);
 | `toJSON()`                  | Serialize cache to JSON format. Returns array of items. |
 | `values(keys?)`             | Get all values, or values for specific keys. Returns array of values. |
 | `valuesByTTL()`             | Get values by TTL status. Returns `{valid, expired, noTTL}`. |
-| `expiresAt(key)`            | Get expiration timestamp for a key. Returns `number | undefined`. |
 
 ## Common Patterns
 
