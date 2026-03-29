@@ -296,7 +296,7 @@ cache.forEach((value, key, cache) => {
 
 **Returns:** `LRU` - this instance (for chaining)
 
-**Note:** This method creates a snapshot of keys before iteration to safely handle cache modifications during iteration.
+**Note:** This method traverses the linked list directly and does not update LRU order or check TTL expiration during iteration. Cache modifications during iteration may cause unexpected behavior.
 
 ---
 
