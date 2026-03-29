@@ -121,13 +121,24 @@ const user: User | undefined = cache.get("user:1");
 | `entries(keys?)`        | Get `[key, value]` pairs in LRU order.         |
 | `evict()`               | Remove the least recently used item.           |
 | `expiresAt(key)`        | Get expiration timestamp for a key.            |
+| `forEach(callback, thisArg?)` | Iterate over items in LRU order.         |
 | `get(key)`              | Retrieve a value. Moves item to most recent.   |
+| `getMany(keys)`         | Batch retrieve multiple items.                 |
 | `has(key)`              | Check if key exists and is not expired.        |
+| `hasAll(keys)`          | Check if ALL keys exist.                       |
+| `hasAny(keys)`          | Check if ANY key exists.                       |
 | `keys()`                | Get all keys in LRU order (oldest first).      |
+| `cleanup()`             | Remove expired items without LRU update.       |
 | `peek(key)`             | Retrieve a value without LRU update.           |
 | `set(key, value)`       | Store a value. Returns `this` for chaining.    |
 | `setWithEvicted(key, value)` | Store value, return evicted item if full. |
 | `values(keys?)`         | Get all values, or values for specific keys.   |
+| `toJSON()`              | Serialize cache to JSON format.                |
+| `stats()`               | Get cache statistics.                          |
+| `onEvict(callback)`     | Register eviction callback.                    |
+| `sizeByTTL()`           | Get counts by TTL status.                      |
+| `keysByTTL()`           | Get keys by TTL status.                        |
+| `valuesByTTL()`         | Get values by TTL status.                      |
 
 ### Properties
 

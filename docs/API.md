@@ -248,6 +248,246 @@ console.log(cache.keys()); // ['b', 'a'] - order unchanged
 
 ---
 
+### `forEach(callback, thisArg?)`
+
+Iterates over cache items in LRU order (least to most recent).
+
+```javascript
+cache.set("a", 1).set("b", 2).set("c", 3);
+cache.forEach((value, key, cache) => {
+  console.log(key, value);
+});
+// Output:
+// a 1
+// b 2
+// c 3
+```
+
+**Parameters:**
+
+| Name      | Type       | Description                             |
+| --------- | ---------- | --------------------------------------- |
+| `callback` | `function` | Function to call for each item. Signature: `callback(value, key, cache)` |
+| `thisArg`  | `Object`   | Value to use as `this` when executing callback |
+
+**Returns:** `LRU` - this instance (for chaining)
+
+**Note:** This method creates a snapshot of keys before iteration to safely handle cache modifications during iteration.
+
+---
+
+### `getMany(keys)`
+
+Batch retrieves multiple items.
+
+```javascript
+cache.set("a", 1).set("b", 2).set("c", 3);
+const result = cache.getMany(["a", "c"]);
+console.log(result); // { a: 1, c: 3 }
+```
+
+**Parameters:**
+
+| Name   | Type       | Description          |
+| ------ | ---------- | -------------------- |
+| `keys` | `string[]` | Array of keys to get |
+
+**Returns:** `Object` - Object mapping keys to values (undefined for missing/expired keys)
+
+**Note:** Returns `undefined` for non-existent or expired keys.
+
+---
+
+### `hasAll(keys)`
+
+Batch existence check - returns true if ALL keys exist and are not expired.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+const result = cache.hasAll(["a", "b"]);
+console.log(result); // true
+
+cache.hasAll(["a", "nonexistent"]); // false
+```
+
+**Parameters:**
+
+| Name   | Type       | Description          |
+| ------ | ---------- | -------------------- |
+| `keys` | `string[]` | Array of keys to check |
+
+**Returns:** `boolean` - True if all keys exist and are not expired
+
+**Note:** Returns `true` for empty arrays.
+
+---
+
+### `hasAny(keys)`
+
+Batch existence check - returns true if ANY key exists and is not expired.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+cache.hasAny(["nonexistent", "a"]); // true
+cache.hasAny(["nonexistent1", "nonexistent2"]); // false
+```
+
+**Parameters:**
+
+| Name   | Type       | Description          |
+| ------ | ---------- | -------------------- |
+| `keys` | `string[]` | Array of keys to check |
+
+**Returns:** `boolean` - True if any key exists and is not expired
+
+**Note:** Returns `false` for empty arrays.
+
+---
+
+### `cleanup()`
+
+Removes expired items without affecting LRU order.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+// ... wait for items to expire
+const removed = cache.cleanup();
+console.log(removed); // 2 (number of items removed)
+```
+
+**Returns:** `number` - Number of expired items removed
+
+**Note:** Only removes items when TTL is enabled (`ttl > 0`).
+
+---
+
+### `toJSON()`
+
+Serializes cache to JSON-compatible format.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+const json = cache.toJSON();
+console.log(json);
+// [
+//   { key: "a", value: 1, expiry: 0 },
+//   { key: "b", value: 2, expiry: 0 }
+// ]
+
+// Works with JSON.stringify:
+const jsonString = JSON.stringify(cache);
+```
+
+**Returns:** `Array<{key, value, expiry}>` - Array of cache items
+
+---
+
+### `stats()`
+
+Returns cache statistics.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+cache.get("a");
+cache.get("nonexistent");
+
+console.log(cache.stats());
+// {
+//   hits: 1,
+//   misses: 1,
+//   sets: 2,
+//   deletes: 0,
+//   evictions: 0
+// }
+```
+
+**Returns:** `Object` - Statistics object with the following properties:
+- `hits` - Number of successful get() calls
+- `misses` - Number of failed get() calls
+- `sets` - Number of set() calls
+- `deletes` - Number of delete() calls
+- `evictions` - Number of evicted items
+
+---
+
+### `onEvict(callback)`
+
+Registers a callback function to be called when items are evicted.
+
+```javascript
+cache.onEvict((item) => {
+  console.log("Evicted:", item.key, item.value);
+});
+
+cache.set("a", 1).set("b", 2).set("c", 3).set("d", 4);
+// Evicted: a 1
+```
+
+**Parameters:**
+
+| Name      | Type       | Description                                           |
+| --------- | ---------- | ----------------------------------------------------- |
+| `callback` | `function` | Function called with evicted item. Receives `{key, value, expiry}` |
+
+**Returns:** `LRU` - this instance (for chaining)
+
+**Note:** Only the last registered callback will be used. Only triggers on explicit eviction via `set()` or `setWithEvicted()` when cache is full, not on TTL expiry.
+
+---
+
+### `sizeByTTL()`
+
+Returns counts of items by TTL status.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+console.log(cache.sizeByTTL());
+// { valid: 2, expired: 0, noTTL: 0 }
+```
+
+**Returns:** `Object` - Object with three properties:
+- `valid` - Number of items that haven't expired
+- `expired` - Number of expired items
+- `noTTL` - Number of items without TTL (when `ttl=0`)
+
+**Note:** Items without TTL (expiry === 0) count as both valid and noTTL.
+
+---
+
+### `keysByTTL()`
+
+Returns keys grouped by TTL status.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+console.log(cache.keysByTTL());
+// { valid: ["a", "b"], expired: [], noTTL: ["a", "b"] }
+```
+
+**Returns:** `Object` - Object with three properties:
+- `valid` - Array of valid (non-expired) keys
+- `expired` - Array of expired keys
+- `noTTL` - Array of keys without TTL (when `ttl=0`)
+
+---
+
+### `valuesByTTL()`
+
+Returns values grouped by TTL status.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+console.log(cache.valuesByTTL());
+// { valid: [1, 2], expired: [], noTTL: [1, 2] }
+```
+
+**Returns:** `Object` - Object with three properties:
+- `valid` - Array of valid (non-expired) values
+- `expired` - Array of expired values
+- `noTTL` - Array of values without TTL (when `ttl=0`)
+
+---
+
 ### `get(key)`
 
 Retrieves value and promotes to most recently used.

@@ -15,6 +15,9 @@
  * @class LRU
  */
 class LRU {
+	#stats;
+	#onEvict;
+
 	/**
 	 * Creates a new LRU cache instance.
 	 * Note: Constructor does not validate parameters. Use lru() factory function for parameter validation.
@@ -32,6 +35,8 @@ class LRU {
 		this.resetTtl = resetTtl;
 		this.size = 0;
 		this.ttl = ttl;
+		this.#stats = { hits: 0, misses: 0, sets: 0, deletes: 0, evictions: 0 };
+		this.#onEvict = null;
 	}
 
 	/**
@@ -44,6 +49,11 @@ class LRU {
 		this.items = Object.create(null);
 		this.last = null;
 		this.size = 0;
+		this.#stats.hits = 0;
+		this.#stats.misses = 0;
+		this.#stats.sets = 0;
+		this.#stats.deletes = 0;
+		this.#stats.evictions = 0;
 
 		return this;
 	}
@@ -60,6 +70,7 @@ class LRU {
 		if (item !== undefined) {
 			delete this.items[key];
 			this.size--;
+			this.#stats.deletes++;
 
 			this.#unlink(item);
 
@@ -106,6 +117,7 @@ class LRU {
 		const item = this.first;
 
 		delete this.items[item.key];
+		this.#stats.evictions++;
 
 		if (--this.size === 0) {
 			this.first = null;
@@ -115,6 +127,13 @@ class LRU {
 		}
 
 		item.next = null;
+		if (this.#onEvict !== null) {
+			this.#onEvict({
+				key: item.key,
+				value: item.value,
+				expiry: item.expiry,
+			});
+		}
 
 		return this;
 	}
@@ -156,6 +175,7 @@ class LRU {
 			if (this.ttl > 0) {
 				if (item.expiry <= Date.now()) {
 					this.delete(key);
+					this.#stats.misses++;
 
 					return undefined;
 				}
@@ -163,10 +183,12 @@ class LRU {
 
 			// Fast LRU update without full set() overhead
 			this.moveToEnd(item);
+			this.#stats.hits++;
 
 			return item.value;
 		}
 
+		this.#stats.misses++;
 		return undefined;
 	}
 
@@ -289,6 +311,7 @@ class LRU {
 			this.last = item;
 		}
 
+		this.#stats.sets++;
 		return evicted;
 	}
 
@@ -332,6 +355,8 @@ class LRU {
 			this.last = item;
 		}
 
+		this.#stats.sets++;
+
 		return this;
 	}
 
@@ -340,12 +365,17 @@ class LRU {
 	 * When no keys provided, returns all values in LRU order.
 	 * When keys provided, order matches the input array.
 	 *
-	 * @param {string[]} [keys=this.keys()] - Array of keys to get values for. Defaults to all keys.
+	 * @param {string[]} [keys] - Array of keys to get values for. Defaults to all keys.
 	 * @returns {Array<*>} Array of values corresponding to the keys.
 	 */
 	values(keys) {
 		if (keys === undefined) {
-			keys = this.keys();
+			const result = Array.from({ length: this.size });
+			let i = 0;
+			for (let x = this.first; x !== null; x = x.next) {
+				result[i++] = x.value;
+			}
+			return result;
 		}
 
 		const result = Array.from({ length: keys.length });
@@ -356,6 +386,248 @@ class LRU {
 
 		return result;
 	}
+
+	/**
+	 * Iterate over cache items in LRU order (least to most recent).
+	 * Note: This method directly accesses items from the linked list without calling
+	 * get() or peek(), so it does not update LRU order or check TTL expiration during iteration.
+	 *
+	 * @param {function(*, any, LRU): void} callback - Function to call for each item. Signature: callback(value, key, cache)
+	 * @param {Object} [thisArg] - Value to use as `this` when executing callback.
+	 * @returns {LRU} The LRU instance for method chaining.
+	 */
+	forEach(callback, thisArg) {
+		for (let x = this.first; x !== null; x = x.next) {
+			callback.call(thisArg, x.value, x.key, this);
+		}
+
+		return this;
+	}
+
+	/**
+	 * Batch retrieve multiple items.
+	 *
+	 * @param {string[]} keys - Array of keys to retrieve.
+	 * @returns {Object} Object mapping keys to values (undefined for missing/expired keys).
+	 */
+	getMany(keys) {
+		const result = Object.create(null);
+		for (let i = 0; i < keys.length; i++) {
+			const key = keys[i];
+			result[key] = this.get(key);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Batch existence check - returns true if ALL keys exist.
+	 *
+	 * @param {string[]} keys - Array of keys to check.
+	 * @returns {boolean} True if all keys exist and are not expired.
+	 */
+	hasAll(keys) {
+		for (let i = 0; i < keys.length; i++) {
+			if (!this.has(keys[i])) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Batch existence check - returns true if ANY key exists.
+	 *
+	 * @param {string[]} keys - Array of keys to check.
+	 * @returns {boolean} True if any key exists and is not expired.
+	 */
+	hasAny(keys) {
+		for (let i = 0; i < keys.length; i++) {
+			if (this.has(keys[i])) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Remove expired items without affecting LRU order.
+	 * Unlike get(), this does not move items to the end.
+	 *
+	 * @returns {number} Number of expired items removed.
+	 */
+	cleanup() {
+		if (this.ttl === 0 || this.size === 0) {
+			return 0;
+		}
+
+		const now = Date.now();
+		let removed = 0;
+
+		for (let x = this.first; x !== null; x = x.next) {
+			if (x.expiry <= now) {
+				const key = x.key;
+				if (this.items[key] !== undefined) {
+					delete this.items[key];
+					this.size--;
+					removed++;
+				}
+			}
+		}
+
+		if (removed > 0) {
+			this.#rebuildList();
+		}
+
+		return removed;
+	}
+
+	/**
+	 * Serialize cache to JSON-compatible format.
+	 *
+	 * @returns {Array<{key: any, value: *, expiry: number}>} Array of cache items.
+	 */
+	toJSON() {
+		const result = [];
+		for (let x = this.first; x !== null; x = x.next) {
+			result.push({
+				key: x.key,
+				value: x.value,
+				expiry: x.expiry,
+			});
+		}
+
+		return result;
+	}
+
+	/**
+	 * Get cache statistics.
+	 *
+	 * @returns {Object} Statistics object with hits, misses, sets, deletes, evictions counts.
+	 */
+	stats() {
+		return { ...this.#stats };
+	}
+
+	/**
+	 * Register callback for evicted items.
+	 *
+	 * @param {function(Object): void} callback - Function called when item is evicted. Receives {key, value, expiry}.
+	 * @returns {LRU} The LRU instance for method chaining.
+	 */
+	onEvict(callback) {
+		this.#onEvict = callback;
+
+		return this;
+	}
+
+	/**
+	 * Get counts of items by TTL status.
+	 *
+	 * @returns {Object} Object with valid, expired, and noTTL counts.
+	 */
+	sizeByTTL() {
+		if (this.ttl === 0) {
+			return { valid: this.size, expired: 0, noTTL: this.size };
+		}
+
+		const now = Date.now();
+		let valid = 0;
+		let expired = 0;
+		let noTTL = 0;
+
+		for (let x = this.first; x !== null; x = x.next) {
+			if (x.expiry === 0) {
+				noTTL++;
+				valid++;
+			} else if (x.expiry > now) {
+				valid++;
+			} else {
+				expired++;
+			}
+		}
+
+		return { valid, expired, noTTL };
+	}
+
+	/**
+	 * Get keys filtered by TTL status.
+	 *
+	 * @returns {Object} Object with valid, expired, and noTTL arrays of keys.
+	 */
+	keysByTTL() {
+		if (this.ttl === 0) {
+			return { valid: this.keys(), expired: [], noTTL: this.keys() };
+		}
+
+		const now = Date.now();
+		const valid = [];
+		const expired = [];
+		const noTTL = [];
+
+		for (let x = this.first; x !== null; x = x.next) {
+			if (x.expiry === 0) {
+				valid.push(x.key);
+				noTTL.push(x.key);
+			} else if (x.expiry > now) {
+				valid.push(x.key);
+			} else {
+				expired.push(x.key);
+			}
+		}
+
+		return { valid, expired, noTTL };
+	}
+
+	/**
+	 * Get values filtered by TTL status.
+	 *
+	 * @returns {Object} Object with valid, expired, and noTTL arrays of values.
+	 */
+	valuesByTTL() {
+		const keysByTTL = this.keysByTTL();
+
+		return {
+			valid: this.values(keysByTTL.valid),
+			expired: this.values(keysByTTL.expired),
+			noTTL: this.values(keysByTTL.noTTL),
+		};
+	}
+
+	/**
+	 * Rebuild the doubly-linked list after cleanup by deleting expired items.
+	 * This removes nodes that were deleted during cleanup.
+	 *
+	 * @private
+	 */
+	#rebuildList() {
+		if (this.size === 0) {
+			this.first = null;
+			this.last = null;
+			return;
+		}
+
+		const keys = this.keys();
+		this.first = null;
+		this.last = null;
+
+		for (let i = 0; i < keys.length; i++) {
+			const item = this.items[keys[i]];
+			if (item !== null && item !== undefined) {
+				if (this.first === null) {
+					this.first = item;
+					item.prev = null;
+				} else {
+					item.prev = this.last;
+					this.last.next = item;
+				}
+				item.next = null;
+				this.last = item;
+			}
+		}
+	}
 }
 
 /**
@@ -364,7 +636,7 @@ class LRU {
  * @function lru
  * @param {number} [max=1000] - Maximum number of items to store. Must be >= 0. Use 0 for unlimited size.
  * @param {number} [ttl=0] - Time to live in milliseconds. Must be >= 0. Use 0 for no expiration.
- * @param {boolean} [resetTtl=false] - Whether to reset TTL when accessing existing items via get().
+ * @param {boolean} [resetTtl=false] - Whether to reset TTL when updating existing items via set().
  * @returns {LRU} A new LRU cache instance.
  * @throws {TypeError} When parameters are invalid (negative numbers or wrong types).
  */

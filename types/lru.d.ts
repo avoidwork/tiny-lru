@@ -58,7 +58,7 @@ export class LRU<T = any> {
 	readonly last: LRUItem<T> | null;
 	/** Maximum number of items to store (0 = unlimited) */
 	readonly max: number;
-	/** Whether to reset TTL on each get() operation */
+	/** Whether to reset TTL on set() operations */
 	readonly resetTtl: boolean;
 	/** Current number of items in the cache */
 	readonly size: number;
@@ -112,6 +112,105 @@ export class LRU<T = any> {
 	 * @returns True if the key exists and is not expired, false otherwise
 	 */
 	has(key: any): boolean;
+
+	/**
+	 * Iterate over cache items in LRU order (least to most recent).
+	 * @param callback Function to call for each item. Signature: callback(value, key, cache)
+	 * @param thisArg Value to use as `this` when executing callback
+	 * @returns The LRU instance for method chaining
+	 */
+	forEach(callback: (value: T, key: any, cache: this) => void, thisArg?: any): this;
+
+	/**
+	 * Retrieve a value from the cache by key without updating LRU order.
+	 * Note: Does not perform TTL checks or remove expired items.
+	 * @param key The key to retrieve
+	 * @returns The value associated with the key, or undefined if not found
+	 */
+	peek(key: any): T | undefined;
+
+	/**
+	 * Batch retrieve multiple items.
+	 * @param keys Array of keys to retrieve
+	 * @returns Object mapping keys to values (undefined for missing/expired keys)
+	 */
+	getMany(keys: any[]): Record<any, T | undefined>;
+
+	/**
+	 * Batch existence check - returns true if ALL keys exist.
+	 * @param keys Array of keys to check
+	 * @returns True if all keys exist and are not expired
+	 */
+	hasAll(keys: any[]): boolean;
+
+	/**
+	 * Batch existence check - returns true if ANY key exists.
+	 * @param keys Array of keys to check
+	 * @returns True if any key exists and is not expired
+	 */
+	hasAny(keys: any[]): boolean;
+
+	/**
+	 * Remove expired items without affecting LRU order.
+	 * Unlike get(), this does not move items to the end.
+	 * @returns Number of expired items removed
+	 */
+	cleanup(): number;
+
+	/**
+	 * Serialize cache to JSON-compatible format.
+	 * @returns Array of cache items with key, value, and expiry
+	 */
+	toJSON(): Array<{ key: any; value: T; expiry: number }>;
+
+	/**
+	 * Get cache statistics.
+	 * @returns Statistics object with hits, misses, sets, deletes, evictions counts
+	 */
+	stats(): {
+			hits: number;
+			misses: number;
+			sets: number;
+			deletes: number;
+			evictions: number;
+	};
+
+	/**
+	 * Register callback for evicted items.
+	 * @param callback Function called when item is evicted. Receives {key, value, expiry}
+	 * @returns The LRU instance for method chaining
+	 */
+	onEvict(callback: (item: { key: any; value: T; expiry: number }) => void): this;
+
+	/**
+	 * Get counts of items by TTL status.
+	 * @returns Object with valid, expired, and noTTL counts
+	 */
+	sizeByTTL(): {
+			valid: number;
+			expired: number;
+			noTTL: number;
+	};
+
+	/**
+	 * Get keys filtered by TTL status.
+	 * @returns Object with valid, expired, and noTTL arrays of keys
+	 */
+	keysByTTL(): {
+			valid: any[];
+			expired: any[];
+			noTTL: any[];
+	};
+
+	/**
+	 * Get values filtered by TTL status.
+	 * @returns Object with valid, expired, and noTTL arrays of values
+	 */
+	valuesByTTL(): {
+			valid: (T | undefined)[];
+			expired: (T | undefined)[];
+			noTTL: (T | undefined)[];
+	};
 
 	/**
 	 * Returns an array of all keys in the cache, ordered from least to most recently used.
