@@ -155,8 +155,8 @@ const cache = new LRU(100, 5000);
 
 | Property  | Type             | Description                                |
 | --------- | ---------------- | ------------------------------------------ |
-| `first`   | `object | null`  | Least recently used item (node with `key`, `value`, `prev`, `next`, `expiry`) |
-| `last`    | `object | null`  | Most recently used item                    |
+| `first`   | `object` \| `null`  | Least recently used item (node with `key`, `value`, `prev`, `next`, `expiry`) |
+| `last`    | `object` \| `null`  | Most recently used item (node with `key`, `value`, `prev`, `next`, `expiry`) |
 | `max`     | `number`         | Maximum items allowed                      |
 | `size`    | `number`         | Current number of items                    |
 | `ttl`     | `number`         | Time-to-live in milliseconds               |
