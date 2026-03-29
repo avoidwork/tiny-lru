@@ -323,7 +323,6 @@ export class LRU {
 	 * @memberof LRU
 	 * @param {string} key - The key to set.
 	 * @param {*} value - The value to store.
-	 * @param {boolean} [resetTtl=this.resetTtl] - Whether to reset the TTL for this operation.
 	 * @returns {Object|null} The evicted item (if any) with shape {key, value, expiry, prev, next}, or null.
 	 * @example
 	 * const cache = new LRU(2);
@@ -333,13 +332,13 @@ export class LRU {
 	 * @see {@link LRU#evict}
 	 * @since 11.3.0
 	 */
-	setWithEvicted(key, value, resetTtl = this.resetTtl) {
+	setWithEvicted(key, value) {
 		let evicted = null;
 		let item = this.items[key];
 
 		if (item !== undefined) {
 			item.value = value;
-			if (resetTtl) {
+			if (this.resetTtl) {
 				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
 			}
 			this.moveToEnd(item);
@@ -380,7 +379,6 @@ export class LRU {
 	 * @memberof LRU
 	 * @param {string} key - The key to set.
 	 * @param {*} value - The value to store.
-	 * @param {boolean} [resetTtl=this.resetTtl] - Whether to reset the TTL for this operation.
 	 * @returns {LRU} The LRU instance for method chaining.
 	 * @example
 	 * cache.set('key1', 'value1')
@@ -390,13 +388,13 @@ export class LRU {
 	 * @see {@link LRU#setWithEvicted}
 	 * @since 1.0.0
 	 */
-	set(key, value, resetTtl = this.resetTtl) {
+	set(key, value) {
 		let item = this.items[key];
 
 		if (item !== undefined) {
 			item.value = value;
 
-			if (resetTtl) {
+			if (this.resetTtl) {
 				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
 			}
 

@@ -159,17 +159,17 @@ The LRU cache maintains a doubly-linked list $L$ and a hash table $H$ for O(1) o
 
 **Note:** The mathematical notation uses `create(k, v)` to represent the item creation logic that is inline in the actual implementation.
 
-#### Set Operation: $set(k, v, bypass = false, resetTtl = resetTtl) \rightarrow \text{LRU}$
+#### Set Operation: $set(k, v) \rightarrow \text{LRU}$
 
 $$
 \begin{align}
-set(k, v, bypass, resetTtl) &= \begin{cases}
-update(k, v, bypass, resetTtl) & \text{if } k \in H \\
+set(k, v) &= \begin{cases}
+update(k, v) & \text{if } k \in H \\
 insert(k, v) & \text{if } k \notin H
 \end{cases} \\
-update(k, v, bypass, resetTtl) &= H[k].value \leftarrow v \land moveToEnd(H[k]) \\
+update(k, v) &= H[k].value \leftarrow v \land moveToEnd(H[k]) \\
 & \quad \land \begin{cases}
-H[k].expiry \leftarrow t_{now} + ttl & \text{if } bypass = false \land resetTtl = true \land ttl > 0 \\
+H[k].expiry \leftarrow t_{now} + ttl & \text{if } resetTtl = true \land ttl > 0 \\
 \text{no-op} & \text{otherwise}
 \end{cases} \\
 insert(k, v) &= \begin{cases}
@@ -187,16 +187,16 @@ $$
 
 **Time Complexity:** $O(1)$ amortized
 
-#### Set With Evicted Operation: $setWithEvicted(k, v, resetTtl = resetTtl) \rightarrow \{key: K, value: V, expiry: \mathbb{N}_0\} \cup \{\bot\}$
+#### Set With Evicted Operation: $setWithEvicted(k, v) \rightarrow \{key: K, value: V, expiry: \mathbb{N}_0\} \cup \{\bot\}$
 
 $$
 \begin{align}
-setWithEvicted(k, v, resetTtl) &= \begin{cases}
-update(k, v, resetTtl) \land \bot & \text{if } k \in H \\
+setWithEvicted(k, v) &= \begin{cases}
+update(k, v) \land \bot & \text{if } k \in H \\
 evicted \land create(k, v) & \text{if } k \notin H \land max > 0 \land size = max \\
 \bot \land create(k, v) & \text{if } k \notin H \land (max = 0 \lor size < max)
 \end{cases} \\
-update(k, v, resetTtl) &= H[k].value \leftarrow v \land moveToEnd(H[k]) \\
+update(k, v) &= H[k].value \leftarrow v \land moveToEnd(H[k]) \\
 & \quad \land \begin{cases}
 H[k].expiry \leftarrow t_{now} + ttl & \text{if } resetTtl = true \land ttl > 0 \\
 \text{no-op} & \text{otherwise}
@@ -207,8 +207,6 @@ H[k].expiry \leftarrow t_{now} + ttl & \text{if } resetTtl = true \land ttl > 0 
 \end{cases}
 \end{align}
 $$
-
-**Note:** Unlike `set()`, `setWithEvicted()` does not use a `bypass` parameter, so TTL is reset when `resetTtl = true`.
 
 **Time Complexity:** $O(1)$ amortized
 
@@ -289,9 +287,8 @@ $$
 
 **TTL Reset Behavior:**
 
-- TTL is only reset during `set()` operations when `resetTtl = true` and `bypass = false`
+- TTL is reset during `set()` and `setWithEvicted()` operations when `resetTtl = true`
 - `get()` operations never reset TTL, regardless of the `resetTtl` setting
-- `setWithEvicted()` operations reset TTL when `resetTtl = true` (does not use bypass parameter)
 
 ### Space Complexity
 
@@ -341,12 +338,8 @@ export class LRU<T> {
 	get(key: any): T | undefined;
 	has(key: any): boolean;
 	keys(): any[];
-	set(key: any, value: T, bypass?: boolean, resetTtl?: boolean): this;
-	setWithEvicted(
-		key: any,
-		value: T,
-		resetTtl?: boolean,
-	): { key: any; value: T; expiry: number } | null;
+	set(key: any, value: T): this;
+	setWithEvicted(key: any, value: T): { key: any; value: T; expiry: number } | null;
 	values(keys?: any[]): T[];
 }
 

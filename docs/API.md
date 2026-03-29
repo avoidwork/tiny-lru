@@ -288,7 +288,7 @@ console.log(cache.keys()); // ['b', 'c', 'a']
 
 ---
 
-### `set(key, value, bypass?, resetTtl?)`
+### `set(key, value)`
 
 Stores value and moves to most recently used.
 
@@ -299,18 +299,16 @@ console.log(cache.keys()); // ['a', 'b', 'c']
 
 **Parameters:**
 
-| Name       | Type      | Default         | Description                        |
-| ---------- | --------- | --------------- | ---------------------------------- |
-| `key`      | `string`  | -               | Item key                           |
-| `value`    | `*`       | -               | Item value                         |
-| `bypass`   | `boolean` | `false`         | Internal flag for `setWithEvicted` |
-| `resetTtl` | `boolean` | `this.resetTtl` | Reset TTL for this operation       |
+| Name  | Type  | Description |
+| ----- | ----- | ----------- |
+| `key` | `string` | Item key |
+| `value` | `*` | Item value |
 
 **Returns:** `LRU` - this instance (for chaining)
 
 ---
 
-### `setWithEvicted(key, value, resetTtl?)`
+### `setWithEvicted(key, value)`
 
 Stores value and returns evicted item if cache was full.
 
@@ -325,11 +323,10 @@ console.log(cache.keys()); // ['b', 'c']
 
 **Parameters:**
 
-| Name       | Type      | Default         | Description                  |
-| ---------- | --------- | --------------- | ---------------------------- |
-| `key`      | `string`  | -               | Item key                     |
-| `value`    | `*`       | -               | Item value                   |
-| `resetTtl` | `boolean` | `this.resetTtl` | Reset TTL for this operation |
+| Name  | Type  | Description |
+| ----- | ----- | ----------- |
+| `key` | `string` | Item key |
+| `value` | `*` | Item value |
 
 **Returns:** `{ key, value, expiry } | null` - Evicted item or null
 
