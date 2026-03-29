@@ -14,12 +14,11 @@ const bannerShort = `/*!
  ${year} ${pkg.author}
  @version ${pkg.version}
 */`;
-const defaultOutBase = {compact: true, banner: bannerLong, name: pkg.name};
-const cjOutBase = {...defaultOutBase, compact: false, format: "cjs", exports: "named"};
-const esmOutBase = {...defaultOutBase, format: "esm"};
-const umdOutBase = {...defaultOutBase, format: "umd"};
-const minOutBase = {banner: bannerShort, name: pkg.name, plugins: [terser()], sourcemap: true};
-
+const defaultOutBase = { compact: true, banner: bannerLong, name: pkg.name };
+const cjOutBase = { ...defaultOutBase, compact: false, format: "cjs", exports: "named" };
+const esmOutBase = { ...defaultOutBase, format: "esm" };
+const umdOutBase = { ...defaultOutBase, format: "umd" };
+const minOutBase = { banner: bannerShort, name: pkg.name, plugins: [terser()], sourcemap: true };
 
 export default [
 	{
@@ -27,28 +26,28 @@ export default [
 		output: [
 			{
 				...cjOutBase,
-				file: `dist/${pkg.name}.cjs`
+				file: `dist/${pkg.name}.cjs`,
 			},
 			{
 				...esmOutBase,
-				file: `dist/${pkg.name}.js`
+				file: `dist/${pkg.name}.js`,
 			},
 			{
 				...esmOutBase,
 				...minOutBase,
-				file: `dist/${pkg.name}.min.js`
+				file: `dist/${pkg.name}.min.js`,
 			},
 			{
 				...umdOutBase,
 				file: `dist/${pkg.name}.umd.js`,
-				name: "lru"
+				name: "lru",
 			},
 			{
 				...umdOutBase,
 				...minOutBase,
 				file: `dist/${pkg.name}.umd.min.js`,
-				name: "lru"
-			}
-		]
-	}
+				name: "lru",
+			},
+		],
+	},
 ];

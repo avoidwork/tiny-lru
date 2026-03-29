@@ -6,7 +6,7 @@ const CACHE_SIZES = [100, 1000, 5000];
 const WORKLOAD_SIZES = [50, 500, 2500]; // Half of cache size for realistic workloads
 const ITERATIONS = {
 	time: 1000, // Run for 1 second minimum
-	iterations: 100 // Minimum iterations for statistical significance
+	iterations: 100, // Minimum iterations for statistical significance
 };
 
 // Utility functions for generating test data
@@ -16,28 +16,30 @@ const ITERATIONS = {
  * @param {number} size - Number of items
  * @returns {Array<{key:string,value:string}>}
  */
-function generateRandomData (size) {
-	const data = new Array(size);
+function generateRandomData(size) {
+	const data = Array.from({ length: size });
 	let x = 2463534242;
 	for (let i = 0; i < size; i++) {
 		// xorshift32
-		x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
+		x ^= x << 13;
+		x ^= x >>> 17;
+		x ^= x << 5;
 		const n = (x >>> 0).toString(36);
 		data[i] = {
 			key: `key_${i}_${n}`,
-			value: `value_${i}_${n}${n}`
+			value: `value_${i}_${n}${n}`,
 		};
 	}
 
 	return data;
 }
 
-function generateSequentialData (size) {
-	const data = new Array(size);
+function generateSequentialData(size) {
+	const data = Array.from({ length: size });
 	for (let i = 0; i < size; i++) {
 		data[i] = {
 			key: `seq_key_${i}`,
-			value: `seq_value_${i}`
+			value: `seq_value_${i}`,
 		};
 	}
 
@@ -51,21 +53,23 @@ function generateSequentialData (size) {
  * @param {number} modulo - Upper bound (exclusive)
  * @returns {Uint32Array}
  */
-function generateAccessPattern (length, modulo) {
+function generateAccessPattern(length, modulo) {
 	const pattern = new Uint32Array(length);
 	let x = 123456789;
 	let y = 362436069;
 	for (let i = 0; i < length; i++) {
-		x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
-		y = y + 1 >>> 0;
-		pattern[i] = (x + y >>> 0) % modulo;
+		x ^= x << 13;
+		x ^= x >>> 17;
+		x ^= x << 5;
+		y = (y + 1) >>> 0;
+		pattern[i] = ((x + y) >>> 0) % modulo;
 	}
 
 	return pattern;
 }
 
 // Pre-populate cache with data
-function prepopulateCache (cache, data, fillRatio = 0.8) {
+function prepopulateCache(cache, data, fillRatio = 0.8) {
 	const fillCount = Math.floor(data.length * fillRatio);
 	for (let i = 0; i < fillCount; i++) {
 		cache.set(data[i].key, data[i].value);
@@ -73,9 +77,9 @@ function prepopulateCache (cache, data, fillRatio = 0.8) {
 }
 
 // Benchmark suites
-async function runSetOperationsBenchmarks () {
+async function runSetOperationsBenchmarks() {
 	console.log("\n📝 SET Operations Benchmarks");
-	console.log("=" .repeat(50));
+	console.log("=".repeat(50));
 
 	for (const cacheSize of CACHE_SIZES) {
 		const workloadSize = WORKLOAD_SIZES[CACHE_SIZES.indexOf(cacheSize)];
@@ -123,9 +127,9 @@ async function runSetOperationsBenchmarks () {
 	}
 }
 
-async function runGetOperationsBenchmarks () {
+async function runGetOperationsBenchmarks() {
 	console.log("\n🔍 GET Operations Benchmarks");
-	console.log("=" .repeat(50));
+	console.log("=".repeat(50));
 
 	for (const cacheSize of CACHE_SIZES) {
 		const workloadSize = WORKLOAD_SIZES[CACHE_SIZES.indexOf(cacheSize)];
@@ -143,8 +147,10 @@ async function runGetOperationsBenchmarks () {
 
 		prepopulateCache(randomCache, randomData);
 		prepopulateCache(sequentialCache, sequentialData);
-		prepopulateCache(mixedCache, [...randomData.slice(0, Math.floor(workloadSize / 2)),
-			...sequentialData.slice(0, Math.floor(workloadSize / 2))]);
+		prepopulateCache(mixedCache, [
+			...randomData.slice(0, Math.floor(workloadSize / 2)),
+			...sequentialData.slice(0, Math.floor(workloadSize / 2)),
+		]);
 
 		const hitPattern = generateAccessPattern(20000, Math.floor(workloadSize * 0.8));
 		const missPattern = generateAccessPattern(20000, 1 << 30);
@@ -182,9 +188,9 @@ async function runGetOperationsBenchmarks () {
 	}
 }
 
-async function runMixedOperationsBenchmarks () {
+async function runMixedOperationsBenchmarks() {
 	console.log("\n🔄 Mixed Operations Benchmarks (Real-world scenarios)");
-	console.log("=" .repeat(60));
+	console.log("=".repeat(60));
 
 	for (const cacheSize of CACHE_SIZES) {
 		const workloadSize = WORKLOAD_SIZES[CACHE_SIZES.indexOf(cacheSize)];
@@ -250,9 +256,9 @@ async function runMixedOperationsBenchmarks () {
 	}
 }
 
-async function runSpecialOperationsBenchmarks () {
+async function runSpecialOperationsBenchmarks() {
 	console.log("\n⚙️  Special Operations Benchmarks");
-	console.log("=" .repeat(50));
+	console.log("=".repeat(50));
 
 	const cacheSize = 1000;
 	const workloadSize = 500;
@@ -263,10 +269,10 @@ async function runSpecialOperationsBenchmarks () {
 	let cursor = 0;
 
 	// Test cache with different data types
-	const numberData = Array.from({length: workloadSize}, (_, i) => ({key: i, value: i * 2}));
-	const objectData = Array.from({length: workloadSize}, (_, i) => ({
+	const numberData = Array.from({ length: workloadSize }, (_, i) => ({ key: i, value: i * 2 }));
+	const objectData = Array.from({ length: workloadSize }, (_, i) => ({
 		key: `obj_${i}`,
-		value: {id: i, data: `object_data_${i}`, nested: {prop: i}}
+		value: { id: i, data: `object_data_${i}`, nested: { prop: i } },
 	}));
 
 	bench
@@ -312,9 +318,9 @@ async function runSpecialOperationsBenchmarks () {
 }
 
 // Memory usage benchmarks
-async function runMemoryBenchmarks () {
+async function runMemoryBenchmarks() {
 	console.log("\n🧠 Memory Usage Analysis");
-	console.log("=" .repeat(40));
+	console.log("=".repeat(40));
 
 	const testSizes = [100, 1000, 10000];
 
@@ -331,7 +337,7 @@ async function runMemoryBenchmarks () {
 		const memBefore = process.memoryUsage();
 
 		// Fill cache
-		testData.forEach(item => cache.set(item.key, item.value));
+		testData.forEach((item) => cache.set(item.key, item.value));
 
 		// Memory after
 		if (global.gc) {
@@ -349,7 +355,7 @@ async function runMemoryBenchmarks () {
 }
 
 // Main execution
-async function runAllBenchmarks () {
+async function runAllBenchmarks() {
 	console.log("🚀 Tiny-LRU Modern Benchmark Suite");
 	console.log("==================================");
 	console.log(`Node.js version: ${process.version}`);
@@ -370,7 +376,6 @@ async function runAllBenchmarks () {
 		console.log("- Mixed operations: Simulates real-world usage scenarios");
 		console.log("- Special operations: Tests additional cache methods and edge cases");
 		console.log("- Memory analysis: Shows memory consumption patterns");
-
 	} catch (error) {
 		console.error("❌ Benchmark failed:", error);
 		process.exit(1);
@@ -388,6 +393,5 @@ export {
 	runGetOperationsBenchmarks,
 	runMixedOperationsBenchmarks,
 	runSpecialOperationsBenchmarks,
-	runMemoryBenchmarks
+	runMemoryBenchmarks,
 };
-

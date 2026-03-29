@@ -3,11 +3,11 @@ import { lru } from "../dist/tiny-lru.js";
 
 // Custom high-resolution timer benchmark (alternative approach)
 class CustomTimer {
-	constructor () {
+	constructor() {
 		this.results = new Map();
 	}
 
-	async timeFunction (name, fn, iterations = 1000) {
+	async timeFunction(name, fn, iterations = 1000) {
 		const times = [];
 
 		// Warmup
@@ -43,42 +43,44 @@ class CustomTimer {
 			maxTime,
 			median,
 			stdDev,
-			opsPerSec: 1000 / avgTime // Convert ms to ops/sec
+			opsPerSec: 1000 / avgTime, // Convert ms to ops/sec
 		});
 	}
 
-	printResults () {
+	printResults() {
 		console.log("\n⏱️  Performance Results");
 		console.log("========================");
 
 		const results = Array.from(this.results.values());
-		console.table(results.map(r => ({
-			"Operation": r.name,
-			"Iterations": r.iterations,
-			"Avg (ms)": r.avgTime.toFixed(6),
-			"Min (ms)": r.minTime.toFixed(6),
-			"Max (ms)": r.maxTime.toFixed(6),
-			"Median (ms)": r.median.toFixed(6),
-			"Std Dev": r.stdDev.toFixed(6),
-			"Ops/sec": Math.round(r.opsPerSec)
-		})));
+		console.table(
+			results.map((r) => ({
+				Operation: r.name,
+				Iterations: r.iterations,
+				"Avg (ms)": r.avgTime.toFixed(6),
+				"Min (ms)": r.minTime.toFixed(6),
+				"Max (ms)": r.maxTime.toFixed(6),
+				"Median (ms)": r.median.toFixed(6),
+				"Std Dev": r.stdDev.toFixed(6),
+				"Ops/sec": Math.round(r.opsPerSec),
+			})),
+		);
 	}
 }
 
 // Test data generation
-function generateTestData (size) {
-	const out = new Array(size);
+function generateTestData(size) {
+	const out = Array.from({ length: size });
 	for (let i = 0; i < size; i++) {
 		out[i] = {
 			key: `key_${i}`,
-			value: `value_${i}_${"x".repeat(50)}`
+			value: `value_${i}_${"x".repeat(50)}`,
 		};
 	}
 
 	return out;
 }
 
-async function runPerformanceBenchmarks () {
+async function runPerformanceBenchmarks() {
 	console.log("🔬 LRU Performance Benchmarks");
 	console.log("==============================");
 	console.log("(Using CustomTimer for high-resolution function timing)");
@@ -94,11 +96,15 @@ async function runPerformanceBenchmarks () {
 	console.log("Phase 1: Initial cache population");
 	const phase1Cache = lru(cacheSize);
 	let phase1Index = 0;
-	await timer.timeFunction("lru.set (initial population)", () => {
-		const i = phase1Index % cacheSize;
-		phase1Cache.set(testData[i].key, testData[i].value);
-		phase1Index++;
-	}, iterations);
+	await timer.timeFunction(
+		"lru.set (initial population)",
+		() => {
+			const i = phase1Index % cacheSize;
+			phase1Cache.set(testData[i].key, testData[i].value);
+			phase1Index++;
+		},
+		iterations,
+	);
 
 	// Phase 2: Mixed read/write operations
 	console.log("Phase 2: Mixed operations");
@@ -123,64 +129,100 @@ async function runPerformanceBenchmarks () {
 	}
 
 	let mixedGetIndex = 0;
-	await timer.timeFunction("lru.get", () => {
-		const idx = getIndices[mixedGetIndex % iterations];
-		phase2Cache.get(testData[idx].key);
-		mixedGetIndex++;
-	}, iterations);
+	await timer.timeFunction(
+		"lru.get",
+		() => {
+			const idx = getIndices[mixedGetIndex % iterations];
+			phase2Cache.get(testData[idx].key);
+			mixedGetIndex++;
+		},
+		iterations,
+	);
 
 	let mixedSetIndex = 0;
-	await timer.timeFunction("lru.set", () => {
-		const idx = setIndices[mixedSetIndex % iterations];
-		phase2Cache.set(testData[idx].key, testData[idx].value);
-		mixedSetIndex++;
-	}, iterations);
+	await timer.timeFunction(
+		"lru.set",
+		() => {
+			const idx = setIndices[mixedSetIndex % iterations];
+			phase2Cache.set(testData[idx].key, testData[idx].value);
+			mixedSetIndex++;
+		},
+		iterations,
+	);
 
 	let mixedHasIndex = 0;
-	await timer.timeFunction("lru.has", () => {
-		const idx = hasIndices[mixedHasIndex % iterations];
-		phase2Cache.has(testData[idx].key);
-		mixedHasIndex++;
-	}, iterations);
+	await timer.timeFunction(
+		"lru.has",
+		() => {
+			const idx = hasIndices[mixedHasIndex % iterations];
+			phase2Cache.has(testData[idx].key);
+			mixedHasIndex++;
+		},
+		iterations,
+	);
 
 	// keys()
-	await timer.timeFunction("lru.keys", () => {
-		phase2Cache.keys();
-	}, iterations);
+	await timer.timeFunction(
+		"lru.keys",
+		() => {
+			phase2Cache.keys();
+		},
+		iterations,
+	);
 
 	// values()
-	await timer.timeFunction("lru.values", () => {
-		phase2Cache.values();
-	}, iterations);
+	await timer.timeFunction(
+		"lru.values",
+		() => {
+			phase2Cache.values();
+		},
+		iterations,
+	);
 
 	// entries()
-	await timer.timeFunction("lru.entries", () => {
-		phase2Cache.entries();
-	}, iterations);
+	await timer.timeFunction(
+		"lru.entries",
+		() => {
+			phase2Cache.entries();
+		},
+		iterations,
+	);
 
 	let mixedDeleteIndex = 0;
-	await timer.timeFunction("lru.delete", () => {
-		const idx = deleteIndices[mixedDeleteIndex % iterations];
-		phase2Cache.delete(testData[idx].key);
-		mixedDeleteIndex++;
-	}, iterations);
+	await timer.timeFunction(
+		"lru.delete",
+		() => {
+			const idx = deleteIndices[mixedDeleteIndex % iterations];
+			phase2Cache.delete(testData[idx].key);
+			mixedDeleteIndex++;
+		},
+		iterations,
+	);
 
 	// Phase 3: Cache eviction stress test
 	console.log("Phase 3: Cache eviction stress test");
 	const phase3Cache = lru(2);
 	let phase3Index = 1;
 	phase3Cache.set(`evict_key_${phase3Index}`, `evict__value_${phase3Index++}`);
-	await timer.timeFunction("lru.set (eviction stress)", () => {
-		phase3Cache.set(`evict_key_${phase3Index}`, `evict_value_${phase3Index++}`);
-	}, iterations);
+	await timer.timeFunction(
+		"lru.set (eviction stress)",
+		() => {
+			phase3Cache.set(`evict_key_${phase3Index}`, `evict_value_${phase3Index++}`);
+		},
+		iterations,
+	);
 
 	// Phase 4: Some clear operations
 	console.log("Phase 4: Clear operations");
 	const phase4Cache = lru(1);
-	await timer.timeFunction("lru.clear", () => {
-		phase4Cache.set("temp_1", "temp_value_1");
-		phase4Cache.clear();
-	}, iterations);
+	await timer.timeFunction(
+		"lru.clear",
+		() => {
+			phase4Cache.set("temp_1", "temp_value_1");
+			phase4Cache.clear();
+		},
+		iterations,
+	);
 
 	// Phase 5: Additional API method benchmarks
 	console.log("Phase 5: Additional API method benchmarks");
@@ -190,26 +232,34 @@ async function runPerformanceBenchmarks () {
 	setWithEvictedCache.set("a", "value_a");
 	setWithEvictedCache.set("b", "value_b");
 	let setWithEvictedIndex = 0;
-	await timer.timeFunction("lru.setWithEvicted", () => {
-		const key = `extra_key_${setWithEvictedIndex}`;
-		const value = `extra_value_${setWithEvictedIndex}`;
-		setWithEvictedCache.setWithEvicted(key, value);
-		setWithEvictedIndex++;
-	}, iterations);
+	await timer.timeFunction(
+		"lru.setWithEvicted",
+		() => {
+			const key = `extra_key_${setWithEvictedIndex}`;
+			const value = `extra_value_${setWithEvictedIndex}`;
+			setWithEvictedCache.setWithEvicted(key, value);
+			setWithEvictedIndex++;
+		},
+		iterations,
+	);
 
 	// expiresAt()
 	const expiresCache = lru(cacheSize, 6e4);
 	const expiresKey = "expires_key";
 	expiresCache.set(expiresKey, "expires_value");
-	await timer.timeFunction("lru.expiresAt", () => {
-		expiresCache.expiresAt(expiresKey);
-	}, iterations);
+	await timer.timeFunction(
+		"lru.expiresAt",
+		() => {
+			expiresCache.expiresAt(expiresKey);
+		},
+		iterations,
+	);
 
 	timer.printResults();
 }
 
 // Comparison with different cache sizes
-async function runScalabilityTest () {
+async function runScalabilityTest() {
 	console.log("\n📈 Scalability Test");
 	console.log("===================");
 
@@ -223,7 +273,7 @@ async function runScalabilityTest () {
 		// Test set performance
 		const cache = lru(size);
 		const setStart = performance.now();
-		testData.forEach(item => cache.set(item.key, item.value));
+		testData.forEach((item) => cache.set(item.key, item.value));
 		const setEnd = performance.now();
 		const setTime = setEnd - setStart;
 
@@ -237,11 +287,11 @@ async function runScalabilityTest () {
 		const getTime = getEnd - getStart;
 
 		results.push({
-			"Size": size,
+			Size: size,
 			"Set Total (ms)": setTime.toFixed(2),
 			"Set Per Item (ms)": (setTime / size).toFixed(4),
 			"Get 1K Items (ms)": getTime.toFixed(2),
-			"Get Per Item (ms)": (getTime / 1000).toFixed(4)
+			"Get Per Item (ms)": (getTime / 1000).toFixed(4),
 		});
 	}
 
@@ -249,7 +299,7 @@ async function runScalabilityTest () {
 }
 
 // Main execution
-async function runAllPerformanceTests () {
+async function runAllPerformanceTests() {
 	console.log("🔬 Node.js Performance API Benchmarks");
 	console.log("======================================");
 	console.log(`Node.js version: ${process.version}`);
@@ -262,9 +312,10 @@ async function runAllPerformanceTests () {
 
 		console.log("\n✅ Performance tests completed!");
 		console.log("\n📋 Notes:");
-		console.log("- Benchmarks: High-resolution timing with statistical analysis using CustomTimer (based on performance.now())");
+		console.log(
+			"- Benchmarks: High-resolution timing with statistical analysis using CustomTimer (based on performance.now())",
+		);
 		console.log("- Scalability Test: Shows how performance scales with cache size");
-
 	} catch (error) {
 		console.error("❌ Performance test failed:", error);
 		process.exit(1);
@@ -276,9 +327,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 	runAllPerformanceTests();
 }
 
-export {
-	runAllPerformanceTests,
-	runPerformanceBenchmarks,
-	runScalabilityTest,
-	CustomTimer
-};
+export { runAllPerformanceTests, runPerformanceBenchmarks, runScalabilityTest, CustomTimer };

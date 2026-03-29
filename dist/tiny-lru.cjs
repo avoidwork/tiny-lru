@@ -13,17 +13,6 @@
  * removing the least recently used items first. All core operations (get, set, delete) are O(1).
  *
  * @class LRU
- * @example
- * // Create a cache with max 100 items
- * const cache = new LRU(100);
- * cache.set('key1', 'value1');
- * console.log(cache.get('key1')); // 'value1'
- *
- * @example
- * // Create a cache with TTL
- * const cache = new LRU(100, 5000); // 5 second TTL
- * cache.set('key1', 'value1');
- * // After 5 seconds, key1 will be expired
  */
 class LRU {
 	/**
@@ -33,13 +22,9 @@ class LRU {
 	 * @constructor
 	 * @param {number} [max=0] - Maximum number of items to store. 0 means unlimited.
 	 * @param {number} [ttl=0] - Time to live in milliseconds. 0 means no expiration.
-	 * @param {boolean} [resetTtl=false] - Whether to reset TTL when accessing existing items via get().
-	 * @example
-	 * const cache = new LRU(1000, 60000, true); // 1000 items, 1 minute TTL, reset on access
-	 * @see {@link lru} For parameter validation
-	 * @since 1.0.0
+	 * @param {boolean} [resetTtl=false] - Whether to reset TTL when updating existing items via set().
 	 */
-	constructor (max = 0, ttl = 0, resetTtl = false) {
+	constructor(max = 0, ttl = 0, resetTtl = false) {
 		this.first = null;
 		this.items = Object.create(null);
 		this.last = null;
@@ -52,15 +37,9 @@ class LRU {
 	/**
 	 * Removes all items from the cache.
 	 *
-	 * @method clear
-	 * @memberof LRU
 	 * @returns {LRU} The LRU instance for method chaining.
-	 * @example
-	 * cache.clear();
-	 * console.log(cache.size); // 0
-	 * @since 1.0.0
 	 */
-	clear () {
+	clear() {
 		this.first = null;
 		this.items = Object.create(null);
 		this.last = null;
@@ -72,40 +51,20 @@ class LRU {
 	/**
 	 * Removes an item from the cache by key.
 	 *
-	 * @method delete
-	 * @memberof LRU
 	 * @param {string} key - The key of the item to delete.
 	 * @returns {LRU} The LRU instance for method chaining.
-	 * @example
-	 * cache.set('key1', 'value1');
-	 * cache.delete('key1');
-	 * console.log(cache.has('key1')); // false
-	 * @see {@link LRU#has}
-	 * @see {@link LRU#clear}
-	 * @since 1.0.0
 	 */
-	delete (key) {
-		if (this.has(key)) {
-			const item = this.items[key];
+	delete(key) {
+		const item = this.items[key];
 
+		if (item !== undefined) {
 			delete this.items[key];
 			this.size--;
 
-			if (item.prev !== null) {
-				item.prev.next = item.next;
-			}
+			this.#unlink(item);
 
-			if (item.next !== null) {
-				item.next.prev = item.prev;
-			}
-
-			if (this.first === item) {
-				this.first = item.next;
-			}
-
-			if (this.last === item) {
-				this.last = item.prev;
-			}
+			item.prev = null;
+			item.next = null;
 		}
 
 		return this;
@@ -113,25 +72,22 @@ class LRU {
 
 	/**
 	 * Returns an array of [key, value] pairs for the specified keys.
-	 * Order follows LRU order (least to most recently used).
+	 * When no keys provided, returns all entries in LRU order.
+	 * When keys provided, order matches the input array.
 	 *
-	 * @method entries
-	 * @memberof LRU
 	 * @param {string[]} [keys=this.keys()] - Array of keys to get entries for. Defaults to all keys.
-	 * @returns {Array<Array<*>>} Array of [key, value] pairs in LRU order.
-	 * @example
-	 * cache.set('a', 1).set('b', 2);
-	 * console.log(cache.entries()); // [['a', 1], ['b', 2]]
-	 * console.log(cache.entries(['a'])); // [['a', 1]]
-	 * @see {@link LRU#keys}
-	 * @see {@link LRU#values}
-	 * @since 11.1.0
+	 * @returns {Array<Array<*>>} Array of [key, value] pairs.
 	 */
-	entries (keys = this.keys()) {
-		const result = new Array(keys.length);
+	entries(keys) {
+		if (keys === undefined) {
+			keys = this.keys();
+		}
+
+		const result = Array.from({ length: keys.length });
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
-			result[i] = [key, this.get(key)];
+			const item = this.items[key];
+			result[i] = [key, item !== undefined ? item.value : undefined];
 		}
 
 		return result;
@@ -140,30 +96,25 @@ class LRU {
 	/**
 	 * Removes the least recently used item from the cache.
 	 *
-	 * @method evict
-	 * @memberof LRU
-	 * @param {boolean} [bypass=false] - Whether to force eviction even when cache is empty.
 	 * @returns {LRU} The LRU instance for method chaining.
-	 * @example
-	 * cache.set('old', 'value').set('new', 'value');
-	 * cache.evict(); // Removes 'old' item
-	 * @see {@link LRU#setWithEvicted}
-	 * @since 1.0.0
 	 */
-	evict (bypass = false) {
-		if (bypass || this.size > 0) {
-			const item = this.first;
-
-			delete this.items[item.key];
-
-			if (--this.size === 0) {
-				this.first = null;
-				this.last = null;
-			} else {
-				this.first = item.next;
-				this.first.prev = null;
-			}
+	evict() {
+		if (this.size === 0) {
+			return this;
 		}
+
+		const item = this.first;
+
+		delete this.items[item.key];
+
+		if (--this.size === 0) {
+			this.first = null;
+			this.last = null;
+		} else {
+			this.#unlink(item);
+		}
+
+		item.next = null;
 
 		return this;
 	}
@@ -171,44 +122,21 @@ class LRU {
 	/**
 	 * Returns the expiration timestamp for a given key.
 	 *
-	 * @method expiresAt
-	 * @memberof LRU
 	 * @param {string} key - The key to check expiration for.
 	 * @returns {number|undefined} The expiration timestamp in milliseconds, or undefined if key doesn't exist.
-	 * @example
-	 * const cache = new LRU(100, 5000); // 5 second TTL
-	 * cache.set('key1', 'value1');
-	 * console.log(cache.expiresAt('key1')); // timestamp 5 seconds from now
-	 * @see {@link LRU#get}
-	 * @see {@link LRU#has}
-	 * @since 1.0.0
 	 */
-	expiresAt (key) {
-		let result;
-
-		if (this.has(key)) {
-			result = this.items[key].expiry;
-		}
-
-		return result;
+	expiresAt(key) {
+		const item = this.items[key];
+		return item !== undefined ? item.expiry : undefined;
 	}
 
 	/**
 	 * Retrieves a value from the cache by key. Updates the item's position to most recently used.
 	 *
-	 * @method get
-	 * @memberof LRU
 	 * @param {string} key - The key to retrieve.
 	 * @returns {*} The value associated with the key, or undefined if not found or expired.
-	 * @example
-	 * cache.set('key1', 'value1');
-	 * console.log(cache.get('key1')); // 'value1'
-	 * console.log(cache.get('nonexistent')); // undefined
-	 * @see {@link LRU#set}
-	 * @see {@link LRU#has}
-	 * @since 1.0.0
 	 */
-	get (key) {
+	get(key) {
 		const item = this.items[key];
 
 		if (item !== undefined) {
@@ -233,40 +161,22 @@ class LRU {
 	/**
 	 * Checks if a key exists in the cache.
 	 *
-	 * @method has
-	 * @memberof LRU
 	 * @param {string} key - The key to check for.
 	 * @returns {boolean} True if the key exists, false otherwise.
-	 * @example
-	 * cache.set('key1', 'value1');
-	 * console.log(cache.has('key1')); // true
-	 * console.log(cache.has('nonexistent')); // false
-	 * @see {@link LRU#get}
-	 * @see {@link LRU#delete}
-	 * @since 9.0.0
 	 */
-	has (key) {
-		return key in this.items;
+	has(key) {
+		const item = this.items[key];
+		return item !== undefined && (this.ttl === 0 || item.expiry > Date.now());
 	}
 
 	/**
-	 * Efficiently moves an item to the end of the LRU list (most recently used position).
-	 * This is an internal optimization method that avoids the overhead of the full set() operation
-	 * when only LRU position needs to be updated.
+	 * Unlinks an item from the doubly-linked list.
+	 * Updates first/last pointers if needed.
+	 * Does NOT clear the item's prev/next pointers or delete from items map.
 	 *
-	 * @method moveToEnd
-	 * @memberof LRU
-	 * @param {Object} item - The cache item with prev/next pointers to reposition.
 	 * @private
-	 * @since 11.3.5
 	 */
-	moveToEnd (item) {
-		// If already at the end, nothing to do
-		if (this.last === item) {
-			return;
-		}
-
-		// Remove item from current position in the list
+	#unlink(item) {
 		if (item.prev !== null) {
 			item.prev.next = item.next;
 		}
@@ -275,43 +185,43 @@ class LRU {
 			item.next.prev = item.prev;
 		}
 
-		// Update first pointer if this was the first item
 		if (this.first === item) {
 			this.first = item.next;
 		}
 
-		// Add item to the end
+		if (this.last === item) {
+			this.last = item.prev;
+		}
+	}
+
+	/**
+	 * Efficiently moves an item to the end of the LRU list (most recently used position).
+	 * This is an internal optimization method that avoids the overhead of the full set() operation
+	 * when only LRU position needs to be updated.
+	 *
+	 * @param {Object} item - The cache item with prev/next pointers to reposition.
+	 * @private
+	 */
+	moveToEnd(item) {
+		if (this.last === item) {
+			return;
+		}
+
+		this.#unlink(item);
+
 		item.prev = this.last;
 		item.next = null;
-
-		if (this.last !== null) {
-			this.last.next = item;
-		}
-
+		this.last.next = item;
 		this.last = item;
-
-		// Handle edge case: if this was the only item, it's also first
-		if (this.first === null) {
-			this.first = item;
-		}
 	}
 
 	/**
 	 * Returns an array of all keys in the cache, ordered from least to most recently used.
 	 *
-	 * @method keys
-	 * @memberof LRU
 	 * @returns {string[]} Array of keys in LRU order.
-	 * @example
-	 * cache.set('a', 1).set('b', 2);
-	 * cache.get('a'); // Move 'a' to most recent
-	 * console.log(cache.keys()); // ['b', 'a']
-	 * @see {@link LRU#values}
-	 * @see {@link LRU#entries}
-	 * @since 9.0.0
 	 */
-	keys () {
-		const result = new Array(this.size);
+	keys() {
+		const result = Array.from({ length: this.size });
 		let x = this.first;
 		let i = 0;
 
@@ -326,37 +236,36 @@ class LRU {
 	/**
 	 * Sets a value in the cache and returns any evicted item.
 	 *
-	 * @method setWithEvicted
-	 * @memberof LRU
 	 * @param {string} key - The key to set.
 	 * @param {*} value - The value to store.
-	 * @param {boolean} [resetTtl=this.resetTtl] - Whether to reset the TTL for this operation.
-	 * @returns {Object|null} The evicted item (if any) with shape {key, value, expiry, prev, next}, or null.
-	 * @example
-	 * const cache = new LRU(2);
-	 * cache.set('a', 1).set('b', 2);
-	 * const evicted = cache.setWithEvicted('c', 3); // evicted = {key: 'a', value: 1, ...}
-	 * @see {@link LRU#set}
-	 * @see {@link LRU#evict}
-	 * @since 11.3.0
+	 * @returns {Object|null} The evicted item (if any) with shape {key, value, expiry}, or null.
 	 */
-	setWithEvicted (key, value, resetTtl = this.resetTtl) {
+	setWithEvicted(key, value) {
 		let evicted = null;
+		let item = this.items[key];
 
-		if (this.has(key)) {
-			this.set(key, value, true, resetTtl);
+		if (item !== undefined) {
+			item.value = value;
+			if (this.resetTtl) {
+				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
+			}
+			this.moveToEnd(item);
 		} else {
 			if (this.max > 0 && this.size === this.max) {
-				evicted = {...this.first};
-				this.evict(true);
+				evicted = {
+					key: this.first.key,
+					value: this.first.value,
+					expiry: this.first.expiry,
+				};
+				this.evict();
 			}
 
-			let item = this.items[key] = {
+			item = this.items[key] = {
 				expiry: this.ttl > 0 ? Date.now() + this.ttl : this.ttl,
 				key: key,
 				prev: this.last,
 				next: null,
-				value
+				value,
 			};
 
 			if (++this.size === 1) {
@@ -374,38 +283,24 @@ class LRU {
 	/**
 	 * Sets a value in the cache. Updates the item's position to most recently used.
 	 *
-	 * @method set
-	 * @memberof LRU
 	 * @param {string} key - The key to set.
 	 * @param {*} value - The value to store.
-	 * @param {boolean} [bypass=false] - Internal parameter for setWithEvicted method.
-	 * @param {boolean} [resetTtl=this.resetTtl] - Whether to reset the TTL for this operation.
 	 * @returns {LRU} The LRU instance for method chaining.
-	 * @example
-	 * cache.set('key1', 'value1')
-	 *      .set('key2', 'value2')
-	 *      .set('key3', 'value3');
-	 * @see {@link LRU#get}
-	 * @see {@link LRU#setWithEvicted}
-	 * @since 1.0.0
 	 */
-	set (key, value, bypass = false, resetTtl = this.resetTtl) {
+	set(key, value) {
 		let item = this.items[key];
 
-		if (bypass || item !== undefined) {
-			// Existing item: update value and position
+		if (item !== undefined) {
 			item.value = value;
 
-			if (bypass === false && resetTtl) {
+			if (this.resetTtl) {
 				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
 			}
 
-			// Always move to end, but the bypass parameter affects TTL reset behavior
 			this.moveToEnd(item);
 		} else {
-			// New item: check for eviction and create
 			if (this.max > 0 && this.size === this.max) {
-				this.evict(true);
+				this.evict();
 			}
 
 			item = this.items[key] = {
@@ -413,7 +308,7 @@ class LRU {
 				key: key,
 				prev: this.last,
 				next: null,
-				value
+				value,
 			};
 
 			if (++this.size === 1) {
@@ -430,24 +325,21 @@ class LRU {
 
 	/**
 	 * Returns an array of all values in the cache for the specified keys.
-	 * Order follows LRU order (least to most recently used).
+	 * When no keys provided, returns all values in LRU order.
+	 * When keys provided, order matches the input array.
 	 *
-	 * @method values
-	 * @memberof LRU
 	 * @param {string[]} [keys=this.keys()] - Array of keys to get values for. Defaults to all keys.
-	 * @returns {Array<*>} Array of values corresponding to the keys in LRU order.
-	 * @example
-	 * cache.set('a', 1).set('b', 2);
-	 * console.log(cache.values()); // [1, 2]
-	 * console.log(cache.values(['a'])); // [1]
-	 * @see {@link LRU#keys}
-	 * @see {@link LRU#entries}
-	 * @since 11.1.0
+	 * @returns {Array<*>} Array of values corresponding to the keys.
 	 */
-	values (keys = this.keys()) {
-		const result = new Array(keys.length);
+	values(keys) {
+		if (keys === undefined) {
+			keys = this.keys();
+		}
+
+		const result = Array.from({ length: keys.length });
 		for (let i = 0; i < keys.length; i++) {
-			result[i] = this.get(keys[i]);
+			const item = this.items[keys[i]];
+			result[i] = item !== undefined ? item.value : undefined;
 		}
 
 		return result;
@@ -463,22 +355,8 @@ class LRU {
  * @param {boolean} [resetTtl=false] - Whether to reset TTL when accessing existing items via get().
  * @returns {LRU} A new LRU cache instance.
  * @throws {TypeError} When parameters are invalid (negative numbers or wrong types).
- * @example
- * // Create cache with factory function
- * const cache = lru(100, 5000, true);
- * cache.set('key', 'value');
- *
- * @example
- * // Error handling
- * try {
- *   const cache = lru(-1); // Invalid max
- * } catch (error) {
- *   console.error(error.message); // "Invalid max value"
- * }
- * @see {@link LRU}
- * @since 1.0.0
  */
-function lru (max = 1000, ttl = 0, resetTtl = false) {
+function lru(max = 1000, ttl = 0, resetTtl = false) {
 	if (isNaN(max) || max < 0) {
 		throw new TypeError("Invalid max value");
 	}
