@@ -82,7 +82,7 @@ export class LRU {
 			delete this.items[key];
 			this.size--;
 
-			this.unlink(item);
+			this.#unlink(item);
 
 			item.prev = null;
 			item.next = null;
@@ -148,7 +148,7 @@ export class LRU {
 			this.first = null;
 			this.last = null;
 		} else {
-			this.unlink(item);
+			this.#unlink(item);
 		}
 
 		item.next = null;
@@ -238,13 +238,10 @@ export class LRU {
 	 * Updates first/last pointers if needed.
 	 * Does NOT clear the item's prev/next pointers or delete from items map.
 	 *
-	 * @method unlink
-	 * @memberof LRU
-	 * @param {Object} item - The cache item to unlink.
 	 * @private
 	 * @since 11.4.8
 	 */
-	unlink(item) {
+	#unlink(item) {
 		if (item.prev !== null) {
 			item.prev.next = item.next;
 		}
@@ -278,7 +275,7 @@ export class LRU {
 			return;
 		}
 
-		this.unlink(item);
+		this.#unlink(item);
 
 		item.prev = this.last;
 		item.next = null;
