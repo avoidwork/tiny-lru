@@ -89,21 +89,7 @@ class LRU {
 			delete this.items[key];
 			this.size--;
 
-			if (item.prev !== null) {
-				item.prev.next = item.next;
-			}
-
-			if (item.next !== null) {
-				item.next.prev = item.prev;
-			}
-
-			if (this.first === item) {
-				this.first = item.next;
-			}
-
-			if (this.last === item) {
-				this.last = item.prev;
-			}
+			this.unlink(item);
 
 			item.prev = null;
 			item.next = null;
@@ -171,8 +157,7 @@ class LRU {
 				this.first = null;
 				this.last = null;
 			} else {
-				this.first = item.next;
-				this.first.prev = null;
+				this.unlink(item);
 			}
 
 			item.next = null;
@@ -259,6 +244,35 @@ class LRU {
 	}
 
 	/**
+	 * Unlinks an item from the doubly-linked list.
+	 * Updates first/last pointers if needed.
+	 * Does NOT clear the item's prev/next pointers or delete from items map.
+	 *
+	 * @method unlink
+	 * @memberof LRU
+	 * @param {Object} item - The cache item to unlink.
+	 * @private
+	 * @since 11.4.8
+	 */
+	unlink(item) {
+		if (item.prev !== null) {
+			item.prev.next = item.next;
+		}
+
+		if (item.next !== null) {
+			item.next.prev = item.prev;
+		}
+
+		if (this.first === item) {
+			this.first = item.next;
+		}
+
+		if (this.last === item) {
+			this.last = item.prev;
+		}
+	}
+
+	/**
 	 * Efficiently moves an item to the end of the LRU list (most recently used position).
 	 * This is an internal optimization method that avoids the overhead of the full set() operation
 	 * when only LRU position needs to be updated.
@@ -274,17 +288,7 @@ class LRU {
 			return;
 		}
 
-		if (item.prev !== null) {
-			item.prev.next = item.next;
-		}
-
-		if (item.next !== null) {
-			item.next.prev = item.prev;
-		}
-
-		if (this.first === item) {
-			this.first = item.next;
-		}
+		this.unlink(item);
 
 		item.prev = this.last;
 		item.next = null;
