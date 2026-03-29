@@ -94,28 +94,29 @@ const cache = new LRU(100, 5000);
 
 ### Methods
 
-| Method            | Description                                    |
-| ----------------- | ---------------------------------------------- |
-| `set(key, value)` | Store a value. Returns `this` for chaining.    |
-| `get(key)`        | Retrieve a value. Moves item to most recent.   |
-| `has(key)`        | Check if key exists and is not expired.        |
-| `delete(key)`     | Remove an item. Returns `this` for chaining.   |
-| `clear()`         | Remove all items. Returns `this` for chaining. |
-| `evict()`         | Remove the least recently used item.           |
-| `keys()`          | Get all keys in LRU order (oldest first).      |
-| `values(keys?)`   | Get all values, or values for specific keys.   |
-| `entries(keys?)`  | Get `[key, value]` pairs in LRU order.         |
-| `expiresAt(key)`  | Get expiration timestamp for a key.            |
+| Method                  | Description                                    |
+| ----------------------- | ---------------------------------------------- |
+| `clear()`               | Remove all items. Returns `this` for chaining. |
+| `delete(key)`           | Remove an item. Returns `this` for chaining.   |
+| `entries(keys?)`        | Get `[key, value]` pairs in LRU order.         |
+| `evict()`               | Remove the least recently used item.           |
+| `expiresAt(key)`        | Get expiration timestamp for a key.            |
+| `get(key)`              | Retrieve a value. Moves item to most recent.   |
+| `has(key)`              | Check if key exists and is not expired.        |
+| `keys()`                | Get all keys in LRU order (oldest first).      |
+| `set(key, value)`       | Store a value. Returns `this` for chaining.    |
+| `setWithEvicted(key, value)` | Store value, return evicted item if full. |
+| `values(keys?)`         | Get all values, or values for specific keys.   |
 
 ### Properties
 
 | Property | Type   | Description                  |
 | -------- | ------ | ---------------------------- |
-| `size`   | number | Current number of items      |
-| `max`    | number | Maximum items allowed        |
-| `ttl`    | number | Time-to-live in milliseconds |
 | `first`  | object | Least recently used item     |
 | `last`   | object | Most recently used item      |
+| `max`    | number | Maximum items allowed        |
+| `size`   | number | Current number of items      |
+| `ttl`    | number | Time-to-live in milliseconds |
 
 ## Common Patterns
 
