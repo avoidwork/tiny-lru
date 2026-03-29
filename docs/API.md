@@ -174,7 +174,7 @@ console.log(removed); // 2 (number of items removed)
 
 **Returns:** `number` - Number of expired items removed
 
-**Note:** Only removes items when TTL is enabled (`ttl > 0`).
+**Note:** Only removes items when TTL is enabled (`ttl > 0`). Does not support method chaining (returns `number`).
 
 ---
 
@@ -232,7 +232,7 @@ console.log(cache.entries(["c", "a"]));
 | ------ | ---------- | ---------------------------------- |
 | `keys` | `string[]` | Optional specific keys to retrieve |
 
-**Returns:** `Array<[string, *]>` - Array of key-value pairs
+**Returns:** `Array<(string|*)[]>` - Array of key-value pairs
 
 ---
 
@@ -292,7 +292,7 @@ cache.forEach((value, key, cache) => {
 | Name      | Type       | Description                             |
 | --------- | ---------- | --------------------------------------- |
 | `callback` | `function` | Function to call for each item. Signature: `callback(value, key, cache)` |
-| `thisArg`  | `Object`   | Value to use as `this` when executing callback |
+| `thisArg`  | `*`        | Value to use as `this` when executing callback |
 
 **Returns:** `LRU` - this instance (for chaining)
 
@@ -458,6 +458,8 @@ cache.set("a", 1).set("b", 2).set("c", 3).set("d", 4);
 
 **Returns:** `LRU` - this instance (for chaining)
 
+**Throws:** `TypeError` if callback is not a function
+
 **Note:** Only the last registered callback will be used. Triggers on:
 - Explicit eviction via `evict()`
 - Implicit eviction via `set()`/`setWithEvicted()` when cache is at max capacity
@@ -528,6 +530,8 @@ console.log(cache.keys()); // ['b', 'c']
 | `value` | `*` | Item value |
 
 **Returns:** `{ key, value, expiry } | null` - Evicted item (if any) or `null` when no eviction occurs
+
+**Note:** When updating an existing key with `resetTtl=true`, the TTL is reset but no eviction occurs (returns `null`).
 
 ---
 
@@ -609,7 +613,7 @@ console.log(cache.values());
 // [1, 2, 3]
 
 console.log(cache.values(["c", "a"]));
-// [3, 1] - respects LRU order
+// [3, 1] - order matches input array
 ```
 
 **Parameters:**
@@ -655,7 +659,7 @@ When `setWithEvicted` returns an evicted item:
 
 ## Method Chaining
 
-All mutation methods return `this` for chaining:
+All mutation methods return `this` for chaining (except `cleanup()` which returns `number`):
 
 ```javascript
 cache.set("a", 1).set("b", 2).set("c", 3).delete("a").evict();
