@@ -163,7 +163,7 @@ console.log(cache.ttl); // 60000
 
 ### `cleanup()`
 
-Removes expired items without affecting LRU order.
+Removes expired items without affecting LRU order. Silently removes expired items without triggering the `onEvict()` callback.
 
 ```javascript
 cache.set("a", 1).set("b", 2);
@@ -215,7 +215,7 @@ console.log(cache.size); // 1
 
 ### `entries(keys?)`
 
-Returns `[key, value]` pairs in LRU order.
+Returns `[key, value]` pairs. Without `keys`: returns all entries in LRU order. With `keys`: order matches the input array.
 
 ```javascript
 cache.set("a", 1).set("b", 2).set("c", 3);
@@ -223,7 +223,7 @@ console.log(cache.entries());
 // [['a', 1], ['b', 2], ['c', 3]]
 
 console.log(cache.entries(["c", "a"]));
-// [['c', 3], ['a', 1]] - respects LRU order
+// [['c', 3], ['a', 1]] - order matches input array
 ```
 
 **Parameters:**
@@ -382,9 +382,7 @@ cache.hasAll(["a", "nonexistent"]); // false
 | ------ | ---------- | -------------------- |
 | `keys` | `string[]` | Array of keys to check |
 
-**Returns:** `boolean` - True if all keys exist and are not expired
-
-**Note:** Returns `true` for empty arrays.
+**Returns:** `boolean` - True if all keys exist and are not expired. Returns `true` for empty arrays (vacuous truth).
 
 ---
 
@@ -404,9 +402,7 @@ cache.hasAny(["nonexistent1", "nonexistent2"]); // false
 | ------ | ---------- | -------------------- |
 | `keys` | `string[]` | Array of keys to check |
 
-**Returns:** `boolean` - True if any key exists and is not expired
-
-**Note:** Returns `false` for empty arrays.
+**Returns:** `boolean` - True if any key exists and is not expired. Returns `false` for empty arrays.
 
 ---
 
@@ -462,7 +458,10 @@ cache.set("a", 1).set("b", 2).set("c", 3).set("d", 4);
 
 **Returns:** `LRU` - this instance (for chaining)
 
-**Note:** Only the last registered callback will be used. Triggers on explicit eviction via `evict()` or when `set()`/`setWithEvicted()` evicts items due to cache being full. Does not trigger on TTL expiry (items are silently removed).
+**Note:** Only the last registered callback will be used. Triggers on:
+- Explicit eviction via `evict()`
+- Implicit eviction via `set()`/`setWithEvicted()` when cache is at max capacity
+Does NOT trigger on TTL expiry (items are silently removed).
 
 ---
 
@@ -528,7 +527,7 @@ console.log(cache.keys()); // ['b', 'c']
 | `key` | `string` | Item key |
 | `value` | `*` | Item value |
 
-**Returns:** `{ key, value, expiry } | null` - Evicted item or null
+**Returns:** `{ key, value, expiry } | null` - Evicted item (if any) or `null` when no eviction occurs
 
 ---
 

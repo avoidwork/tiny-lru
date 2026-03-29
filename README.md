@@ -129,6 +129,8 @@ const cache4 = lru(100, 60000, true); // with resetTtl enabled
 | `ttl`      | `number`  | `0`     | Time-to-live in milliseconds. `0` = no expiration. Must be >= 0. |
 | `resetTtl` | `boolean` | `false` | Reset TTL when updating existing items via `set()`               |
 
+**Returns:** `LRU` - New cache instance
+
 **Throws:** `TypeError` if parameters are invalid
 
 ### Class: `new LRU(max?, ttl?, resetTtl?)`
@@ -168,6 +170,7 @@ const cache = new LRU(100, 5000);
 | `clear()`                   | Remove all items. Returns `this` for chaining. |
 | `delete(key)`               | Remove an item by key. Returns `this` for chaining. |
 | `entries(keys?)`            | Get `[key, value]` pairs in LRU order.         |
+| `entries(keys?)`            | Get `[key, value]` pairs. Without keys: LRU order. With keys: input array order. |
 | `evict()`                   | Remove the least recently used item. Returns `this` for chaining. |
 | `expiresAt(key)`            | Get expiration timestamp for a key. Returns `number | undefined`. |
 | `forEach(callback, thisArg?)` | Iterate over items in LRU order. Returns `this` for chaining. |
@@ -177,6 +180,7 @@ const cache = new LRU(100, 5000);
 | `hasAll(keys)`              | Check if ALL keys exist. Returns `boolean`.    |
 | `hasAny(keys)`              | Check if ANY key exists. Returns `boolean`.    |
 | `keys()`                    | Get all keys in LRU order (oldest first). Returns `string[]`. |
+| `entries(keys?)`            | Get `[key, value]` pairs. Without keys: LRU order. With keys: input array order. |
 | `keysByTTL()`               | Get keys by TTL status. Returns `{valid, expired, noTTL}`. |
 | `peek(key)`                 | Retrieve a value without LRU update. Returns value or `undefined`. |
 | `set(key, value)`           | Store a value. Returns `this` for chaining.    |
@@ -186,7 +190,7 @@ const cache = new LRU(100, 5000);
 | `toJSON()`                  | Serialize cache to JSON format. Returns array of items. |
 | `values(keys?)`             | Get all values, or values for specific keys. Returns array of values. |
 | `valuesByTTL()`             | Get values by TTL status. Returns `{valid, expired, noTTL}`. |
-| `onEvict(callback)`         | Register eviction callback. Returns `this` for chaining. |
+| `onEvict(callback)`         | Register eviction callback (triggers on `evict()` or when `set()`/`setWithEvicted()` evicts). Returns `this` for chaining. |
 
 ## Common Patterns
 
