@@ -415,6 +415,13 @@ Build produces multiple module formats:
 - `dist/tiny-lru.min.js` - Minified ESM
 - `types/lru.d.ts` - TypeScript definitions
 
+## Tests
+
+| Metric    | Count |
+| --------- | ----- |
+| Tests     | 149   |
+| Suites    | 26    |
+
 ## Test Coverage
 
 | Metric    | Coverage |
