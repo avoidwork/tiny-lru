@@ -7,7 +7,36 @@ Complete API documentation for tiny-lru.
 - [Factory Function](#factory-function)
 - [LRU Class](#lru-class)
 - [Properties](#properties)
+  - [first](#first)
+  - [last](#last)
+  - [max](#max)
+  - [resetTtl](#resetttl)
+  - [size](#size)
+  - [ttl](#ttl)
 - [Methods](#methods)
+  - [cleanup()](#cleanup)
+  - [clear()](#clear)
+  - [delete(key)](#deletekey)
+  - [entries(keys?)](#entrieskeys)
+  - [evict()](#evict)
+  - [expiresAt(key)](#expiresatkey)
+  - [forEach(callback, thisArg?)](#foreachcallback-thisarg)
+  - [get(key)](#getkey)
+  - [getMany(keys)](#getmanykeys)
+  - [has(key)](#haskey)
+  - [hasAll(keys)](#hasallkeys)
+  - [hasAny(keys)](#hasanykeys)
+  - [keys()](#keys)
+  - [keysByTTL()](#keysbyttl)
+  - [onEvict(callback)](#onevictcallback)
+  - [peek(key)](#peekkey)
+  - [set(key, value)](#setkey-value)
+  - [setWithEvicted(key, value)](#setwithevictedkey-value)
+  - [sizeByTTL()](#sizebyttl)
+  - [stats()](#stats)
+  - [toJSON()](#tojson)
+  - [values(keys?)](#valueskeys)
+  - [valuesByTTL()](#valuesbyttl)
 
 ---
 
@@ -70,43 +99,6 @@ const cache = new LRU(100, 5000, true);
 
 ## Properties
 
-### `size`
-
-`number` - Current number of items in cache.
-
-```javascript
-const cache = lru(10);
-cache.set("a", 1).set("b", 2);
-console.log(cache.size); // 2
-```
-
-### `max`
-
-`number` - Maximum number of items allowed.
-
-```javascript
-const cache = lru(100);
-console.log(cache.max); // 100
-```
-
-### `ttl`
-
-`number` - Time-to-live in milliseconds. `0` = no expiration.
-
-```javascript
-const cache = lru(100, 60000);
-console.log(cache.ttl); // 60000
-```
-
-### `resetTtl`
-
-`boolean` - Whether TTL resets on `set()` updates.
-
-```javascript
-const cache = lru(100, 5000, true);
-console.log(cache.resetTtl); // true
-```
-
 ### `first`
 
 `Object | null` - Least recently used item (node with `key`, `value`, `prev`, `next`, `expiry`).
@@ -128,9 +120,63 @@ cache.set("a", 1).set("b", 2);
 console.log(cache.last.key); // "b"
 ```
 
+### `max`
+
+`number` - Maximum number of items allowed.
+
+```javascript
+const cache = lru(100);
+console.log(cache.max); // 100
+```
+
+### `resetTtl`
+
+`boolean` - Whether TTL resets on `set()` updates.
+
+```javascript
+const cache = lru(100, 5000, true);
+console.log(cache.resetTtl); // true
+```
+
+### `size`
+
+`number` - Current number of items in cache.
+
+```javascript
+const cache = lru(10);
+cache.set("a", 1).set("b", 2);
+console.log(cache.size); // 2
+```
+
+### `ttl`
+
+`number` - Time-to-live in milliseconds. `0` = no expiration.
+
+```javascript
+const cache = lru(100, 60000);
+console.log(cache.ttl); // 60000
+```
+
 ---
 
 ## Methods
+
+### `cleanup()`
+
+Removes expired items without affecting LRU order.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+// ... wait for items to expire
+const removed = cache.cleanup();
+console.log(removed); // 2 (number of items removed)
+```
+
+**Returns:** `number` - Number of expired items removed
+
+**Note:** Only removes items when TTL is enabled (`ttl > 0`).
+
+---
 
 ### `clear()`
 
@@ -226,28 +272,6 @@ console.log(cache.expiresAt("nonexistent")); // undefined
 
 ---
 
-### `peek(key)`
-
-Retrieves value without updating LRU order.
-
-```javascript
-cache.set("a", 1).set("b", 2);
-cache.peek("a"); // 1
-console.log(cache.keys()); // ['b', 'a'] - order unchanged
-```
-
-**Parameters:**
-
-| Name  | Type     | Description     |
-| ----- | -------- | --------------- |
-| `key` | `string` | Key to retrieve |
-
-**Returns:** `* | undefined` - Value or undefined if not found
-
-**Note:** Does not perform TTL expiration checks or update LRU order.
-
----
-
 ### `forEach(callback, thisArg?)`
 
 Iterates over cache items in LRU order (least to most recent).
@@ -276,6 +300,28 @@ cache.forEach((value, key, cache) => {
 
 ---
 
+### `get(key)`
+
+Retrieves value and promotes to most recently used.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+cache.get("a"); // 1
+console.log(cache.keys()); // ['b', 'a'] - 'a' moved to end
+```
+
+Expired items are deleted and return `undefined`.
+
+**Parameters:**
+
+| Name  | Type     | Description     |
+| ----- | -------- | --------------- |
+| `key` | `string` | Key to retrieve |
+
+**Returns:** `* | undefined` - Value or undefined if not found/expired
+
+---
+
 ### `getMany(keys)`
 
 Batch retrieves multiple items.
@@ -295,6 +341,26 @@ console.log(result); // { a: 1, c: 3 }
 **Returns:** `Object` - Object mapping keys to values (undefined for missing/expired keys)
 
 **Note:** Returns `undefined` for non-existent or expired keys.
+
+---
+
+### `has(key)`
+
+Checks if key exists and is not expired.
+
+```javascript
+cache.set("a", 1);
+cache.has("a"); // true
+cache.has("nonexistent"); // false
+```
+
+**Parameters:**
+
+| Name  | Type     | Description  |
+| ----- | -------- | ------------ |
+| `key` | `string` | Key to check |
+
+**Returns:** `boolean`
 
 ---
 
@@ -344,69 +410,34 @@ cache.hasAny(["nonexistent1", "nonexistent2"]); // false
 
 ---
 
-### `cleanup()`
+### `keys()`
 
-Removes expired items without affecting LRU order.
+Returns all keys in LRU order (oldest first).
 
 ```javascript
-cache.set("a", 1).set("b", 2);
-// ... wait for items to expire
-const removed = cache.cleanup();
-console.log(removed); // 2 (number of items removed)
+cache.set("a", 1).set("b", 2).set("c", 3);
+cache.get("a"); // Promote 'a'
+console.log(cache.keys()); // ['b', 'c', 'a']
 ```
 
-**Returns:** `number` - Number of expired items removed
-
-**Note:** Only removes items when TTL is enabled (`ttl > 0`).
+**Returns:** `string[]`
 
 ---
 
-### `toJSON()`
+### `keysByTTL()`
 
-Serializes cache to JSON-compatible format.
-
-```javascript
-cache.set("a", 1).set("b", 2);
-const json = cache.toJSON();
-console.log(json);
-// [
-//   { key: "a", value: 1, expiry: 0 },
-//   { key: "b", value: 2, expiry: 0 }
-// ]
-
-// Works with JSON.stringify:
-const jsonString = JSON.stringify(cache);
-```
-
-**Returns:** `Array<{key, value, expiry}>` - Array of cache items
-
----
-
-### `stats()`
-
-Returns cache statistics.
+Returns keys grouped by TTL status.
 
 ```javascript
 cache.set("a", 1).set("b", 2);
-cache.get("a");
-cache.get("nonexistent");
-
-console.log(cache.stats());
-// {
-//   hits: 1,
-//   misses: 1,
-//   sets: 2,
-//   deletes: 0,
-//   evictions: 0
-// }
+console.log(cache.keysByTTL());
+// { valid: ["a", "b"], expired: [], noTTL: ["a", "b"] }
 ```
 
-**Returns:** `Object` - Statistics object with the following properties:
-- `hits` - Number of successful get() calls
-- `misses` - Number of failed get() calls
-- `sets` - Number of set() calls
-- `deletes` - Number of delete() calls
-- `evictions` - Number of evicted items
+**Returns:** `Object` - Object with three properties:
+- `valid` - Array of valid (non-expired) keys
+- `expired` - Array of expired keys
+- `noTTL` - Array of keys without TTL (when `ttl=0`)
 
 ---
 
@@ -435,70 +466,15 @@ cache.set("a", 1).set("b", 2).set("c", 3).set("d", 4);
 
 ---
 
-### `sizeByTTL()`
+### `peek(key)`
 
-Returns counts of items by TTL status.
-
-```javascript
-cache.set("a", 1).set("b", 2);
-console.log(cache.sizeByTTL());
-// { valid: 2, expired: 0, noTTL: 0 }
-```
-
-**Returns:** `Object` - Object with three properties:
-- `valid` - Number of items that haven't expired
-- `expired` - Number of expired items
-- `noTTL` - Number of items without TTL (when `ttl=0`)
-
-**Note:** Items without TTL (expiry === 0) count as both valid and noTTL.
-
----
-
-### `keysByTTL()`
-
-Returns keys grouped by TTL status.
+Retrieves value without updating LRU order.
 
 ```javascript
 cache.set("a", 1).set("b", 2);
-console.log(cache.keysByTTL());
-// { valid: ["a", "b"], expired: [], noTTL: ["a", "b"] }
+cache.peek("a"); // 1
+console.log(cache.keys()); // ['b', 'a'] - order unchanged
 ```
-
-**Returns:** `Object` - Object with three properties:
-- `valid` - Array of valid (non-expired) keys
-- `expired` - Array of expired keys
-- `noTTL` - Array of keys without TTL (when `ttl=0`)
-
----
-
-### `valuesByTTL()`
-
-Returns values grouped by TTL status.
-
-```javascript
-cache.set("a", 1).set("b", 2);
-console.log(cache.valuesByTTL());
-// { valid: [1, 2], expired: [], noTTL: [1, 2] }
-```
-
-**Returns:** `Object` - Object with three properties:
-- `valid` - Array of valid (non-expired) values
-- `expired` - Array of expired values
-- `noTTL` - Array of values without TTL (when `ttl=0`)
-
----
-
-### `get(key)`
-
-Retrieves value and promotes to most recently used.
-
-```javascript
-cache.set("a", 1).set("b", 2);
-cache.get("a"); // 1
-console.log(cache.keys()); // ['b', 'a'] - 'a' moved to end
-```
-
-Expired items are deleted and return `undefined`.
 
 **Parameters:**
 
@@ -506,41 +482,9 @@ Expired items are deleted and return `undefined`.
 | ----- | -------- | --------------- |
 | `key` | `string` | Key to retrieve |
 
-**Returns:** `* | undefined` - Value or undefined if not found/expired
+**Returns:** `* | undefined` - Value or undefined if not found
 
----
-
-### `has(key)`
-
-Checks if key exists and is not expired.
-
-```javascript
-cache.set("a", 1);
-cache.has("a"); // true
-cache.has("nonexistent"); // false
-```
-
-**Parameters:**
-
-| Name  | Type     | Description  |
-| ----- | -------- | ------------ |
-| `key` | `string` | Key to check |
-
-**Returns:** `boolean`
-
----
-
-### `keys()`
-
-Returns all keys in LRU order (oldest first).
-
-```javascript
-cache.set("a", 1).set("b", 2).set("c", 3);
-cache.get("a"); // Promote 'a'
-console.log(cache.keys()); // ['b', 'c', 'a']
-```
-
-**Returns:** `string[]`
+**Note:** Does not perform TTL expiration checks or update LRU order.
 
 ---
 
@@ -588,6 +532,74 @@ console.log(cache.keys()); // ['b', 'c']
 
 ---
 
+### `sizeByTTL()`
+
+Returns counts of items by TTL status.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+console.log(cache.sizeByTTL());
+// { valid: 2, expired: 0, noTTL: 0 }
+```
+
+**Returns:** `Object` - Object with three properties:
+- `valid` - Number of items that haven't expired
+- `expired` - Number of expired items
+- `noTTL` - Number of items without TTL (when `ttl=0`)
+
+**Note:** Items without TTL (expiry === 0) count as both valid and noTTL.
+
+---
+
+### `stats()`
+
+Returns cache statistics.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+cache.get("a");
+cache.get("nonexistent");
+
+console.log(cache.stats());
+// {
+//   hits: 1,
+//   misses: 1,
+//   sets: 2,
+//   deletes: 0,
+//   evictions: 0
+// }
+```
+
+**Returns:** `Object` - Statistics object with the following properties:
+- `hits` - Number of successful get() calls
+- `misses` - Number of failed get() calls
+- `sets` - Number of set() calls
+- `deletes` - Number of delete() calls
+- `evictions` - Number of evicted items
+
+---
+
+### `toJSON()`
+
+Serializes cache to JSON-compatible format.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+const json = cache.toJSON();
+console.log(json);
+// [
+//   { key: "a", value: 1, expiry: 0 },
+//   { key: "b", value: 2, expiry: 0 }
+// ]
+
+// Works with JSON.stringify:
+const jsonString = JSON.stringify(cache);
+```
+
+**Returns:** `Array<{key, value, expiry}>` - Array of cache items
+
+---
+
 ### `values(keys?)`
 
 Returns values in LRU order.
@@ -608,6 +620,23 @@ console.log(cache.values(["c", "a"]));
 | `keys` | `string[]` | Optional specific keys to retrieve |
 
 **Returns:** `*[]` - Array of values
+
+---
+
+### `valuesByTTL()`
+
+Returns values grouped by TTL status.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+console.log(cache.valuesByTTL());
+// { valid: [1, 2], expired: [], noTTL: [1, 2] }
+```
+
+**Returns:** `Object` - Object with three properties:
+- `valid` - Array of valid (non-expired) values
+- `expired` - Array of expired values
+- `noTTL` - Array of values without TTL (when `ttl=0`)
 
 ---
 
