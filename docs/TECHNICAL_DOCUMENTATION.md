@@ -1084,10 +1084,6 @@ export default [
 			{ format: "esm", file: "dist/tiny-lru.js" },
 			// Minified ES Modules
 			{ format: "esm", file: "dist/tiny-lru.min.js", plugins: [terser()] },
-			// UMD for browsers
-			{ format: "umd", file: "dist/tiny-lru.umd.js", name: "lru" },
-			// Minified UMD
-			{ format: "umd", file: "dist/tiny-lru.umd.min.js", name: "lru", plugins: [terser()] },
 		],
 	},
 ];
@@ -1113,8 +1109,7 @@ export default [
 
 - **ESM**: `dist/tiny-lru.js` - ES Modules for modern bundlers
 - **CommonJS**: `dist/tiny-lru.cjs` - Node.js compatible format
-- **UMD**: `dist/tiny-lru.umd.js` - Universal format for browsers
-- **Minified**: All formats available with `.min.js` extension
+- **Minified**: `dist/tiny-lru.min.js` - Minified ESM
 - **TypeScript**: `types/lru.d.ts` - Complete type definitions
 
 ### Development Commands
@@ -1144,9 +1139,7 @@ tiny-lru/
 ├── dist/                   # Built distributions (generated)
 │   ├── tiny-lru.js        # ES Modules
 │   ├── tiny-lru.cjs       # CommonJS
-│   ├── tiny-lru.min.js    # Minified ESM
-│   ├── tiny-lru.umd.js    # UMD
-│   └── tiny-lru.umd.min.js # Minified UMD
+│   └── tiny-lru.min.js    # Minified ESM
 ├── tests/
 │   ├── unit/              # Unit tests with Node.js built-in test runner
 │   └── integration/       # Integration tests

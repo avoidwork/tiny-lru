@@ -412,8 +412,6 @@ Build produces multiple module formats:
 - `dist/tiny-lru.js` - ES Modules
 - `dist/tiny-lru.cjs` - CommonJS
 - `dist/tiny-lru.min.js` - Minified ESM
-- `dist/tiny-lru.umd.js` - UMD
-- `dist/tiny-lru.umd.min.js` - Minified UMD
 - `types/lru.d.ts` - TypeScript definitions
 
 ## Test Coverage

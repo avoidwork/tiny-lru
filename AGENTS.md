@@ -32,6 +32,9 @@ Source code is in `src/`.
 ├── tests/              # Test files
 ├── benchmarks/          # Performance benchmarks
 ├── dist/               # Built distribution files
+│   ├── tiny-lru.js     # ES Modules
+│   ├── tiny-lru.cjs    # CommonJS
+│   └── tiny-lru.min.js # Minified ESM
 ├── types/              # TypeScript definitions
 ├── docs/               # Documentation
 ├── rollup.config.js    # Build configuration
