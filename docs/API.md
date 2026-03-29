@@ -232,7 +232,7 @@ console.log(cache.entries(["c", "a"]));
 | ------ | ---------- | ---------------------------------- |
 | `keys` | `string[]` | Optional specific keys to retrieve |
 
-**Returns:** `Array<(string|*)[]>` - Array of key-value pairs
+**Returns:** `[string, *][]` - Array of 2-element tuples [key, value]
 
 ---
 
