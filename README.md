@@ -5,7 +5,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/avoidwork/tiny-lru.svg)](https://github.com/avoidwork/tiny-lru/stargazers)
 [![License](https://img.shields.io/npm/l/tiny-lru.svg)](https://github.com/avoidwork/tiny-lru/blob/master/LICENSE)
 [![Node.js version](https://img.shields.io/node/v/tiny-lru.svg)](https://www.npmjs.com/package/tiny-lru)
-[![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/avoidwork/tiny-lru/actions?query=branch%3Amaster)
+[![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/ci.yml/badge.svg)](https://github.com/avoidwork/tiny-lru/actions?query=workflow%3Aci)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://app.codecov.io/gh/avoidwork/tiny-lru)
 
 [![npm](https://nodei.co/npm/tiny-lru.png?downloads=true&stars=true)](https://www.npmjs.com/package/tiny-lru)
