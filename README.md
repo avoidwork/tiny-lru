@@ -124,6 +124,7 @@ const user: User | undefined = cache.get("user:1");
 | `get(key)`              | Retrieve a value. Moves item to most recent.   |
 | `has(key)`              | Check if key exists and is not expired.        |
 | `keys()`                | Get all keys in LRU order (oldest first).      |
+| `peek(key)`             | Retrieve a value without LRU update.           |
 | `set(key, value)`       | Store a value. Returns `this` for chaining.    |
 | `setWithEvicted(key, value)` | Store value, return evicted item if full. |
 | `values(keys?)`         | Get all values, or values for specific keys.   |

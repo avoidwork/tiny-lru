@@ -728,4 +728,56 @@ describe("LRU Cache", function () {
 			assert.deepEqual(values, [1, undefined, 2]);
 		});
 	});
+
+	describe("peek method", function () {
+		let cache;
+
+		beforeEach(function () {
+			cache = new LRU(3);
+		});
+
+		it("should retrieve value without moving to end", function () {
+			cache.set("key1", "value1");
+			cache.set("key2", "value2");
+
+			assert.equal(cache.peek("key1"), "value1");
+			assert.deepEqual(cache.keys(), ["key1", "key2"]);
+		});
+
+		it("should return undefined for non-existent key", function () {
+			assert.equal(cache.peek("nonexistent"), undefined);
+		});
+
+		it("should not affect LRU order when used with get", function () {
+			cache.set("key1", "value1");
+			cache.set("key2", "value2");
+			cache.set("key3", "value3");
+
+			cache.peek("key1");
+			cache.get("key2");
+
+			assert.deepEqual(cache.keys(), ["key1", "key3", "key2"]);
+		});
+
+		it("should work with TTL enabled but not check expiration", function () {
+			const ttlCache = new LRU(3, 100);
+			ttlCache.set("key1", "value1");
+
+			assert.equal(ttlCache.peek("key1"), "value1");
+
+			const expiry = ttlCache.expiresAt("key1");
+			assert.ok(expiry > 0);
+		});
+
+		it("should allow peek after get maintains LRU order", function () {
+			cache.set("key1", "value1");
+			cache.set("key2", "value2");
+			cache.set("key3", "value3");
+
+			cache.get("key1");
+			cache.peek("key2");
+
+			assert.deepEqual(cache.keys(), ["key2", "key3", "key1"]);
+		});
+	});
 });

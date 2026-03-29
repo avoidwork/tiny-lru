@@ -129,6 +129,18 @@ class LRU {
 	}
 
 	/**
+	 * Retrieves a value from the cache by key without updating LRU order.
+	 * Note: Does not perform TTL checks or remove expired items.
+	 *
+	 * @param {string} key - The key to retrieve.
+	 * @returns {*} The value associated with the key, or undefined if not found.
+	 */
+	peek(key) {
+		const item = this.items[key];
+		return item !== undefined ? item.value : undefined;
+	}
+
+	/**
 	 * Retrieves a value from the cache by key. Updates the item's position to most recently used.
 	 *
 	 * @param {string} key - The key to retrieve.

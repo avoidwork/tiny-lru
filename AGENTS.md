@@ -56,9 +56,10 @@ Source code is in `src/`.
 
 - `lru(max, ttl, resetTtl)` - Factory function to create cache
 - `LRU` class - Direct instantiation with `new LRU(max, ttl, resetTtl)`
-- Key methods: `get()`, `set()`, `delete()`, `has()`, `clear()`, `evict()`
+- Key methods: `get()`, `set()`, `peek()`, `delete()`, `has()`, `clear()`, `evict()`
 - Array methods: `keys()`, `values()`, `entries()`
 - Properties: `first`, `last`, `max`, `size`, `ttl`, `resetTtl`
+- `peek(key)` - Retrieve value without moving it (no LRU update, no TTL check)
 
 ## Testing
 

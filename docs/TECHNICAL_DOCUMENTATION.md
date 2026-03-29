@@ -127,6 +127,7 @@ sequenceDiagram
 | `setWithEvicted(key, value)` | O(1)         | O(1)       | O(1)  | Store value, return evicted item   |
 | `delete(key)`                | O(1)         | O(1)       | O(1)  | Remove item from cache             |
 | `has(key)`                   | O(1)         | O(1)       | O(1)  | Check key existence                |
+| `peek(key)`                  | O(1)         | O(1)       | O(1)  | Retrieve value without LRU update  |
 | `clear()`                    | O(1)         | O(1)       | O(1)  | Reset all pointers                 |
 | `evict()`                    | O(1)         | O(1)       | O(1)  | Remove least recently used item    |
 | `expiresAt(key)`             | O(1)         | O(1)       | O(1)  | Get expiration timestamp           |
@@ -338,6 +339,7 @@ export class LRU<T> {
 	get(key: any): T | undefined;
 	has(key: any): boolean;
 	keys(): any[];
+	peek(key: any): T | undefined;
 	set(key: any, value: T): this;
 	setWithEvicted(key: any, value: T): EvictedItem<T> | null;
 	values(keys?: any[]): (T | undefined)[];

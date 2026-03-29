@@ -226,6 +226,28 @@ console.log(cache.expiresAt("nonexistent")); // undefined
 
 ---
 
+### `peek(key)`
+
+Retrieves value without updating LRU order.
+
+```javascript
+cache.set("a", 1).set("b", 2);
+cache.peek("a"); // 1
+console.log(cache.keys()); // ['b', 'a'] - order unchanged
+```
+
+**Parameters:**
+
+| Name  | Type     | Description     |
+| ----- | -------- | --------------- |
+| `key` | `string` | Key to retrieve |
+
+**Returns:** `* | undefined` - Value or undefined if not found
+
+**Note:** Does not perform TTL expiration checks or update LRU order.
+
+---
+
 ### `get(key)`
 
 Retrieves value and promotes to most recently used.
