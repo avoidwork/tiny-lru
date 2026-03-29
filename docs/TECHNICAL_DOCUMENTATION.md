@@ -332,15 +332,15 @@ export class LRU<T> {
 	// Core methods
 	clear(): this;
 	delete(key: any): this;
-	entries(keys?: any[]): [any, T][];
+	entries(keys?: any[]): [any, T | undefined][];
 	evict(bypass?: boolean): this;
 	expiresAt(key: any): number | undefined;
 	get(key: any): T | undefined;
 	has(key: any): boolean;
 	keys(): any[];
 	set(key: any, value: T): this;
-	setWithEvicted(key: any, value: T): { key: any; value: T; expiry: number } | null;
-	values(keys?: any[]): T[];
+	setWithEvicted(key: any, value: T): EvictedItem<T> | null;
+	values(keys?: any[]): (T | undefined)[];
 }
 
 // Internal item structure
