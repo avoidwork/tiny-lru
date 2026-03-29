@@ -275,4 +275,6 @@ npm run coverage     # Generate test coverage report
 
 ## License
 
+Copyright (c) 2026, Jason Mulligan
+
 BSD-3-Clause
