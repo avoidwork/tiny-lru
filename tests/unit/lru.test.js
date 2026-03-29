@@ -858,7 +858,7 @@ describe("LRU Cache", function () {
 			assert.deepEqual(result, ["b", "c", "a", "d"]);
 		});
 
-		it("should allow deleting items during iteration", function () {
+		it("should allow deleting items after collecting keys during iteration", function () {
 			const keysToDelete = [];
 			cache.forEach((value, key) => {
 				if (value === 2) {
