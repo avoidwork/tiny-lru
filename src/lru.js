@@ -128,7 +128,6 @@ export class LRU {
 	 *
 	 * @method evict
 	 * @memberof LRU
-	 * @param {boolean} [bypass=false] - Whether to force eviction even when cache is empty.
 	 * @returns {LRU} The LRU instance for method chaining.
 	 * @example
 	 * cache.set('old', 'value').set('new', 'value');
@@ -136,25 +135,23 @@ export class LRU {
 	 * @see {@link LRU#setWithEvicted}
 	 * @since 1.0.0
 	 */
-	evict(bypass = false) {
-		if (bypass || this.size > 0) {
-			const item = this.first;
-
-			if (!item) {
-				return this;
-			}
-
-			delete this.items[item.key];
-
-			if (--this.size === 0) {
-				this.first = null;
-				this.last = null;
-			} else {
-				this.unlink(item);
-			}
-
-			item.next = null;
+	evict() {
+		if (this.size === 0) {
+			return this;
 		}
+
+		const item = this.first;
+
+		delete this.items[item.key];
+
+		if (--this.size === 0) {
+			this.first = null;
+			this.last = null;
+		} else {
+			this.unlink(item);
+		}
+
+		item.next = null;
 
 		return this;
 	}
@@ -349,7 +346,7 @@ export class LRU {
 					value: this.first.value,
 					expiry: this.first.expiry,
 				};
-				this.evict(true);
+				this.evict();
 			}
 
 			item = this.items[key] = {
@@ -401,7 +398,7 @@ export class LRU {
 			this.moveToEnd(item);
 		} else {
 			if (this.max > 0 && this.size === this.max) {
-				this.evict(true);
+				this.evict();
 			}
 
 			item = this.items[key] = {

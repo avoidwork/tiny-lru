@@ -190,7 +190,7 @@ console.log(cache.entries(["c", "a"]));
 
 ---
 
-### `evict(bypass?)`
+### `evict()`
 
 Removes the least recently used item.
 
@@ -200,12 +200,6 @@ cache.evict();
 console.log(cache.has("a")); // false
 console.log(cache.keys()); // ['b', 'c']
 ```
-
-**Parameters:**
-
-| Name     | Type      | Default | Description                    |
-| -------- | --------- | ------- | ------------------------------ |
-| `bypass` | `boolean` | `false` | Force eviction even when empty |
 
 **Returns:** `LRU` - this instance (for chaining)
 

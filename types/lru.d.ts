@@ -88,10 +88,9 @@ export class LRU<T = any> {
 
 	/**
 	 * Removes the least recently used item from the cache.
-	 * @param bypass Whether to force eviction even when cache is empty (default: false)
 	 * @returns The LRU instance for method chaining
 	 */
-	evict(bypass?: boolean): this;
+	evict(): this;
 
 	/**
 	 * Returns the expiration timestamp for a given key.

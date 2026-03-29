@@ -264,9 +264,9 @@ $$
 **LRU Eviction:** When $max > 0 \land size = max$ and inserting a new item:
 
 $$
-evict(bypass = false) = \begin{cases}
-first \leftarrow first.next \land first.prev \leftarrow null \land H \setminus \{first.key\} \land size \leftarrow size - 1 & \text{if } (bypass \lor size > 0) \\
-\text{no-op} & \text{otherwise}
+evict() = \begin{cases}
+\text{no-op} & \text{if } size = 0 \\
+first \leftarrow first.next \land first.prev \leftarrow null \land H \setminus \{first.key\} \land size \leftarrow size - 1 \land item.next \leftarrow null & \text{if } size > 0
 \end{cases}
 $$
 
@@ -333,7 +333,7 @@ export class LRU<T> {
 	clear(): this;
 	delete(key: any): this;
 	entries(keys?: any[]): [any, T | undefined][];
-	evict(bypass?: boolean): this;
+	evict(): this;
 	expiresAt(key: any): number | undefined;
 	get(key: any): T | undefined;
 	has(key: any): boolean;
