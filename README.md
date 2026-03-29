@@ -2,8 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/tiny-lru.svg)](https://www.npmjs.com/package/tiny-lru)
 [![npm downloads](https://img.shields.io/npm/dm/tiny-lru.svg)](https://www.npmjs.com/package/tiny-lru)
-[![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/test.yml/badge.svg)](https://github.com/avoidwork/tiny-lru/actions)
-[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/avoidwork/tiny-lru)
+[![Build Status](https://github.com/avoidwork/tiny-lru/actions/workflows/ci.yml/badge.svg)](https://github.com/avoidwork/tiny-lru/actions)
 
 A fast, lightweight LRU (Least Recently Used) cache for JavaScript with O(1) operations and optional TTL support.
 
