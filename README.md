@@ -116,6 +116,7 @@ const user: User | undefined = cache.get("user:1");
 
 | Method                  | Description                                    |
 | ----------------------- | ---------------------------------------------- |
+| `cleanup()`             | Remove expired items without LRU update.       |
 | `clear()`               | Remove all items. Returns `this` for chaining. |
 | `delete(key)`           | Remove an item. Returns `this` for chaining.   |
 | `entries(keys?)`        | Get `[key, value]` pairs in LRU order.         |
@@ -128,17 +129,16 @@ const user: User | undefined = cache.get("user:1");
 | `hasAll(keys)`          | Check if ALL keys exist.                       |
 | `hasAny(keys)`          | Check if ANY key exists.                       |
 | `keys()`                | Get all keys in LRU order (oldest first).      |
-| `cleanup()`             | Remove expired items without LRU update.       |
+| `keysByTTL()`           | Get keys by TTL status.                        |
 | `peek(key)`             | Retrieve a value without LRU update.           |
 | `set(key, value)`       | Store a value. Returns `this` for chaining.    |
 | `setWithEvicted(key, value)` | Store value, return evicted item if full. |
-| `values(keys?)`         | Get all values, or values for specific keys.   |
-| `toJSON()`              | Serialize cache to JSON format.                |
-| `stats()`               | Get cache statistics.                          |
-| `onEvict(callback)`     | Register eviction callback.                    |
 | `sizeByTTL()`           | Get counts by TTL status.                      |
-| `keysByTTL()`           | Get keys by TTL status.                        |
+| `stats()`               | Get cache statistics.                          |
+| `toJSON()`              | Serialize cache to JSON format.                |
+| `values(keys?)`         | Get all values, or values for specific keys.   |
 | `valuesByTTL()`         | Get values by TTL status.                      |
+| `onEvict(callback)`     | Register eviction callback.                    |
 
 ### Properties
 
