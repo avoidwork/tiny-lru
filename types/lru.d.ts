@@ -124,20 +124,17 @@ export class LRU<T = any> {
 	 * Sets a value in the cache. Updates the item's position to most recently used.
 	 * @param key The key to set
 	 * @param value The value to store
-	 * @param bypass Internal parameter for setWithEvicted method (default: false)
-	 * @param resetTtl Whether to reset the TTL for this operation (default: this.resetTtl)
 	 * @returns The LRU instance for method chaining
 	 */
-	set(key: any, value: T, bypass?: boolean, resetTtl?: boolean): this;
+	set(key: any, value: T): this;
 
 	/**
 	 * Sets a value in the cache and returns any evicted item.
 	 * @param key The key to set
 	 * @param value The value to store
-	 * @param resetTtl Whether to reset the TTL for this operation (default: this.resetTtl)
 	 * @returns The evicted item (if any) with {key, value, expiry} or null
 	 */
-	setWithEvicted(key: any, value: T, resetTtl?: boolean): EvictedItem<T> | null;
+	setWithEvicted(key: any, value: T): EvictedItem<T> | null;
 
 	/**
 	 * Returns an array of all values in the cache for the specified keys.
