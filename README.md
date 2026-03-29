@@ -17,7 +17,7 @@ Think of an LRU cache like a limited-size bookshelf. When you add a new book and
 npm install tiny-lru
 ```
 
-Requires Node.js ≥12 or modern browsers with ES Module support.
+Requires Node.js ≥14 or modern browsers with ES Module support.
 
 ## Quick Start
 

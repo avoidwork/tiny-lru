@@ -1146,7 +1146,7 @@ tiny-lru/
 │   ├── tiny-lru.umd.js    # UMD
 │   └── tiny-lru.umd.min.js # Minified UMD
 ├── tests/
-│   ├── unit/              # Unit tests with mocha
+│   ├── unit/              # Unit tests with Node.js built-in test runner
 │   └── integration/       # Integration tests
 ├── benchmarks/            # Performance benchmarks
 └── docs/                  # Documentation
