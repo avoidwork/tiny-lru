@@ -11,8 +11,8 @@ npm install          # Install dependencies
 npm run build        # Lint and build (runs lint then rollup)
 npm run rollup       # Build with rollup
 npm run test         # Run lint and tests
-npm run mocha        # Run tests with coverage (c8)
-npm run fmt          # Format code with oxfmt
+npm run coverage     # Run tests with coverage reporting
+npm run fix          # Fix linting and formatting issues
 npm run lint         # Lint code with oxlint
 ```
 
