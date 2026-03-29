@@ -124,7 +124,7 @@ const cache4 = lru(100, 60000, true); // with resetTtl enabled
 | ---------- | --------- | ------- | ---------------------------------------------------------------- |
 | `max`      | `number`  | `1000`  | Maximum items. `0` = unlimited. Must be >= 0.                    |
 | `ttl`      | `number`  | `0`     | Time-to-live in milliseconds. `0` = no expiration. Must be >= 0. |
-| `resetTtl` | `boolean` | `false` | Reset TTL when updating existing items via `set()`               |
+| `resetTTL` | `boolean` | `false` | Reset TTL when updating existing items via `set()`               |
 
 **Returns:** `LRU` - New cache instance
 
@@ -146,7 +146,7 @@ const cache = new LRU(100, 5000);
 | ---------- | --------- | ------- | -------------------------------------------------- |
 | `max`      | `number`  | `0`     | Maximum items. `0` = unlimited.                    |
 | `ttl`      | `number`  | `0`     | Time-to-live in milliseconds. `0` = no expiration. |
-| `resetTtl` | `boolean` | `false` | Reset TTL when updating via `set()`                |
+| `resetTTL` | `boolean` | `false` | Reset TTL when updating via `set()`                |
 
 ### Properties
 
@@ -155,7 +155,7 @@ const cache = new LRU(100, 5000);
 | `first`   | `object` \| `null`  | Least recently used item (node with `key`, `value`, `prev`, `next`, `expiry`) |
 | `last`    | `object` \| `null`  | Most recently used item (node with `key`, `value`, `prev`, `next`, `expiry`) |
 | `max`     | `number`         | Maximum items allowed                      |
-| `resetTtl`| `boolean`        | Whether TTL resets on `set()` updates      |
+| `resetTTL`| `boolean`        | Whether TTL resets on `set()` updates      |
 | `size`    | `number`         | Current number of items                    |
 | `ttl`     | `number`         | Time-to-live in milliseconds               |
 

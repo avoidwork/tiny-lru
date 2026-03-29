@@ -56,7 +56,7 @@ graph TD
   - `max`: Maximum cache size (0 = unlimited)
   - `size`: Current number of items
   - `ttl`: Time-to-live in milliseconds (0 = no expiration)
-  - `resetTtl`: Whether to reset TTL on `set()` and `setWithEvicted()` operations (not on `get()`)
+   - `resetTTL`: Whether to reset TTL on `set()` and `setWithEvicted()` operations (not on `get()`)
 
 ## Data Flow
 

@@ -16,14 +16,14 @@ export class LRU {
 	 * @constructor
 	 * @param {number} [max=0] - Maximum number of items to store. 0 means unlimited.
 	 * @param {number} [ttl=0] - Time to live in milliseconds. 0 means no expiration.
-	 * @param {boolean} [resetTtl=false] - Whether to reset TTL when updating existing items via set().
+	 * @param {boolean} [resetTTL=false] - Whether to reset TTL when updating existing items via set().
 	 */
-	constructor(max = 0, ttl = 0, resetTtl = false) {
+	constructor(max = 0, ttl = 0, resetTTL = false) {
 		this.first = null;
 		this.items = Object.create(null);
 		this.last = null;
 		this.max = max;
-		this.resetTtl = resetTtl;
+		this.resetTTL = resetTTL;
 		this.size = 0;
 		this.ttl = ttl;
 		this.#stats = { hits: 0, misses: 0, sets: 0, deletes: 0, evictions: 0 };
@@ -288,7 +288,7 @@ export class LRU {
 
 		if (item !== undefined) {
 			item.value = value;
-			if (this.resetTtl) {
+			if (this.resetTTL) {
 				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
 			}
 			this.moveToEnd(item);
@@ -336,7 +336,7 @@ export class LRU {
 		if (item !== undefined) {
 			item.value = value;
 
-			if (this.resetTtl) {
+			if (this.resetTTL) {
 				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
 			}
 
@@ -652,11 +652,11 @@ export class LRU {
  * @function lru
  * @param {number} [max=1000] - Maximum number of items to store. Must be >= 0. Use 0 for unlimited size.
  * @param {number} [ttl=0] - Time to live in milliseconds. Must be >= 0. Use 0 for no expiration.
- * @param {boolean} [resetTtl=false] - Whether to reset TTL when updating existing items via set().
+ * @param {boolean} [resetTTL=false] - Whether to reset TTL when updating existing items via set().
  * @returns {LRU} A new LRU cache instance.
  * @throws {TypeError} When parameters are invalid (negative numbers or wrong types).
  */
-export function lru(max = 1000, ttl = 0, resetTtl = false) {
+export function lru(max = 1000, ttl = 0, resetTTL = false) {
 	if (isNaN(max) || max < 0) {
 		throw new TypeError("Invalid max value");
 	}
@@ -665,9 +665,9 @@ export function lru(max = 1000, ttl = 0, resetTtl = false) {
 		throw new TypeError("Invalid ttl value");
 	}
 
-	if (typeof resetTtl !== "boolean") {
-		throw new TypeError("Invalid resetTtl value");
+	if (typeof resetTTL !== "boolean") {
+		throw new TypeError("Invalid resetTTL value");
 	}
 
-	return new LRU(max, ttl, resetTtl);
+	return new LRU(max, ttl, resetTTL);
 }

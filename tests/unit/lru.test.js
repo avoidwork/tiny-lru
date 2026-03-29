@@ -8,7 +8,7 @@ describe("LRU Cache", function () {
 			const cache = new LRU();
 			assert.equal(cache.max, 0);
 			assert.equal(cache.ttl, 0);
-			assert.equal(cache.resetTtl, false);
+			assert.equal(cache.resetTTL, false);
 			assert.equal(cache.size, 0);
 			assert.equal(cache.first, null);
 			assert.equal(cache.last, null);
@@ -20,7 +20,7 @@ describe("LRU Cache", function () {
 			const cache = new LRU(10, 5000, true);
 			assert.equal(cache.max, 10);
 			assert.equal(cache.ttl, 5000);
-			assert.equal(cache.resetTtl, true);
+			assert.equal(cache.resetTTL, true);
 			assert.equal(cache.size, 0);
 		});
 	});
@@ -30,14 +30,14 @@ describe("LRU Cache", function () {
 			const cache = lru();
 			assert.equal(cache.max, 1000);
 			assert.equal(cache.ttl, 0);
-			assert.equal(cache.resetTtl, false);
+			assert.equal(cache.resetTTL, false);
 		});
 
 		it("should create an LRU instance with custom parameters", function () {
 			const cache = lru(50, 1000, true);
 			assert.equal(cache.max, 50);
 			assert.equal(cache.ttl, 1000);
-			assert.equal(cache.resetTtl, true);
+			assert.equal(cache.resetTTL, true);
 		});
 
 		it("should throw TypeError for invalid max value", function () {
@@ -52,9 +52,9 @@ describe("LRU Cache", function () {
 			assert.throws(() => lru(10, NaN), TypeError, "Invalid ttl value");
 		});
 
-		it("should throw TypeError for invalid resetTtl value", function () {
-			assert.throws(() => lru(10, 0, "invalid"), TypeError, "Invalid resetTtl value");
-			assert.throws(() => lru(10, 0, 1), TypeError, "Invalid resetTtl value");
+		it("should throw TypeError for invalid resetTTL value", function () {
+			assert.throws(() => lru(10, 0, "invalid"), TypeError, "Invalid resetTTL value");
+			assert.throws(() => lru(10, 0, 1), TypeError, "Invalid resetTTL value");
 		});
 	});
 
@@ -326,7 +326,7 @@ describe("LRU Cache", function () {
 			assert.equal(neverExpireCache.expiresAt("key1"), 0);
 		});
 
-		it("should reset TTL when updating with resetTtl=true", async function () {
+		it("should reset TTL when updating with resetTTL=true", async function () {
 			const resetCache = new LRU(5, 1000, true);
 			resetCache.set("key1", "value1");
 
@@ -339,7 +339,7 @@ describe("LRU Cache", function () {
 			assert.ok(secondExpiry > firstExpiry, "TTL should be reset");
 		});
 
-		it("should not reset TTL when resetTtl=false", async function () {
+		it("should not reset TTL when resetTTL=false", async function () {
 			const noResetCache = new LRU(5, 100, false);
 			noResetCache.set("key1", "value1");
 
@@ -350,7 +350,7 @@ describe("LRU Cache", function () {
 			assert.equal(noResetCache.get("key1"), undefined);
 		});
 
-		it("should not reset TTL on get() even with resetTtl=true", async function () {
+		it("should not reset TTL on get() even with resetTTL=true", async function () {
 			const resetCache = new LRU(5, 100, true);
 			resetCache.set("key1", "value1");
 
@@ -647,7 +647,7 @@ describe("LRU Cache", function () {
 			assert.ok(expiry <= before + 250);
 		});
 
-		it("should set expiry to 0 when resetTtl=true and ttl=0 on update", function () {
+		it("should set expiry to 0 when resetTTL=true and ttl=0 on update", function () {
 			const cache = new LRU(2, 0, true);
 			cache.set("x", 1);
 			assert.equal(cache.expiresAt("x"), 0);
@@ -655,7 +655,7 @@ describe("LRU Cache", function () {
 			assert.equal(cache.expiresAt("x"), 0);
 		});
 
-		it("should set expiry to 0 when resetTtl=true and ttl=0 on setWithEvicted", function () {
+		it("should set expiry to 0 when resetTTL=true and ttl=0 on setWithEvicted", function () {
 			const cache = new LRU(2, 0, true);
 			cache.set("x", 1);
 			assert.equal(cache.expiresAt("x"), 0);
@@ -1249,11 +1249,17 @@ describe("LRU Cache", function () {
 			const ttlCache = new LRU(5, 50);
 			ttlCache.set("a", 1).set("b", 2).set("c", 3);
 
+			let evictedItem = null;
+			ttlCache.onEvict((item) => {
+				evictedItem = item;
+			});
+
 			await new Promise((resolve) => setTimeout(resolve, 100));
 			const removed = ttlCache.cleanup();
 
 			assert.equal(removed, 3);
 			assert.equal(ttlCache.size, 0);
+			assert.equal(evictedItem, null, "onEvict callback should not be called during cleanup()");
 		});
 
 		it("should only have last registered callback", function () {

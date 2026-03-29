@@ -2,11 +2,11 @@
  * Factory function to create a new LRU cache instance with parameter validation.
  * @param max Maximum number of items to store (default: 1000, 0 = unlimited)
  * @param ttl Time to live in milliseconds (default: 0, 0 = no expiration)
- * @param resetTtl Whether to reset TTL when updating existing items via set() (default: false)
+ * @param resetTTL Whether to reset TTL when updating existing items via set() (default: false)
  * @returns A new LRU cache instance
  * @throws TypeError when parameters are invalid (negative numbers or wrong types)
  */
-export function lru<T = any>(max?: number, ttl?: number, resetTtl?: boolean): LRU<T>;
+export function lru<T = any>(max?: number, ttl?: number, resetTTL?: boolean): LRU<T>;
 
 /**
  * Internal structure representing a cache item in the doubly-linked list.
@@ -46,9 +46,9 @@ export class LRU<T = any> {
 	 * Note: Constructor does not validate parameters. Use lru() factory function for parameter validation.
 	 * @param max Maximum number of items to store (default: 0, 0 = unlimited)
 	 * @param ttl Time to live in milliseconds (default: 0, 0 = no expiration)
-	 * @param resetTtl Whether to reset TTL when updating existing items via set() (default: false)
+	 * @param resetTTL Whether to reset TTL when updating existing items via set() (default: false)
 	 */
-	constructor(max?: number, ttl?: number, resetTtl?: boolean);
+	constructor(max?: number, ttl?: number, resetTTL?: boolean);
 
 	/** Pointer to the least recently used item (first to be evicted) */
 	first: LRUItem<T> | null;
@@ -59,7 +59,7 @@ export class LRU<T = any> {
 	/** Maximum number of items to store (0 = unlimited) */
 	max: number;
 	/** Whether to reset TTL on set() operations */
-	resetTtl: boolean;
+	resetTTL: boolean;
 	/** Current number of items in the cache */
 	size: number;
 	/** Time-to-live in milliseconds (0 = no expiration) */

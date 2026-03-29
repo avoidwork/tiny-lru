@@ -10,7 +10,7 @@ Complete API documentation for tiny-lru.
   - [first](#first)
   - [last](#last)
   - [max](#max)
-  - [resetTtl](#resetttl)
+  - [resetTTL](#resetttl)
   - [size](#size)
   - [ttl](#ttl)
 - [Methods](#methods)
@@ -61,7 +61,7 @@ const cache = lru(100, 5000, true);
 | ---------- | --------- | ------- | ---------------------------------------------------------------- |
 | `max`      | `number`  | `1000`  | Maximum items. `0` = unlimited. Must be >= 0.                    |
 | `ttl`      | `number`  | `0`     | Time-to-live in milliseconds. `0` = no expiration. Must be >= 0. |
-| `resetTtl` | `boolean` | `false` | Reset TTL when updating existing items via `set()`               |
+| `resetTTL` | `boolean` | `false` | Reset TTL when updating existing items via `set()`               |
 
 **Returns:** `LRU` - New cache instance
 
@@ -93,7 +93,7 @@ const cache = new LRU(100, 5000, true);
 | ---------- | --------- | ------- | -------------------------------------------------- |
 | `max`      | `number`  | `0`     | Maximum items. `0` = unlimited.                    |
 | `ttl`      | `number`  | `0`     | Time-to-live in milliseconds. `0` = no expiration. |
-| `resetTtl` | `boolean` | `false` | Reset TTL when updating via `set()`                |
+| `resetTTL` | `boolean` | `false` | Reset TTL when updating via `set()`                |
 
 ---
 
@@ -129,7 +129,7 @@ const cache = lru(100);
 console.log(cache.max); // 100
 ```
 
-### `resetTtl`
+### `resetTTL`
 
 `boolean` - Whether TTL resets on `set()` updates.
 
