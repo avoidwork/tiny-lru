@@ -288,9 +288,9 @@ To add new benchmark scenarios:
 ```javascript
 // In modern-benchmark.js
 bench.add("your-test-name", () => {
-  // Your test code here
-  const cache = lru(1000);
-  cache.set("key", "value");
+	// Your test code here
+	const cache = lru(1000);
+	cache.set("key", "value");
 });
 ```
 

@@ -30,9 +30,9 @@ const user = cache.get("user:42"); // { name: "Alice", score: 1500 }
 cache.set("a", 1).set("b", 2).set("c", 3);
 
 // Check what's in the cache
-cache.has("a");        // true
-cache.size;            // 3
-cache.keys();          // ['a', 'b', 'c'] (LRU order)
+cache.has("a"); // true
+cache.size; // 3
+cache.keys(); // ['a', 'b', 'c'] (LRU order)
 ```
 
 ## With TTL (Time-to-Live)
@@ -59,6 +59,7 @@ cache.set("key", "new value"); // TTL resets
 ## When to Use Tiny LRU
 
 **Great for:**
+
 - API response caching
 - Function memoization
 - Session storage with expiration
@@ -66,6 +67,7 @@ cache.set("key", "new value"); // TTL resets
 - Any scenario where you want to limit memory usage
 
 **Not ideal for:**
+
 - Non-string keys (works best with strings)
 - Very large caches (consider a database)
 
@@ -76,10 +78,10 @@ cache.set("key", "new value"); // TTL resets
 ```javascript
 import { lru } from "tiny-lru";
 
-const cache1 = lru();                    // 1000 items, no TTL
-const cache2 = lru(500);                 // 500 items, no TTL
-const cache3 = lru(100, 30000);          // 100 items, 30s TTL
-const cache4 = lru(100, 60000, true);   // with resetTtl enabled
+const cache1 = lru(); // 1000 items, no TTL
+const cache2 = lru(500); // 500 items, no TTL
+const cache3 = lru(100, 30000); // 100 items, 30s TTL
+const cache4 = lru(100, 60000, true); // with resetTtl enabled
 ```
 
 ### Class: `new LRU(max?, ttl?, resetTtl?)`
@@ -92,28 +94,28 @@ const cache = new LRU(100, 5000);
 
 ### Methods
 
-| Method | Description |
-|--------|-------------|
-| `set(key, value)` | Store a value. Returns `this` for chaining. |
-| `get(key)` | Retrieve a value. Moves item to most recent. |
-| `has(key)` | Check if key exists and is not expired. |
-| `delete(key)` | Remove an item. Returns `this` for chaining. |
-| `clear()` | Remove all items. Returns `this` for chaining. |
-| `evict()` | Remove the least recently used item. |
-| `keys()` | Get all keys in LRU order (oldest first). |
-| `values(keys?)` | Get all values, or values for specific keys. |
-| `entries(keys?)` | Get `[key, value]` pairs in LRU order. |
-| `expiresAt(key)` | Get expiration timestamp for a key. |
+| Method            | Description                                    |
+| ----------------- | ---------------------------------------------- |
+| `set(key, value)` | Store a value. Returns `this` for chaining.    |
+| `get(key)`        | Retrieve a value. Moves item to most recent.   |
+| `has(key)`        | Check if key exists and is not expired.        |
+| `delete(key)`     | Remove an item. Returns `this` for chaining.   |
+| `clear()`         | Remove all items. Returns `this` for chaining. |
+| `evict()`         | Remove the least recently used item.           |
+| `keys()`          | Get all keys in LRU order (oldest first).      |
+| `values(keys?)`   | Get all values, or values for specific keys.   |
+| `entries(keys?)`  | Get `[key, value]` pairs in LRU order.         |
+| `expiresAt(key)`  | Get expiration timestamp for a key.            |
 
 ### Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `size` | number | Current number of items |
-| `max` | number | Maximum items allowed |
-| `ttl` | number | Time-to-live in milliseconds |
-| `first` | object | Least recently used item |
-| `last` | object | Most recently used item |
+| Property | Type   | Description                  |
+| -------- | ------ | ---------------------------- |
+| `size`   | number | Current number of items      |
+| `max`    | number | Maximum items allowed        |
+| `ttl`    | number | Time-to-live in milliseconds |
+| `first`  | object | Least recently used item     |
+| `last`   | object | Most recently used item      |
 
 ## Common Patterns
 
@@ -121,23 +123,23 @@ const cache = new LRU(100, 5000);
 
 ```javascript
 function memoize(fn, maxSize = 100) {
-  const cache = lru(maxSize);
-  
-  return function(...args) {
-    const key = JSON.stringify(args);
-    
-    if (cache.has(key)) {
-      return cache.get(key);
-    }
-    
-    const result = fn(...args);
-    cache.set(key, result);
-    return result;
-  };
+	const cache = lru(maxSize);
+
+	return function (...args) {
+		const key = JSON.stringify(args);
+
+		if (cache.has(key)) {
+			return cache.get(key);
+		}
+
+		const result = fn(...args);
+		cache.set(key, result);
+		return result;
+	};
 }
 
 // Cache expensive computations
-const fib = memoize(n => n <= 1 ? n : fib(n - 1) + fib(n - 2), 50);
+const fib = memoize((n) => (n <= 1 ? n : fib(n - 1) + fib(n - 2)), 50);
 fib(100); // fast - cached
 fib(100); // even faster - from cache
 ```
@@ -146,21 +148,21 @@ fib(100); // even faster - from cache
 
 ```javascript
 async function getUser(userId) {
-  const cache = lru(1000, 60000); // 1 minute cache
-  
-  // Check cache first
-  const cached = cache.get(`user:${userId}`);
-  if (cached) {
-    return cached;
-  }
-  
-  // Fetch from database
-  const user = await db.users.findById(userId);
-  
-  // Store in cache
-  cache.set(`user:${userId}`, user);
-  
-  return user;
+	const cache = lru(1000, 60000); // 1 minute cache
+
+	// Check cache first
+	const cached = cache.get(`user:${userId}`);
+	if (cached) {
+		return cached;
+	}
+
+	// Fetch from database
+	const user = await db.users.findById(userId);
+
+	// Store in cache
+	cache.set(`user:${userId}`, user);
+
+	return user;
 }
 ```
 
@@ -206,6 +208,7 @@ slowFunc.cache.max = 100; // Configure cache size
 ## Performance
 
 All core operations are O(1):
+
 - **Set**: Add or update items
 - **Get**: Retrieve and promote to most recent
 - **Delete**: Remove items
@@ -224,11 +227,11 @@ npm run coverage     # Generate test coverage report
 
 ## Test Coverage
 
-| Metric | Coverage |
-|--------|----------|
-| Lines | 100% |
-| Branches | 95% |
-| Functions | 100% |
+| Metric    | Coverage |
+| --------- | -------- |
+| Lines     | 100%     |
+| Branches  | 95%      |
+| Functions | 100%     |
 
 ## License
 

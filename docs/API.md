@@ -28,19 +28,19 @@ const cache = lru(100, 5000, true);
 
 **Parameters:**
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `max` | `number` | `1000` | Maximum items. `0` = unlimited. Must be >= 0. |
-| `ttl` | `number` | `0` | Time-to-live in milliseconds. `0` = no expiration. Must be >= 0. |
-| `resetTtl` | `boolean` | `false` | Reset TTL when updating existing items via `set()` |
+| Name       | Type      | Default | Description                                                      |
+| ---------- | --------- | ------- | ---------------------------------------------------------------- |
+| `max`      | `number`  | `1000`  | Maximum items. `0` = unlimited. Must be >= 0.                    |
+| `ttl`      | `number`  | `0`     | Time-to-live in milliseconds. `0` = no expiration. Must be >= 0. |
+| `resetTtl` | `boolean` | `false` | Reset TTL when updating existing items via `set()`               |
 
 **Returns:** `LRU` - New cache instance
 
 **Throws:** `TypeError` if parameters are invalid
 
 ```javascript
-lru(-1);           // TypeError: Invalid max value
-lru(100, -1);      // TypeError: Invalid ttl value
+lru(-1); // TypeError: Invalid max value
+lru(100, -1); // TypeError: Invalid ttl value
 lru(100, 0, "yes"); // TypeError: Invalid resetTtl value
 ```
 
@@ -60,11 +60,11 @@ const cache = new LRU(100, 5000, true);
 
 **Parameters:**
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `max` | `number` | `0` | Maximum items. `0` = unlimited. |
-| `ttl` | `number` | `0` | Time-to-live in milliseconds. `0` = no expiration. |
-| `resetTtl` | `boolean` | `false` | Reset TTL when updating via `set()` |
+| Name       | Type      | Default | Description                                        |
+| ---------- | --------- | ------- | -------------------------------------------------- |
+| `max`      | `number`  | `0`     | Maximum items. `0` = unlimited.                    |
+| `ttl`      | `number`  | `0`     | Time-to-live in milliseconds. `0` = no expiration. |
+| `resetTtl` | `boolean` | `false` | Reset TTL when updating via `set()`                |
 
 ---
 
@@ -159,8 +159,8 @@ console.log(cache.size); // 1
 
 **Parameters:**
 
-| Name | Type | Description |
-|------|------|-------------|
+| Name  | Type     | Description   |
+| ----- | -------- | ------------- |
 | `key` | `string` | Key to delete |
 
 **Returns:** `LRU` - this instance (for chaining)
@@ -182,8 +182,8 @@ console.log(cache.entries(["c", "a"]));
 
 **Parameters:**
 
-| Name | Type | Description |
-|------|------|-------------|
+| Name   | Type       | Description                        |
+| ------ | ---------- | ---------------------------------- |
 | `keys` | `string[]` | Optional specific keys to retrieve |
 
 **Returns:** `Array<[string, *]>` - Array of key-value pairs
@@ -203,8 +203,8 @@ console.log(cache.keys()); // ['b', 'c']
 
 **Parameters:**
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
+| Name     | Type      | Default | Description                    |
+| -------- | --------- | ------- | ------------------------------ |
 | `bypass` | `boolean` | `false` | Force eviction even when empty |
 
 **Returns:** `LRU` - this instance (for chaining)
@@ -224,8 +224,8 @@ console.log(cache.expiresAt("nonexistent")); // undefined
 
 **Parameters:**
 
-| Name | Type | Description |
-|------|------|-------------|
+| Name  | Type     | Description  |
+| ----- | -------- | ------------ |
 | `key` | `string` | Key to check |
 
 **Returns:** `number | undefined` - Expiration timestamp or undefined
@@ -246,8 +246,8 @@ Expired items are deleted and return `undefined`.
 
 **Parameters:**
 
-| Name | Type | Description |
-|------|------|-------------|
+| Name  | Type     | Description     |
+| ----- | -------- | --------------- |
 | `key` | `string` | Key to retrieve |
 
 **Returns:** `* | undefined` - Value or undefined if not found/expired
@@ -266,8 +266,8 @@ cache.has("nonexistent"); // false
 
 **Parameters:**
 
-| Name | Type | Description |
-|------|------|-------------|
+| Name  | Type     | Description  |
+| ----- | -------- | ------------ |
 | `key` | `string` | Key to check |
 
 **Returns:** `boolean`
@@ -299,12 +299,12 @@ console.log(cache.keys()); // ['a', 'b', 'c']
 
 **Parameters:**
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `key` | `string` | - | Item key |
-| `value` | `*` | - | Item value |
-| `bypass` | `boolean` | `false` | Internal flag for `setWithEvicted` |
-| `resetTtl` | `boolean` | `this.resetTtl` | Reset TTL for this operation |
+| Name       | Type      | Default         | Description                        |
+| ---------- | --------- | --------------- | ---------------------------------- |
+| `key`      | `string`  | -               | Item key                           |
+| `value`    | `*`       | -               | Item value                         |
+| `bypass`   | `boolean` | `false`         | Internal flag for `setWithEvicted` |
+| `resetTtl` | `boolean` | `this.resetTtl` | Reset TTL for this operation       |
 
 **Returns:** `LRU` - this instance (for chaining)
 
@@ -325,10 +325,10 @@ console.log(cache.keys()); // ['b', 'c']
 
 **Parameters:**
 
-| Name | Type | Default | Description |
-|------|------|---------|-------------|
-| `key` | `string` | - | Item key |
-| `value` | `*` | - | Item value |
+| Name       | Type      | Default         | Description                  |
+| ---------- | --------- | --------------- | ---------------------------- |
+| `key`      | `string`  | -               | Item key                     |
+| `value`    | `*`       | -               | Item value                   |
 | `resetTtl` | `boolean` | `this.resetTtl` | Reset TTL for this operation |
 
 **Returns:** `{ key, value, expiry } | null` - Evicted item or null
@@ -350,8 +350,8 @@ console.log(cache.values(["c", "a"]));
 
 **Parameters:**
 
-| Name | Type | Description |
-|------|------|-------------|
+| Name   | Type       | Description                        |
+| ------ | ---------- | ---------------------------------- |
 | `keys` | `string[]` | Optional specific keys to retrieve |
 
 **Returns:** `*[]` - Array of values
@@ -377,12 +377,7 @@ When `setWithEvicted` returns an evicted item:
 All mutation methods return `this` for chaining:
 
 ```javascript
-cache
-  .set("a", 1)
-  .set("b", 2)
-  .set("c", 3)
-  .delete("a")
-  .evict();
+cache.set("a", 1).set("b", 2).set("c", 3).delete("a").evict();
 
 console.log(cache.keys()); // ['c']
 ```

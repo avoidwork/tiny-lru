@@ -21,33 +21,33 @@ const umdOutBase = { ...defaultOutBase, format: "umd" };
 const minOutBase = { banner: bannerShort, name: pkg.name, plugins: [terser()], sourcemap: true };
 
 export default [
-  {
-    input: "./src/lru.js",
-    output: [
-      {
-        ...cjOutBase,
-        file: `dist/${pkg.name}.cjs`,
-      },
-      {
-        ...esmOutBase,
-        file: `dist/${pkg.name}.js`,
-      },
-      {
-        ...esmOutBase,
-        ...minOutBase,
-        file: `dist/${pkg.name}.min.js`,
-      },
-      {
-        ...umdOutBase,
-        file: `dist/${pkg.name}.umd.js`,
-        name: "lru",
-      },
-      {
-        ...umdOutBase,
-        ...minOutBase,
-        file: `dist/${pkg.name}.umd.min.js`,
-        name: "lru",
-      },
-    ],
-  },
+	{
+		input: "./src/lru.js",
+		output: [
+			{
+				...cjOutBase,
+				file: `dist/${pkg.name}.cjs`,
+			},
+			{
+				...esmOutBase,
+				file: `dist/${pkg.name}.js`,
+			},
+			{
+				...esmOutBase,
+				...minOutBase,
+				file: `dist/${pkg.name}.min.js`,
+			},
+			{
+				...umdOutBase,
+				file: `dist/${pkg.name}.umd.js`,
+				name: "lru",
+			},
+			{
+				...umdOutBase,
+				...minOutBase,
+				file: `dist/${pkg.name}.umd.min.js`,
+				name: "lru",
+			},
+		],
+	},
 ];

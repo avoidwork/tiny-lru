@@ -30,17 +30,19 @@ if (condition) {
 }
 
 // Space before function parens
-function myFunction() { }
-const arrowFn = () => { };
-const x = function() { };
+function myFunction() {}
+const arrowFn = () => {};
+const x = function () {};
 ```
 
 ### Comparisons
 
 ```javascript
 // Use === and !== for comparisons
-if (item !== undefined) { }
-if (this.first === null) { }
+if (item !== undefined) {
+}
+if (this.first === null) {
+}
 ```
 
 ### Object Creation
@@ -164,12 +166,12 @@ export class LRU {
 	}
 
 	// Public methods
-	clear() { }
-	get(key) { }
-	set(key, value) { }
+	clear() {}
+	get(key) {}
+	set(key, value) {}
 
 	// Private methods at end (if any)
-	moveToEnd(item) { }
+	moveToEnd(item) {}
 }
 ```
 
