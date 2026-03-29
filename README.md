@@ -391,7 +391,7 @@ Run our comprehensive benchmark suite to see performance characteristics:
 npm run benchmark:all
 ```
 
-See [benchmarks/README.md](benchmarks/README.md) for more details.
+See [benchmarks/README.md](https://github.com/avoidwork/tiny-lru/blob/master/benchmarks/README.md) for more details.
 
 ## Development
 
@@ -451,7 +451,7 @@ Example domains:
 - Analytics: `analytics:event:user:session`
 - ML/AI: `ml:llm:response:gpt4-hash`
 
-See [docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md) for more security best practices.
+See [docs/TECHNICAL_DOCUMENTATION.md](https://github.com/avoidwork/tiny-lru/blob/master/docs/TECHNICAL_DOCUMENTATION.md) for more security best practices.
 
 ## License
 
