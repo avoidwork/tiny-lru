@@ -124,6 +124,7 @@ class LRU {
 			this.#unlink(item);
 		}
 
+		item.prev = null;
 		item.next = null;
 		if (this.#onEvict !== null) {
 			this.#onEvict({
