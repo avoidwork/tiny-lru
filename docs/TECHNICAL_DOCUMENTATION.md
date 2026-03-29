@@ -128,7 +128,7 @@ sequenceDiagram
 | `delete(key)`                | O(1)         | O(1)       | O(1)  | Remove item from cache             |
 | `has(key)`                   | O(1)         | O(1)       | O(1)  | Check key existence                |
 | `peek(key)`                  | O(1)         | O(1)       | O(1)  | Retrieve value without LRU update  |
-| `clear()`                    | O(1)         | O(1)       | O(1)  | Reset all pointers                 |
+| `clear()`                    | O(n)         | O(n)       | O(1)  | Reset all pointers, nullify node links             |
 | `evict()`                    | O(1)         | O(1)       | O(1)  | Remove least recently used item    |
 | `expiresAt(key)`             | O(1)         | O(1)       | O(1)  | Get expiration timestamp           |
 | `moveToEnd(item)`            | O(1)         | O(1)       | O(1)  | Internal: optimize LRU positioning |
