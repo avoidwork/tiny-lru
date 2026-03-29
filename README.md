@@ -365,14 +365,16 @@ class LLMCache {
 
 ## Why Tiny LRU?
 
-| Feature          | tiny-lru     | lru-cache | quick-lru   |
-| ---------------- | ------------ | --------- | ----------- |
-| Bundle size      | ~2.2 KB      | ~15 KB    | ~1.8 KB     |
-| O(1) operations  | ✅           | ✅        | ✅          |
-| TTL support      | ✅           | ✅        | ❌          |
-| TypeScript       | ✅           | ✅        | ✅          |
-| Zero dependencies| ✅           | ❌        | ✅          |
-| 100% coverage    | ✅           | ❌        | ❌          |
+| Feature          | tiny-lru     | lru-cache   | quick-lru   |
+| ---------------- | ------------ | ----------- | ----------- |
+| Bundle size      | ~2.2 KB      | ~12 KB      | ~1.5 KB     |
+| O(1) operations  | ✅           | ✅          | ✅          |
+| TTL support      | ✅           | ✅          | ✅          |
+| TypeScript       | ✅           | ✅          | ✅          |
+| Zero dependencies| ✅           | ❌          | ✅          |
+| Pure LRU         | ✅           | ❌*         | ✅          |
+
+\* lru-cache uses a hybrid design that can hold 2× the specified size for performance
 
 ## Performance
 
