@@ -53,7 +53,7 @@ export class LRU<T = any> {
 	/** Pointer to the least recently used item (first to be evicted) */
 	first: LRUItem<T> | null;
 	/** Hash map for O(1) key-based access to cache nodes */
-	items: Record<any, LRUItem<T>>;
+	items: Record<any, LRUItem<T> | undefined>;
 	/** Pointer to the most recently used item */
 	last: LRUItem<T> | null;
 	/** Maximum number of items to store (0 = unlimited) */
