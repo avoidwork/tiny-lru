@@ -19,7 +19,7 @@ The tiny-lru library provides:
 - **Zero dependencies** - pure JavaScript
 - **100% test coverage** - fully tested and reliable
 - **TypeScript support** - full type definitions included
-- **~2.2 KB** minified and gzipped (compared to ~15 KB for lru-cache)
+- **~2.2 KB** minified and gzipped (compared to ~12 KB for lru-cache)
 
 ## Installation
 
