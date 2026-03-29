@@ -126,7 +126,7 @@ export class LRU {
 
 		item.prev = null;
 		item.next = null;
-		if (typeof this.#onEvict === "function") {
+		if (this.#onEvict !== null) {
 			this.#onEvict({
 				key: item.key,
 				value: item.value,
@@ -530,7 +530,11 @@ export class LRU {
 	 * @returns {LRU} The LRU instance for method chaining.
 	 */
 	onEvict(callback) {
-		this.#onEvict = typeof callback === "function" ? callback : null;
+		if (typeof callback !== "function") {
+			throw new TypeError("onEvict callback must be a function");
+		}
+
+		this.#onEvict = callback;
 
 		return this;
 	}
