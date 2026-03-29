@@ -1,7 +1,7 @@
 {
 	"name": "tiny-lru",
 	"version": "11.4.7",
-	"description": "A high-performance, lightweight LRU cache. Built for developers who need fast caching without compromising on features.",
+	"description": "A fast, lightweight LRU (Least Recently Used) cache for JavaScript with O(1) operations and optional TTL support.",
 	"keywords": [
 		"LRU",
 		"TTL",
