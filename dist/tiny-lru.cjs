@@ -45,6 +45,13 @@ class LRU {
 	 * @returns {LRU} The LRU instance for method chaining.
 	 */
 	clear() {
+		for (let x = this.first; x !== null; ) {
+			const next = x.next;
+			x.prev = null;
+			x.next = null;
+			x = next;
+		}
+
 		this.first = null;
 		this.items = Object.create(null);
 		this.last = null;
