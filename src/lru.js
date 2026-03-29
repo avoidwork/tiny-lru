@@ -204,11 +204,11 @@ export class LRU {
 	 * Checks if a key exists in the cache.
 	 *
 	 * @param {string} key - The key to check for.
-	 * @returns {boolean} True if the key exists, false otherwise.
+	 * @returns {boolean} True if the key exists and is not expired, false otherwise.
 	 */
 	has(key) {
 		const item = this.items[key];
-		return item !== undefined && (this.ttl === 0 || item.expiry > Date.now());
+		return item !== undefined && !this.#isExpired(item);
 	}
 
 	/**
