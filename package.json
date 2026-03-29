@@ -1,6 +1,6 @@
 {
 	"name": "tiny-lru",
-	"version": "11.4.7",
+	"version": "12.0.0",
 	"description": "A fast, lightweight LRU (Least Recently Used) cache for JavaScript with O(1) operations and optional TTL support.",
 	"keywords": [
 		"LRU",
@@ -65,7 +65,7 @@
 		"husky": "^9.1.7",
 		"oxfmt": "^0.41.0",
 		"oxlint": "^1.56.0",
-		"rollup": "^4.43.0",
+		"rollup": "^4.60.0",
 		"tinybench": "^6.0.0"
 	},
 	"engines": {
