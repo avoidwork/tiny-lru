@@ -34,7 +34,7 @@
 	"files": [
 		"dist/tiny-lru.cjs",
 		"dist/tiny-lru.js",
-		"types/*.d.ts"
+		"types/lru.d.ts"
 	],
 	"type": "module",
 	"main": "dist/tiny-lru.cjs",
