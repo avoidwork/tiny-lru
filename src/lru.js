@@ -19,6 +19,18 @@ export class LRU {
 	 * @param {boolean} [resetTTL=false] - Whether to reset TTL when updating existing items via set().
 	 */
 	constructor(max = 0, ttl = 0, resetTTL = false) {
+		if (isNaN(max) || max < 0) {
+			throw new TypeError("Invalid max value");
+		}
+
+		if (isNaN(ttl) || ttl < 0) {
+			throw new TypeError("Invalid ttl value");
+		}
+
+		if (typeof resetTTL !== "boolean") {
+			throw new TypeError("Invalid resetTTL value");
+		}
+
 		this.first = null;
 		this.items = Object.create(null);
 		this.last = null;
@@ -38,6 +50,7 @@ export class LRU {
 	clear() {
 		for (let x = this.first; x !== null; ) {
 			const next = x.next;
+			this.#unlink(x);
 			x.prev = null;
 			x.next = null;
 			x = next;
@@ -69,9 +82,7 @@ export class LRU {
 			delete this.items[key];
 			this.size--;
 			this.#stats.deletes++;
-
 			this.#unlink(item);
-
 			item.prev = null;
 			item.next = null;
 		}
@@ -126,6 +137,7 @@ export class LRU {
 
 		item.prev = null;
 		item.next = null;
+
 		if (this.#onEvict !== null) {
 			this.#onEvict({
 				key: item.key,
@@ -489,10 +501,6 @@ export class LRU {
 			x = next;
 		}
 
-		if (removed > 0) {
-			this.#rebuildList();
-		}
-
 		return removed;
 	}
 
@@ -540,42 +548,21 @@ export class LRU {
 	}
 
 	/**
-	 * Get counts of items by TTL status.
+	 * Get items filtered by TTL status.
 	 *
-	 * @returns {Object} Object with valid, expired, and noTTL counts.
+	 * @param {string} [filter] - Filter type: 'counts', 'keys', or 'values'. Defaults to 'keys'.
+	 * @returns {Object} Object with valid, expired, and noTTL arrays or counts.
 	 */
-	sizeByTTL() {
+	byTTL(filter = "keys") {
 		if (this.ttl === 0) {
-			return { valid: this.size, expired: 0, noTTL: this.size };
-		}
-
-		const now = Date.now();
-		let valid = 0;
-		let expired = 0;
-		let noTTL = 0;
-
-		for (let x = this.first; x !== null; x = x.next) {
-			if (x.expiry === 0) {
-				noTTL++;
-				valid++;
-			} else if (x.expiry > now) {
-				valid++;
-			} else {
-				expired++;
+			if (filter === "counts") {
+				return { valid: this.size, expired: 0, noTTL: this.size };
 			}
-		}
-
-		return { valid, expired, noTTL };
-	}
-
-	/**
-	 * Get keys filtered by TTL status.
-	 *
-	 * @returns {Object} Object with valid, expired, and noTTL arrays of keys.
-	 */
-	keysByTTL() {
-		if (this.ttl === 0) {
-			return { valid: this.keys(), expired: [], noTTL: this.keys() };
+			const allKeys = this.keys();
+			if (filter === "values") {
+				return { valid: this.values(allKeys), expired: [], noTTL: this.values(allKeys) };
+			}
+			return { valid: allKeys, expired: [], noTTL: allKeys };
 		}
 
 		const now = Date.now();
@@ -585,16 +572,50 @@ export class LRU {
 
 		for (let x = this.first; x !== null; x = x.next) {
 			if (x.expiry === 0) {
-				valid.push(x.key);
-				noTTL.push(x.key);
+				noTTL.push(x);
+				valid.push(x);
 			} else if (x.expiry > now) {
-				valid.push(x.key);
+				valid.push(x);
 			} else {
-				expired.push(x.key);
+				expired.push(x);
 			}
 		}
 
-		return { valid, expired, noTTL };
+		if (filter === "counts") {
+			return { valid: valid.length, expired: expired.length, noTTL: noTTL.length };
+		}
+
+		if (filter === "values") {
+			return {
+				valid: valid.map((x) => x.value),
+				expired: expired.map((x) => x.value),
+				noTTL: noTTL.map((x) => x.value),
+			};
+		}
+
+		return {
+			valid: valid.map((x) => x.key),
+			expired: expired.map((x) => x.key),
+			noTTL: noTTL.map((x) => x.key),
+		};
+	}
+
+	/**
+	 * Get counts of items by TTL status.
+	 *
+	 * @returns {Object} Object with valid, expired, and noTTL counts.
+	 */
+	sizeByTTL() {
+		return this.byTTL("counts");
+	}
+
+	/**
+	 * Get keys filtered by TTL status.
+	 *
+	 * @returns {Object} Object with valid, expired, and noTTL arrays of keys.
+	 */
+	keysByTTL() {
+		return this.byTTL("keys");
 	}
 
 	/**
@@ -603,46 +624,7 @@ export class LRU {
 	 * @returns {Object} Object with valid, expired, and noTTL arrays of values.
 	 */
 	valuesByTTL() {
-		const keysByTTL = this.keysByTTL();
-
-		return {
-			valid: this.values(keysByTTL.valid),
-			expired: this.values(keysByTTL.expired),
-			noTTL: this.values(keysByTTL.noTTL),
-		};
-	}
-
-	/**
-	 * Rebuild the doubly-linked list after cleanup by deleting expired items.
-	 * This removes nodes that were deleted during cleanup.
-	 *
-	 * @private
-	 */
-	#rebuildList() {
-		if (this.size === 0) {
-			this.first = null;
-			this.last = null;
-			return;
-		}
-
-		const keys = this.keys();
-		this.first = null;
-		this.last = null;
-
-		for (let i = 0; i < keys.length; i++) {
-			const item = this.items[keys[i]];
-			if (item !== null && item !== undefined) {
-				if (this.first === null) {
-					this.first = item;
-					item.prev = null;
-				} else {
-					item.prev = this.last;
-					this.last.next = item;
-				}
-				item.next = null;
-				this.last = item;
-			}
-		}
+		return this.byTTL("values");
 	}
 }
 
