@@ -2,9 +2,21 @@
 
 Coding conventions for tiny-lru source code.
 
+---
+
 ## Editor Configuration
 
 Set your editor to use **tabs** for indentation.
+
+## Forbidden Patterns
+
+The following are **strictly prohibited**:
+
+- Hardcoded secrets, API keys, or credentials.
+- `eval()`, `exec()`, `__import__()` at any level.
+- `*` imports (`from x import *`).
+- Mutating a list while iterating over it.
+- `new Array()` — use `Array()` or `Array.from()` instead (oxlint will warn).
 
 ## JavaScript Style
 
@@ -53,6 +65,9 @@ this.items = Object.create(null);
 
 // Use Array.from() for pre-allocated arrays
 const result = Array.from({ length: this.size });
+
+// Never use new Array() - use Array() or Array.from() instead
+const items = Array(10); // NOT new Array(10)
 ```
 
 ## JSDoc Comments
@@ -101,9 +116,6 @@ setWithEvicted() { }
 // Variables: camelCase
 const maxSize = 1000;
 let currentItem = null;
-
-// Constants: camelCase (not UPPER_SNAKE)
-const defaultMax = 1000;
 ```
 
 ## Method Patterns
@@ -177,20 +189,32 @@ export class LRU {
 
 ## Error Handling
 
-Use TypeError with clear messages:
-
-```javascript
-if (isNaN(max) || max < 0) {
-	throw new TypeError("Invalid max value");
-}
-```
+Not applicable — internal LRU operations should not surface errors; handle gracefully.
 
 ## Testing and Coverage
 
-- All tests must pass before merging
-- 100% line coverage required
-- Run tests with `npm test` (includes linting)
-- Generate coverage report with `npm run coverage`
+- Framework: Node.js built-in test runner (`node --test`)
+- Tests: 149 tests across 26 suites
+- Coverage: 100% lines, 99.28% branches, 100% functions
+- Test pattern: `tests/**/*.js`
+- All tests must pass with 100% line coverage before merging
+- Run: `npm test` (lint + tests) or `npm run coverage` for coverage report
+
+### Coverage
+
+Tests must maintain **100% line coverage**. Every new function or class needs test coverage. No exceptions.
+
+```bash
+npm run coverage
+```
+
+## Common Issues to Avoid
+
+- **Memory leaks**: When removing items from the linked list, always clear `prev`/`next` pointers to allow garbage collection.
+- **LRU order pollution**: Methods like `entries()` and `values()` should access items directly rather than calling `get()`, which moves items and can delete expired items mid-iteration.
+- **TTL edge cases**: Direct property access (`this.items[key]`) should be used instead of `has()` when you need to inspect expired-but-not-yet-deleted items.
+- **Dead code**: Always verify edge case code is actually reachable before adding special handling.
+- **Constructor assignment**: Use `let` not `const` for variables that may be reassigned (e.g., in `setWithEvicted`).
 
 ## Lint Configuration
 
