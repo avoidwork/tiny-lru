@@ -15,9 +15,10 @@ When updating this document, append new information or sections. Do NOT delete o
 The following are **strictly prohibited**:
 
 - Hardcoded secrets, API keys, or credentials.
-- `eval()`, `exec()`, `__import__()` at any level.
-- `*` imports (`from x import *`).
+- `eval()`, `exec()` at any level.
+- Star imports (`import * as foo from 'bar'`).
 - Mutating a list while iterating over it.
+- `new Array()` — use `Array()` or `Array.from()` instead (oxlint will warn).
 
 ### 1.2 Security Rules
 
@@ -167,10 +168,13 @@ npm run coverage
 
 Source code is in `src/`.
 
-- **lint**: Check and fix linting issues with oxlint
-- **fix**: Fix linting and formatting issues
-- **build**: Lint + rollup build
-- **coverage**: Run test suite with coverage reporting
+- **install**: `npm install` — Install dependencies
+- **lint**: `npm run lint` — Check and fix linting issues with oxlint
+- **fix**: `npm run fix` — Fix linting and formatting issues
+- **build**: `npm run build` — Lint + rollup build
+- **rollup**: `npm run rollup` — Build with rollup
+- **test**: `npm run test` — Run lint and tests
+- **coverage**: `npm run coverage` — Run test suite with coverage reporting
 
 ---
 
