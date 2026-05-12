@@ -144,6 +144,10 @@ chore: update rollup configuration
 - All changes require tests to pass and maintain coverage requirements.
 - 100% line coverage is required before merging.
 
+### 5.4 Pull Request Templates
+
+If a `.github/PULL_REQUEST_TEMPLATE.md` file exists, it MUST be used when creating PRs. Fill out every section — do not leave any section blank. If a section does not apply, write `N/A` rather than skipping it.
+
 ---
 
 ## 6. Operational Rules
