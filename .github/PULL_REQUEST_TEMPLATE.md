@@ -1,6 +1,6 @@
 ## Description
 
-<!-- Describe the changes in 1-3 sentences -->
+Describe the changes in 1-3 sentences. Use "N/A" if not applicable.
 
 ## Type of Change
 
@@ -14,7 +14,7 @@
 
 ## Testing
 
-<!-- Describe the tests you wrote/run and their coverage -->
+Describe the tests you wrote/run and their coverage. Use "N/A" if not applicable.
 
 ## Coverage
 
