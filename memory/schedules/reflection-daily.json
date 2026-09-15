@@ -1,0 +1,8 @@
+{
+  "name": "reflection-daily",
+  "cron": "0 2 * * *",
+  "command": "cd /home/jason/Projects/madz && node index.js --chat \"/reflection\"",
+  "enabled": true,
+  "createdAt": "2026-06-27T14:36:01.003Z",
+  "updatedAt": "2026-06-27T14:36:01.003Z"
+}

@@ -1355,9 +1355,9 @@ describe("LRU Cache", function () {
 			cache.items["b"].expiry = 0;
 
 			const counts = cache.sizeByTTL();
-			assert.equal(counts.valid, 3);
-			assert.equal(counts.expired, 0);
-			assert.equal(counts.noTTL, 2);
+			assert.equal(counts.valid, 1);
+			assert.equal(counts.expired, 2);
+			assert.equal(counts.noTTL, 0);
 		});
 
 		it("should handle mixed expired and valid items", async function () {
@@ -1441,12 +1441,12 @@ describe("LRU Cache", function () {
 			cache.items["b"].expiry = 0;
 
 			const result = cache.keysByTTL();
-			assert.equal(result.valid.length, 3);
-			assert.equal(result.expired.length, 0);
-			assert.deepEqual(result.noTTL.sort(), ["a", "b"]);
-			assert.ok(result.valid.includes("a"));
-			assert.ok(result.valid.includes("b"));
+			assert.equal(result.valid.length, 1);
+			assert.equal(result.expired.length, 2);
+			assert.deepEqual(result.noTTL, []);
 			assert.ok(result.valid.includes("c"));
+			assert.ok(result.expired.includes("a"));
+			assert.ok(result.expired.includes("b"));
 		});
 
 		it("should return empty arrays for empty cache", function () {
@@ -1516,12 +1516,12 @@ describe("LRU Cache", function () {
 			cache.items["b"].expiry = 0;
 
 			const result = cache.valuesByTTL();
-			assert.equal(result.valid.length, 3);
-			assert.equal(result.expired.length, 0);
-			assert.deepEqual(result.noTTL.sort(), [1, 2]);
-			assert.ok(result.valid.includes(1));
-			assert.ok(result.valid.includes(2));
+			assert.equal(result.valid.length, 1);
+			assert.equal(result.expired.length, 2);
+			assert.deepEqual(result.noTTL, []);
 			assert.ok(result.valid.includes(3));
+			assert.ok(result.expired.includes(1));
+			assert.ok(result.expired.includes(2));
 		});
 
 		it("should return correct expired values after TTL", async function () {
@@ -1573,6 +1573,169 @@ describe("LRU Cache", function () {
 			assert.ok(result.expired.includes(1));
 			assert.ok(result.expired.includes(2));
 			assert.ok(result.expired.includes(3));
+		});
+	});
+
+	describe("Edge case fixes (issue #487)", function () {
+		it("should throw for non-array keys in entries()", function () {
+			const cache = new LRU(3);
+			cache.set("a", 1);
+			assert.throws(() => cache.entries(null), TypeError, "keys must be an array");
+			assert.throws(() => cache.entries("abc"), TypeError, "keys must be an array");
+		});
+
+		it("should throw for non-array keys in values()", function () {
+			const cache = new LRU(3);
+			cache.set("a", 1);
+			assert.throws(() => cache.values(null), TypeError, "keys must be an array");
+			assert.throws(() => cache.values(5), TypeError, "keys must be an array");
+		});
+
+		it("should throw for non-array keys in getMany()", function () {
+			const cache = new LRU(3);
+			cache.set("a", 1);
+			assert.throws(() => cache.getMany(null), TypeError, "keys must be an array");
+			assert.throws(() => cache.getMany(5), TypeError, "keys must be an array");
+		});
+
+		it("should throw for non-array keys in hasAll()", function () {
+			const cache = new LRU(3);
+			cache.set("a", 1);
+			assert.throws(() => cache.hasAll(null), TypeError, "keys must be an array");
+			assert.throws(() => cache.hasAll("abc"), TypeError, "keys must be an array");
+		});
+
+		it("should throw for non-array keys in hasAny()", function () {
+			const cache = new LRU(3);
+			cache.set("a", 1);
+			assert.throws(() => cache.hasAny(undefined), TypeError, "keys must be an array");
+			assert.throws(() => cache.hasAny(5), TypeError, "keys must be an array");
+		});
+
+		it("should validate max in constructor", function () {
+			assert.throws(() => new LRU(-1), TypeError, "Invalid max value");
+			assert.throws(() => new LRU("10"), TypeError, "Invalid max value");
+			assert.throws(() => new LRU(2.5), TypeError, "Invalid max value");
+			assert.throws(() => new LRU(Infinity), TypeError, "Invalid max value");
+			assert.throws(() => new LRU(null), TypeError, "Invalid max value");
+			assert.throws(() => new LRU(""), TypeError, "Invalid max value");
+		});
+
+		it("should validate ttl in constructor", function () {
+			assert.throws(() => new LRU(10, -1), TypeError, "Invalid ttl value");
+			assert.throws(() => new LRU(10, "100"), TypeError, "Invalid ttl value");
+			assert.throws(() => new LRU(10, 2.5), TypeError, "Invalid ttl value");
+			assert.throws(() => new LRU(10, Infinity), TypeError, "Invalid ttl value");
+		});
+
+		it("should validate resetTTL in constructor", function () {
+			assert.throws(() => new LRU(10, 0, "true"), TypeError, "Invalid resetTTL value");
+			assert.throws(() => new LRU(10, 0, 1), TypeError, "Invalid resetTTL value");
+		});
+
+		it("should reclaim expired key on set() with resetTTL=false", async function () {
+			const cache = new LRU(5, 50, false);
+			cache.set("k", "v");
+			await new Promise((resolve) => setTimeout(resolve, 80));
+			cache.set("k", "v2");
+			assert.equal(cache.has("k"), true);
+			assert.equal(cache.get("k"), "v2");
+			assert.equal(cache.size, 1);
+		});
+
+		it("should reclaim expired key on setWithEvicted()", async function () {
+			const cache = new LRU(1, 50, false);
+			cache.set("a", 1);
+			await new Promise((resolve) => setTimeout(resolve, 80));
+			const evicted = cache.setWithEvicted("a", 2);
+			assert.equal(evicted, null);
+			assert.equal(cache.size, 1);
+			assert.equal(cache.get("a"), 2);
+		});
+
+		it("should skip expired items in values()", async function () {
+			const cache = new LRU(5, 50, false);
+			cache.set("a", 1);
+			cache.set("b", 2);
+			await new Promise((resolve) => setTimeout(resolve, 80));
+			assert.deepEqual(cache.values(), []);
+		});
+
+		it("should skip expired items in entries()", async function () {
+			const cache = new LRU(5, 50, false);
+			cache.set("a", 1);
+			await new Promise((resolve) => setTimeout(resolve, 80));
+			assert.deepEqual(cache.entries(), []);
+		});
+
+		it("should skip expired items in toJSON()", async function () {
+			const cache = new LRU(5, 50, false);
+			cache.set("a", 1);
+			await new Promise((resolve) => setTimeout(resolve, 80));
+			assert.deepEqual(cache.toJSON(), []);
+		});
+
+		it("should skip expired items in forEach()", async function () {
+			const cache = new LRU(5, 50, false);
+			cache.set("a", 1);
+			cache.set("b", 2);
+			await new Promise((resolve) => setTimeout(resolve, 80));
+			const seen = [];
+			cache.forEach((value, key) => seen.push(key));
+			assert.deepEqual(seen, []);
+		});
+
+		it("should be mutation-safe in forEach() when deleting current item", function () {
+			const cache = new LRU(10);
+			cache.set("a", 1).set("b", 2).set("c", 3).set("d", 4);
+			const seen = [];
+			cache.forEach((value, key) => {
+				seen.push(key);
+				cache.delete(key);
+			});
+			assert.deepEqual(seen, ["a", "b", "c", "d"]);
+		});
+
+		it("should not increment deletes when get() removes expired item", async function () {
+			const cache = new LRU(5, 50, false);
+			cache.set("k", "v");
+			await new Promise((resolve) => setTimeout(resolve, 80));
+			cache.get("k");
+			const stats = cache.stats();
+			assert.equal(stats.deletes, 0);
+			assert.equal(stats.misses, 1);
+		});
+
+		it("should delete expired items in getMany()", async function () {
+			const cache = new LRU(5, 50, false);
+			cache.set("a", 1).set("b", 2);
+			await new Promise((resolve) => setTimeout(resolve, 80));
+			const result = cache.getMany(["a", "b"]);
+			assert.equal(result.a, undefined);
+			assert.equal(result.b, undefined);
+			assert.equal(cache.size, 0);
+		});
+
+		it("should treat expiry=0 with ttl>0 as expired in sizeByTTL()", function () {
+			const cache = new LRU(10, 100);
+			cache.set("a", 1).set("b", 2).set("c", 3);
+			cache.items["a"].expiry = 0;
+			cache.items["b"].expiry = 0;
+			const counts = cache.sizeByTTL();
+			assert.equal(counts.valid, 1);
+			assert.equal(counts.expired, 2);
+			assert.equal(counts.noTTL, 0);
+		});
+
+		it("should not fire onEvict for setWithEvicted() silent eviction", function () {
+			const cache = new LRU(2);
+			let cbCount = 0;
+			cache.onEvict(() => cbCount++);
+			cache.set("a", 1).set("b", 2);
+			const evicted = cache.setWithEvicted("c", 3);
+			assert.notEqual(evicted, null);
+			assert.equal(evicted.key, "a");
+			assert.equal(cbCount, 0);
 		});
 	});
 });

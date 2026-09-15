@@ -1,0 +1,9 @@
+{
+  "todos": [
+    {
+      "key": "audit-code",
+      "content": "Audit all directories in ./src for bugs, security vulnerabilities, and performance issues",
+      "completed": false
+    }
+  ]
+}

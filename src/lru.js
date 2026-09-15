@@ -11,14 +11,26 @@ export class LRU {
 
 	/**
 	 * Creates a new LRU cache instance.
-	 * Note: Constructor does not validate parameters. Use lru() factory function for parameter validation.
 	 *
 	 * @constructor
 	 * @param {number} [max=0] - Maximum number of items to store. 0 means unlimited.
 	 * @param {number} [ttl=0] - Time to live in milliseconds. 0 means no expiration.
 	 * @param {boolean} [resetTTL=false] - Whether to reset TTL when updating existing items via set().
+	 * @throws {TypeError} When parameters are invalid (negative numbers or wrong types).
 	 */
 	constructor(max = 0, ttl = 0, resetTTL = false) {
+		if (!Number.isInteger(max) || max < 0) {
+			throw new TypeError("Invalid max value");
+		}
+
+		if (!Number.isInteger(ttl) || ttl < 0) {
+			throw new TypeError("Invalid ttl value");
+		}
+
+		if (typeof resetTTL !== "boolean") {
+			throw new TypeError("Invalid resetTTL value");
+		}
+
 		this.first = null;
 		this.items = Object.create(null);
 		this.last = null;
@@ -66,14 +78,8 @@ export class LRU {
 		const item = this.items[key];
 
 		if (item !== undefined) {
-			delete this.items[key];
-			this.size--;
+			this.#removeItem(item);
 			this.#stats.deletes++;
-
-			this.#unlink(item);
-
-			item.prev = null;
-			item.next = null;
 		}
 
 		return this;
@@ -89,14 +95,25 @@ export class LRU {
 	 */
 	entries(keys) {
 		if (keys === undefined) {
-			keys = this.keys();
+			const result = [];
+			for (let x = this.first; x !== null; x = x.next) {
+				if (!this.#isExpired(x)) {
+					result.push([x.key, x.value]);
+				}
+			}
+
+			return result;
+		}
+
+		if (!Array.isArray(keys)) {
+			throw new TypeError("keys must be an array");
 		}
 
 		const result = Array.from({ length: keys.length });
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
 			const item = this.items[key];
-			result[i] = [key, item !== undefined ? item.value : undefined];
+			result[i] = [key, item !== undefined && !this.#isExpired(item) ? item.value : undefined];
 		}
 
 		return result;
@@ -112,20 +129,8 @@ export class LRU {
 			return this;
 		}
 
-		const item = this.first;
+		const item = this.#evictItem();
 
-		delete this.items[item.key];
-		this.#stats.evictions++;
-
-		if (--this.size === 0) {
-			this.first = null;
-			this.last = null;
-		} else {
-			this.#unlink(item);
-		}
-
-		item.prev = null;
-		item.next = null;
 		if (this.#onEvict !== null) {
 			this.#onEvict({
 				key: item.key,
@@ -156,7 +161,7 @@ export class LRU {
 	 * @private
 	 */
 	#isExpired(item) {
-		if (this.ttl === 0 || item.expiry === 0) {
+		if (this.ttl === 0) {
 			return false;
 		}
 
@@ -191,7 +196,7 @@ export class LRU {
 				return item.value;
 			}
 
-			this.delete(key);
+			this.#removeItem(item);
 			this.#stats.misses++;
 			return undefined;
 		}
@@ -202,13 +207,20 @@ export class LRU {
 
 	/**
 	 * Checks if a key exists in the cache.
+	 * Expired items are removed before returning false.
 	 *
 	 * @param {string} key - The key to check for.
 	 * @returns {boolean} True if the key exists and is not expired, false otherwise.
 	 */
 	has(key) {
 		const item = this.items[key];
-		return item !== undefined && !this.#isExpired(item);
+
+		if (item !== undefined && this.#isExpired(item)) {
+			this.#removeItem(item);
+			return false;
+		}
+
+		return item !== undefined;
 	}
 
 	/**
@@ -234,6 +246,47 @@ export class LRU {
 		if (this.last === item) {
 			this.last = item.prev;
 		}
+	}
+
+	/**
+	 * Removes an item from the cache without incrementing the deletes stat.
+	 * Used internally by get()/has() when removing expired items.
+	 *
+	 * @param {Object} item - The cache item to remove.
+	 * @private
+	 */
+	#removeItem(item) {
+		delete this.items[item.key];
+		this.size--;
+		this.#unlink(item);
+		item.prev = null;
+		item.next = null;
+	}
+
+	/**
+	 * Evicts the least recently used item from the cache without firing onEvict.
+	 * Used internally by setWithEvicted() to avoid double-notification.
+	 *
+	 * @returns {Object} The evicted item.
+	 * @private
+	 */
+	#evictItem() {
+		const item = this.first;
+
+		delete this.items[item.key];
+		this.#stats.evictions++;
+
+		if (--this.size === 0) {
+			this.first = null;
+			this.last = null;
+		} else {
+			this.#unlink(item);
+		}
+
+		item.prev = null;
+		item.next = null;
+
+		return item;
 	}
 
 	/**
@@ -277,6 +330,7 @@ export class LRU {
 
 	/**
 	 * Sets a value in the cache and returns any evicted item.
+	 * Eviction is silent — onEvict is not fired for the returned item.
 	 *
 	 * @param {string} key - The key to set.
 	 * @param {*} value - The value to store.
@@ -286,20 +340,24 @@ export class LRU {
 		let evicted = null;
 		let item = this.items[key];
 
-		if (item !== undefined) {
+		if (item !== undefined && !this.#isExpired(item)) {
 			item.value = value;
 			if (this.resetTTL) {
 				item.expiry = this.ttl > 0 ? Date.now() + this.ttl : this.ttl;
 			}
 			this.moveToEnd(item);
 		} else {
+			if (item !== undefined) {
+				this.#removeItem(item);
+			}
+
 			if (this.max > 0 && this.size === this.max) {
+				const evictedItem = this.#evictItem();
 				evicted = {
-					key: this.first.key,
-					value: this.first.value,
-					expiry: this.first.expiry,
+					key: evictedItem.key,
+					value: evictedItem.value,
+					expiry: evictedItem.expiry,
 				};
-				this.evict();
 			}
 
 			item = this.items[key] = {
@@ -333,7 +391,7 @@ export class LRU {
 	set(key, value) {
 		let item = this.items[key];
 
-		if (item !== undefined) {
+		if (item !== undefined && !this.#isExpired(item)) {
 			item.value = value;
 
 			if (this.resetTTL) {
@@ -342,6 +400,10 @@ export class LRU {
 
 			this.moveToEnd(item);
 		} else {
+			if (item !== undefined) {
+				this.#removeItem(item);
+			}
+
 			if (this.max > 0 && this.size === this.max) {
 				this.evict();
 			}
@@ -378,18 +440,24 @@ export class LRU {
 	 */
 	values(keys) {
 		if (keys === undefined) {
-			const result = Array.from({ length: this.size });
-			let i = 0;
+			const result = [];
 			for (let x = this.first; x !== null; x = x.next) {
-				result[i++] = x.value;
+				if (!this.#isExpired(x)) {
+					result.push(x.value);
+				}
 			}
+
 			return result;
+		}
+
+		if (!Array.isArray(keys)) {
+			throw new TypeError("keys must be an array");
 		}
 
 		const result = Array.from({ length: keys.length });
 		for (let i = 0; i < keys.length; i++) {
 			const item = this.items[keys[i]];
-			result[i] = item !== undefined ? item.value : undefined;
+			result[i] = item !== undefined && !this.#isExpired(item) ? item.value : undefined;
 		}
 
 		return result;
@@ -398,15 +466,19 @@ export class LRU {
 	/**
 	 * Iterate over cache items in LRU order (least to most recent).
 	 * Note: This method directly accesses items from the linked list without calling
-	 * get() or peek(), so it does not update LRU order or check TTL expiration during iteration.
+	 * get() or peek(), so it does not update LRU order. Expired items are skipped.
 	 *
 	 * @param {function(*, any, LRU): void} callback - Function to call for each item. Signature: callback(value, key, cache)
 	 * @param {Object} [thisArg] - Value to use as `this` when executing callback.
 	 * @returns {LRU} The LRU instance for method chaining.
 	 */
 	forEach(callback, thisArg) {
-		for (let x = this.first; x !== null; x = x.next) {
-			callback.call(thisArg, x.value, x.key, this);
+		for (let x = this.first; x !== null; ) {
+			const next = x.next;
+			if (!this.#isExpired(x)) {
+				callback.call(thisArg, x.value, x.key, this);
+			}
+			x = next;
 		}
 
 		return this;
@@ -419,6 +491,10 @@ export class LRU {
 	 * @returns {Object} Object mapping keys to values (undefined for missing/expired keys).
 	 */
 	getMany(keys) {
+		if (!Array.isArray(keys)) {
+			throw new TypeError("keys must be an array");
+		}
+
 		const result = Object.create(null);
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
@@ -435,6 +511,10 @@ export class LRU {
 	 * @returns {boolean} True if all keys exist and are not expired.
 	 */
 	hasAll(keys) {
+		if (!Array.isArray(keys)) {
+			throw new TypeError("keys must be an array");
+		}
+
 		for (let i = 0; i < keys.length; i++) {
 			if (!this.has(keys[i])) {
 				return false;
@@ -451,6 +531,10 @@ export class LRU {
 	 * @returns {boolean} True if any key exists and is not expired.
 	 */
 	hasAny(keys) {
+		if (!Array.isArray(keys)) {
+			throw new TypeError("keys must be an array");
+		}
+
 		for (let i = 0; i < keys.length; i++) {
 			if (this.has(keys[i])) {
 				return true;
@@ -504,11 +588,13 @@ export class LRU {
 	toJSON() {
 		const result = [];
 		for (let x = this.first; x !== null; x = x.next) {
-			result.push({
-				key: x.key,
-				value: x.value,
-				expiry: x.expiry,
-			});
+			if (!this.#isExpired(x)) {
+				result.push({
+					key: x.key,
+					value: x.value,
+					expiry: x.expiry,
+				});
+			}
 		}
 
 		return result;
@@ -552,20 +638,16 @@ export class LRU {
 		const now = Date.now();
 		let valid = 0;
 		let expired = 0;
-		let noTTL = 0;
 
 		for (let x = this.first; x !== null; x = x.next) {
-			if (x.expiry === 0) {
-				noTTL++;
-				valid++;
-			} else if (x.expiry > now) {
+			if (x.expiry > now) {
 				valid++;
 			} else {
 				expired++;
 			}
 		}
 
-		return { valid, expired, noTTL };
+		return { valid, expired, noTTL: 0 };
 	}
 
 	/**
@@ -581,20 +663,16 @@ export class LRU {
 		const now = Date.now();
 		const valid = [];
 		const expired = [];
-		const noTTL = [];
 
 		for (let x = this.first; x !== null; x = x.next) {
-			if (x.expiry === 0) {
-				valid.push(x.key);
-				noTTL.push(x.key);
-			} else if (x.expiry > now) {
+			if (x.expiry > now) {
 				valid.push(x.key);
 			} else {
 				expired.push(x.key);
 			}
 		}
 
-		return { valid, expired, noTTL };
+		return { valid, expired, noTTL: [] };
 	}
 
 	/**
@@ -603,13 +681,23 @@ export class LRU {
 	 * @returns {Object} Object with valid, expired, and noTTL arrays of values.
 	 */
 	valuesByTTL() {
-		const keysByTTL = this.keysByTTL();
+		if (this.ttl === 0) {
+			return { valid: this.values(), expired: [], noTTL: this.values() };
+		}
 
-		return {
-			valid: this.values(keysByTTL.valid),
-			expired: this.values(keysByTTL.expired),
-			noTTL: this.values(keysByTTL.noTTL),
-		};
+		const now = Date.now();
+		const valid = [];
+		const expired = [];
+
+		for (let x = this.first; x !== null; x = x.next) {
+			if (x.expiry > now) {
+				valid.push(x.value);
+			} else {
+				expired.push(x.value);
+			}
+		}
+
+		return { valid, expired, noTTL: [] };
 	}
 
 	/**
@@ -657,17 +745,5 @@ export class LRU {
  * @throws {TypeError} When parameters are invalid (negative numbers or wrong types).
  */
 export function lru(max = 1000, ttl = 0, resetTTL = false) {
-	if (isNaN(max) || max < 0) {
-		throw new TypeError("Invalid max value");
-	}
-
-	if (isNaN(ttl) || ttl < 0) {
-		throw new TypeError("Invalid ttl value");
-	}
-
-	if (typeof resetTTL !== "boolean") {
-		throw new TypeError("Invalid resetTTL value");
-	}
-
 	return new LRU(max, ttl, resetTTL);
 }
