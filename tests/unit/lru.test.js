@@ -1727,6 +1727,18 @@ describe("LRU Cache", function () {
 			assert.equal(counts.noTTL, 0);
 		});
 
+		it("should treat items as expired when ttl is raised after insertion", function () {
+			const cache = new LRU(10, 0);
+			cache.set("a", 1);
+			assert.equal(cache.ttl, 0);
+			assert.equal(cache.get("a"), 1);
+
+			cache.ttl = 5000;
+			assert.equal(cache.has("a"), false);
+			assert.equal(cache.get("a"), undefined);
+			assert.equal(cache.size, 0);
+		});
+
 		it("should not fire onEvict for setWithEvicted() silent eviction", function () {
 			const cache = new LRU(2);
 			let cbCount = 0;
