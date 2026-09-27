@@ -153,9 +153,10 @@ export class LRU<T = any> {
 	/**
 	 * Remove expired items without affecting LRU order.
 	 * Unlike get(), this does not move items to the end.
+	 * @param fireOnEvict When true, invokes the onEvict callback for each removed item
 	 * @returns Number of expired items removed
 	 */
-	cleanup(): number;
+	cleanup(fireOnEvict?: boolean): number;
 
 	/**
 	 * Serialize cache to JSON-compatible format.

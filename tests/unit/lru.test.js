@@ -1063,6 +1063,36 @@ describe("LRU Cache", function () {
 			const removed = cache.cleanup();
 			assert.equal(removed, 0);
 		});
+
+		it("should fire onEvict for each removed item when fireOnEvict is true", async function () {
+			cache.set("a", 1);
+			cache.set("b", 2);
+
+			await new Promise((resolve) => setTimeout(resolve, 150));
+
+			const evicted = [];
+			cache.onEvict((item) => evicted.push(item.key));
+
+			const removed = cache.cleanup(true);
+			assert.equal(removed, 2);
+			assert.equal(cache.size, 0);
+			assert.deepEqual(evicted, ["a", "b"]);
+		});
+
+		it("should not fire onEvict when fireOnEvict is false (default)", async function () {
+			cache.set("a", 1);
+			cache.set("b", 2);
+
+			await new Promise((resolve) => setTimeout(resolve, 150));
+
+			const evicted = [];
+			cache.onEvict((item) => evicted.push(item.key));
+
+			const removed = cache.cleanup();
+			assert.equal(removed, 2);
+			assert.equal(cache.size, 0);
+			assert.deepEqual(evicted, []);
+		});
 	});
 
 	describe("toJSON method", function () {
@@ -1659,6 +1689,14 @@ describe("LRU Cache", function () {
 			cache.set("b", 2);
 			await new Promise((resolve) => setTimeout(resolve, 80));
 			assert.deepEqual(cache.values(), []);
+		});
+
+		it("should skip expired items in keys()", async function () {
+			const cache = new LRU(5, 50, false);
+			cache.set("a", 1);
+			cache.set("b", 2);
+			await new Promise((resolve) => setTimeout(resolve, 80));
+			assert.deepEqual(cache.keys(), []);
 		});
 
 		it("should skip expired items in entries()", async function () {
