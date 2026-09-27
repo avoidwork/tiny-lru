@@ -79,7 +79,7 @@ lru(100, 0, "yes"); // TypeError: Invalid resetTtl value
 
 ### `new LRU(max?, ttl?, resetTtl?)`
 
-Creates an LRU cache instance. Does not validate parameters.
+Creates an LRU cache instance with parameter validation.
 
 ```javascript
 import { LRU } from "tiny-lru";
