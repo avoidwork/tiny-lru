@@ -43,7 +43,7 @@ export interface EvictedItem<T> {
 export class LRU<T = any> {
 	/**
 	 * Creates a new LRU cache instance.
-	 * Note: Constructor does not validate parameters. Use lru() factory function for parameter validation.
+	 * Note: Constructor validates parameters and throws TypeError on invalid values.
 	 * @param max Maximum number of items to store (default: 0, 0 = unlimited)
 	 * @param ttl Time to live in milliseconds (default: 0, 0 = no expiration)
 	 * @param resetTTL Whether to reset TTL when updating existing items via set() (default: false)

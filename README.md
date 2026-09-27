@@ -19,7 +19,7 @@ The tiny-lru library provides:
 - **Zero dependencies** - pure JavaScript
 - **100% test coverage** - fully tested and reliable
 - **TypeScript support** - full type definitions included
-- **~2.2 KB** minified and gzipped (compared to ~12 KB for lru-cache)
+- **~1.6 KB** minified and gzipped (compared to ~5.8 KB for lru-cache)
 
 ## Installation
 
@@ -100,7 +100,7 @@ cache.set("key", "new value"); // TTL resets
 
 **Not ideal for:**
 
-- Non-string keys (works best with strings)
+- Non-string keys (keys are coerced to strings, so objects and other non-primitives can collide)
 - Very large caches (consider a database)
 
 ## API Reference
@@ -132,7 +132,7 @@ const cache4 = lru(100, 60000, true); // with resetTtl enabled
 
 ### Class: `new LRU(max?, ttl?, resetTtl?)`
 
-Creates an LRU cache instance without parameter validation.
+Creates an LRU cache instance with parameter validation.
 
 ```javascript
 import { LRU } from "tiny-lru";
@@ -153,6 +153,7 @@ const cache = new LRU(100, 5000);
 | Property  | Type             | Description                                |
 | --------- | ---------------- | ------------------------------------------ |
 | `first`   | `object` \| `null`  | Least recently used item (node with `key`, `value`, `prev`, `next`, `expiry`) |
+| `items`   | `object`         | Internal hash map of key → item nodes      |
 | `last`    | `object` \| `null`  | Most recently used item (node with `key`, `value`, `prev`, `next`, `expiry`) |
 | `max`     | `number`         | Maximum items allowed                      |
 | `resetTTL`| `boolean`        | Whether TTL resets on `set()` updates      |
@@ -171,14 +172,14 @@ const cache = new LRU(100, 5000);
 | `expiresAt(key)`            | Get expiration timestamp for a key. Returns `number | undefined`. |
 | `forEach(callback, thisArg?)` | Iterate over items in LRU order. Returns `this` for chaining. |
 | `get(key)`                  | Retrieve a value. Moves item to most recent. Returns value or `undefined`. |
-| `getMany(keys)`             | Batch retrieve multiple items. Returns object mapping keys to values. |
+| `getMany(keys)`             | Batch retrieve multiple items. Returns object mapping keys to values (missing/expired keys omitted). |
 | `has(key)`                  | Check if key exists and is not expired. Returns `boolean`. |
 | `hasAll(keys)`              | Check if ALL keys exist. Returns `boolean`.    |
 | `hasAny(keys)`              | Check if ANY key exists. Returns `boolean`.    |
-| `keys()`                    | Get all keys in LRU order (oldest first). Returns `string[]`. |
+| `keys()`                    | Get all keys in LRU order (oldest first). Returns `any[]`. |
 | `keysByTTL()`               | Get keys by TTL status. Returns `{valid, expired, noTTL}`. |
-| `onEvict(callback)`         | Register eviction callback (triggers on `evict()` or when `set()`/`setWithEvicted()` evicts). Returns `this` for chaining. |
-| `peek(key)`                 | Retrieve a value without LRU update. Returns value or `undefined`. |
+| `onEvict(callback)`         | Register eviction callback (triggers on `evict()` or when `set()` evicts). Returns `this` for chaining. |
+| `peek(key)`                 | Retrieve a value without LRU update or TTL check. Returns value or `undefined`. |
 | `set(key, value)`           | Store a value. Returns `this` for chaining.    |
 | `setWithEvicted(key, value)` | Store value, return evicted item if full. Returns `{key, value, expiry} | null`. |
 | `sizeByTTL()`               | Get counts by TTL status. Returns `{valid, expired, noTTL}`. |
@@ -365,16 +366,18 @@ class LLMCache {
 
 ## Why Tiny LRU?
 
+Bundle sizes below are minified and gzipped, measured against the current releases.
+
 | Feature          | tiny-lru     | lru-cache   | quick-lru   |
 | ---------------- | ------------ | ----------- | ----------- |
-| Bundle size      | ~2.2 KB      | ~12 KB      | ~1.5 KB     |
+| Bundle size      | ~1.6 KB      | ~5.8 KB     | ~1.2 KB     |
 | O(1) operations  | ✅           | ✅          | ✅          |
-| TTL support      | ✅           | ✅          | ✅          |
-| TypeScript       | ✅           | ✅          | ✅          |
-| Zero dependencies| ✅           | ❌          | ✅          |
-| Pure LRU         | ✅           | ❌*         | ✅          |
+| TTL support      | ✅           | ✅          | ✅*          |
+| TypeScript       | ✅           | ✅          | ❌          |
+| Zero dependencies| ✅           | ✅          | ✅          |
+| Pure LRU         | ✅           | ✅          | ❌*          |
 
-\* lru-cache uses a hybrid design that can hold 2× the specified size for performance
+\* quick-lru uses a dual-cache design that can temporarily hold up to 2× the specified size, and its expiration is via `maxAge` rather than a `ttl` option.
 
 ## Performance
 
@@ -419,15 +422,15 @@ The minified version (`dist/tiny-lru.min.js`) is available in the repository for
 
 | Metric    | Count |
 | --------- | ----- |
-| Tests     | 149   |
-| Suites    | 26    |
+| Tests     | 169   |
+| Suites    | 27    |
 
 ## Test Coverage
 
 | Metric    | Coverage |
 | --------- | -------- |
 | Lines     | 100%     |
-| Branches  | 99.28%   |
+| Branches  | 99.39%   |
 | Functions | 100%     |
 
 ## Contributing
@@ -441,23 +444,7 @@ The minified version (`dist/tiny-lru.min.js`) is available in the repository for
 
 ## Security
 
-### Multi-Domain Key Convention
-
-Implement a hierarchical key naming convention to prevent cross-domain data leakage:
-
-```
-{domain}:{service}:{resource}:{identifier}[:{version}]
-```
-
-Example domains:
-- User-related: `usr:profile:data:12345`
-- Authentication: `auth:login:session:abc123`
-- External API: `api:response:endpoint:hash`
-- Database: `db:query:sqlhash:paramshash`
-- Application: `app:cache:feature:value`
-- System: `sys:config:feature:version`
-- Analytics: `analytics:event:user:session`
-- ML/AI: `ml:llm:response:gpt4-hash`
+tiny-lru is a pure in-memory cache with no network or I/O surface. For guidance on key naming conventions that prevent cross-domain data leakage when using the cache, see the [Technical Documentation](https://github.com/avoidwork/tiny-lru/blob/master/docs/TECHNICAL_DOCUMENTATION.md).
 
 ## Documentation
 
