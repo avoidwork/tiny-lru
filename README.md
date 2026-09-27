@@ -172,7 +172,7 @@ const cache = new LRU(100, 5000);
 | `expiresAt(key)`            | Get expiration timestamp for a key. Returns `number | undefined`. |
 | `forEach(callback, thisArg?)` | Iterate over items in LRU order. Returns `this` for chaining. |
 | `get(key)`                  | Retrieve a value. Moves item to most recent. Returns value or `undefined`. |
-| `getMany(keys)`             | Batch retrieve multiple items. Returns object mapping keys to values (missing/expired keys omitted). |
+| `getMany(keys)`             | Batch retrieve multiple items. Returns object mapping keys to values (undefined for missing/expired keys). |
 | `has(key)`                  | Check if key exists and is not expired. Returns `boolean`. |
 | `hasAll(keys)`              | Check if ALL keys exist. Returns `boolean`.    |
 | `hasAny(keys)`              | Check if ANY key exists. Returns `boolean`.    |

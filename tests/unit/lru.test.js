@@ -1661,6 +1661,14 @@ describe("LRU Cache", function () {
 			assert.deepEqual(cache.values(), []);
 		});
 
+		it("should skip expired items in keys()", async function () {
+			const cache = new LRU(5, 50, false);
+			cache.set("a", 1);
+			cache.set("b", 2);
+			await new Promise((resolve) => setTimeout(resolve, 80));
+			assert.deepEqual(cache.keys(), []);
+		});
+
 		it("should skip expired items in entries()", async function () {
 			const cache = new LRU(5, 50, false);
 			cache.set("a", 1);

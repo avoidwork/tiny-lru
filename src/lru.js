@@ -312,17 +312,16 @@ export class LRU {
 
 	/**
 	 * Returns an array of all keys in the cache, ordered from least to most recently used.
+	 * Expired items are skipped, consistent with entries(), values(), and toJSON().
 	 *
 	 * @returns {string[]} Array of keys in LRU order.
 	 */
 	keys() {
-		const result = Array.from({ length: this.size });
-		let x = this.first;
-		let i = 0;
-
-		while (x !== null) {
-			result[i++] = x.key;
-			x = x.next;
+		const result = [];
+		for (let x = this.first; x !== null; x = x.next) {
+			if (!this.#isExpired(x)) {
+				result.push(x.key);
+			}
 		}
 
 		return result;
