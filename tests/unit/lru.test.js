@@ -1063,6 +1063,36 @@ describe("LRU Cache", function () {
 			const removed = cache.cleanup();
 			assert.equal(removed, 0);
 		});
+
+		it("should fire onEvict for each removed item when fireOnEvict is true", async function () {
+			cache.set("a", 1);
+			cache.set("b", 2);
+
+			await new Promise((resolve) => setTimeout(resolve, 150));
+
+			const evicted = [];
+			cache.onEvict((item) => evicted.push(item.key));
+
+			const removed = cache.cleanup(true);
+			assert.equal(removed, 2);
+			assert.equal(cache.size, 0);
+			assert.deepEqual(evicted, ["a", "b"]);
+		});
+
+		it("should not fire onEvict when fireOnEvict is false (default)", async function () {
+			cache.set("a", 1);
+			cache.set("b", 2);
+
+			await new Promise((resolve) => setTimeout(resolve, 150));
+
+			const evicted = [];
+			cache.onEvict((item) => evicted.push(item.key));
+
+			const removed = cache.cleanup();
+			assert.equal(removed, 2);
+			assert.equal(cache.size, 0);
+			assert.deepEqual(evicted, []);
+		});
 	});
 
 	describe("toJSON method", function () {

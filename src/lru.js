@@ -547,9 +547,10 @@ export class LRU {
 	 * Remove expired items without affecting LRU order.
 	 * Unlike get(), this does not move items to the end.
 	 *
+	 * @param {boolean} [fireOnEvict=false] - When true, invokes the onEvict callback for each removed item.
 	 * @returns {number} Number of expired items removed.
 	 */
-	cleanup() {
+	cleanup(fireOnEvict = false) {
 		if (this.ttl === 0 || this.size === 0) {
 			return 0;
 		}
@@ -567,6 +568,13 @@ export class LRU {
 					this.#unlink(x);
 					x.prev = null;
 					x.next = null;
+					if (fireOnEvict && this.#onEvict !== null) {
+						this.#onEvict({
+							key: x.key,
+							value: x.value,
+							expiry: x.expiry,
+						});
+					}
 				}
 			}
 			x = next;

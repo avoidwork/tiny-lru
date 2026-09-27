@@ -164,7 +164,7 @@ const cache = new LRU(100, 5000);
 
 | Method                      | Description                                    |
 | --------------------------- | ---------------------------------------------- |
-| `cleanup()`                 | Remove expired items without LRU update. Returns count of removed items. |
+| `cleanup(fireOnEvict?)`     | Remove expired items without LRU update. Returns count of removed items. Pass `true` to fire `onEvict` for each removed item. |
 | `clear()`                   | Remove all items. Returns `this` for chaining. |
 | `delete(key)`               | Remove an item by key. Returns `this` for chaining. |
 | `entries(keys?)`            | Get `[key, value]` pairs. Without keys: LRU order. With keys: input array order. |

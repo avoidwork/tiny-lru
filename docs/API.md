@@ -163,14 +163,23 @@ console.log(cache.ttl); // 60000
 
 ### `cleanup()`
 
-Removes expired items without affecting LRU order. Silently removes expired items without triggering the `onEvict()` callback.
+Removes expired items without affecting LRU order. By default it silently removes expired items without triggering the `onEvict()` callback. Pass `true` to fire `onEvict()` for each removed item.
 
 ```javascript
 cache.set("a", 1).set("b", 2);
 // ... wait for items to expire
 const removed = cache.cleanup();
 console.log(removed); // 2 (number of items removed)
+
+// Fire onEvict for each purged item
+const removedWithCallback = cache.cleanup(true);
 ```
+
+**Parameters:**
+
+| Name           | Type      | Default | Description                                      |
+| -------------- | --------- | ------- | ------------------------------------------------ |
+| `fireOnEvict`  | `boolean` | `false` | When `true`, invokes `onEvict()` for each removed item. |
 
 **Returns:** `number` - Number of expired items removed
 
