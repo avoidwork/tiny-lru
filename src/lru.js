@@ -48,7 +48,7 @@ export class LRU {
 	 * @returns {LRU} The LRU instance for method chaining.
 	 */
 	clear() {
-		for (let x = this.first; x !== null; ) {
+		for (let x = this.first; x !== null;) {
 			const next = x.next;
 			x.prev = null;
 			x.next = null;
@@ -472,7 +472,7 @@ export class LRU {
 	 * @returns {LRU} The LRU instance for method chaining.
 	 */
 	forEach(callback, thisArg) {
-		for (let x = this.first; x !== null; ) {
+		for (let x = this.first; x !== null;) {
 			const next = x.next;
 			if (!this.#isExpired(x)) {
 				callback.call(thisArg, x.value, x.key, this);
@@ -557,7 +557,7 @@ export class LRU {
 
 		let removed = 0;
 
-		for (let x = this.first; x !== null; ) {
+		for (let x = this.first; x !== null;) {
 			const next = x.next;
 			if (this.#isExpired(x)) {
 				const key = x.key;
