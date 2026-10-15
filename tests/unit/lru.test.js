@@ -999,6 +999,22 @@ describe("LRU Cache", function () {
 			cache = new LRU(5, 100);
 		});
 
+		it("should keep the list intact when an item expires during cleanup", function (t) {
+			const times = [0, 50, 100, 149, 150];
+			let index = 0;
+			t.mock.method(Date, "now", () => times[index++] ?? 150);
+			cache.set("a", 1);
+			cache.set("b", 2);
+
+			assert.equal(cache.cleanup(), 1);
+			assert.equal(cache.size, 1);
+			assert.equal(cache.first, cache.items.b);
+			assert.equal(cache.last, cache.items.b);
+			assert.doesNotThrow(() => cache.evict());
+			assert.equal(cache.size, 0);
+			assert.deepEqual(Object.keys(cache.items), []);
+		});
+
 		it("should remove expired items", async function () {
 			cache.set("a", 1);
 			cache.set("b", 2);
