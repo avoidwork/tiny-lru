@@ -580,10 +580,6 @@ export class LRU {
 			x = next;
 		}
 
-		if (removed > 0) {
-			this.#rebuildList();
-		}
-
 		return removed;
 	}
 
@@ -705,39 +701,6 @@ export class LRU {
 		}
 
 		return { valid, expired, noTTL: [] };
-	}
-
-	/**
-	 * Rebuild the doubly-linked list after cleanup by deleting expired items.
-	 * This removes nodes that were deleted during cleanup.
-	 *
-	 * @private
-	 */
-	#rebuildList() {
-		if (this.size === 0) {
-			this.first = null;
-			this.last = null;
-			return;
-		}
-
-		const keys = this.keys();
-		this.first = null;
-		this.last = null;
-
-		for (let i = 0; i < keys.length; i++) {
-			const item = this.items[keys[i]];
-			if (item !== null && item !== undefined) {
-				if (this.first === null) {
-					this.first = item;
-					item.prev = null;
-				} else {
-					item.prev = this.last;
-					this.last.next = item;
-				}
-				item.next = null;
-				this.last = item;
-			}
-		}
 	}
 }
 
