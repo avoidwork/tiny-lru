@@ -3,7 +3,7 @@
  *
  * @copyright 2026 Jason Mulligan <jason.mulligan@avoidwork.com>
  * @license BSD-3-Clause
- * @version 13.1.0
+ * @version 13.1.1
  */
 /**
  * A high-performance Least Recently Used (LRU) cache implementation with optional TTL support.
@@ -55,7 +55,7 @@ class LRU {
 	 * @returns {LRU} The LRU instance for method chaining.
 	 */
 	clear() {
-		for (let x = this.first; x !== null; ) {
+		for (let x = this.first; x !== null;) {
 			const next = x.next;
 			x.prev = null;
 			x.next = null;
@@ -479,7 +479,7 @@ class LRU {
 	 * @returns {LRU} The LRU instance for method chaining.
 	 */
 	forEach(callback, thisArg) {
-		for (let x = this.first; x !== null; ) {
+		for (let x = this.first; x !== null;) {
 			const next = x.next;
 			if (!this.#isExpired(x)) {
 				callback.call(thisArg, x.value, x.key, this);
@@ -564,7 +564,7 @@ class LRU {
 
 		let removed = 0;
 
-		for (let x = this.first; x !== null; ) {
+		for (let x = this.first; x !== null;) {
 			const next = x.next;
 			if (this.#isExpired(x)) {
 				const key = x.key;
@@ -585,10 +585,6 @@ class LRU {
 				}
 			}
 			x = next;
-		}
-
-		if (removed > 0) {
-			this.#rebuildList();
 		}
 
 		return removed;
@@ -712,39 +708,6 @@ class LRU {
 		}
 
 		return { valid, expired, noTTL: [] };
-	}
-
-	/**
-	 * Rebuild the doubly-linked list after cleanup by deleting expired items.
-	 * This removes nodes that were deleted during cleanup.
-	 *
-	 * @private
-	 */
-	#rebuildList() {
-		if (this.size === 0) {
-			this.first = null;
-			this.last = null;
-			return;
-		}
-
-		const keys = this.keys();
-		this.first = null;
-		this.last = null;
-
-		for (let i = 0; i < keys.length; i++) {
-			const item = this.items[keys[i]];
-			if (item !== null && item !== undefined) {
-				if (this.first === null) {
-					this.first = item;
-					item.prev = null;
-				} else {
-					item.prev = this.last;
-					this.last.next = item;
-				}
-				item.next = null;
-				this.last = item;
-			}
-		}
 	}
 }
 
