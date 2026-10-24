@@ -25,39 +25,55 @@ The following are **strictly prohibited**:
 Follow the [OWASP Top 10](https://owasp.org/www-project-top-10/) for every piece of code written:
 
 - Avoid unsafe operations, validate inputs, prevent injection risks.
+- Never store plaintext secrets. Use `process.env` or a settings module loaded from env vars.
+- Validate and sanitize all user input.
+- All settings defaults must be production-safe.
 
 ### 1.3 Git Operations
 
 - **Never rebase under any circumstance without explicit agreement from the user.** Never assume your decision is correct.
+- **Never amend a commit.** Use additional commits instead.
 - Never force push.
+- **Skill execution is implied authorization.** When a skill is executing — standalone or as part of a chained workflow — the skill's own directives constitute the user's authorization for the git operations it performs (staging, committing, pushing, and opening a PR on the branch it created). Do not halt to request explicit agreement for these. The prohibitions above (rebase, amend, force-push) still apply and are never implied by skill execution.
 
 ### 1.4 Core Principles
 
 - **DRY (Don't Repeat Yourself)**: Extract common logic into reusable functions; avoid duplication.
+- **KISS**: Prefer simple, readable code over clever solutions.
 - **YAGNI (You Ain't Gonna Need It)**: Implement only what's needed; avoid over-engineering.
-- **SOLID**: Follow single responsibility, open/closed, and interface segregation principles.
+- **No Unneeded Refactoring**: Do not refactor working code for style, naming, or structure unless it directly addresses a bug, improves performance, or is required by the current spec.
+- **Single Responsibility**: Each module, class, and function must have one reason to change.
+- **Open/Closed**: Extend via composition — not by modifying existing logic.
+- **Dependency Inversion**: Depend on abstractions for external services.
 
 ---
 
 ## 2. Project Context
 
-### 2.0 Expected Project Layout
+`tiny-lru` is a high-performance, lightweight LRU (Least Recently Used) cache library for JavaScript with O(1) operations and optional TTL support. It is a pure in-memory cache with no network or I/O surface.
 
-`tiny-lru` is a high-performance, lightweight LRU (Least Recently Used) cache library for JavaScript with O(1) operations and optional TTL support.
+### 2.0 Expected Project Layout
 
 ```
 ├── src/lru.js          # Main LRU cache implementation
-├── tests/              # Test files
+├── tests/
+│   ├── unit/           # Unit tests (lru.test.js)
+│   └── integration/    # Integration tests
 ├── benchmarks/         # Performance benchmarks
 ├── dist/               # Built distribution files
 │   ├── tiny-lru.js     # ES Modules
 │   ├── tiny-lru.cjs    # CommonJS
-│   └── tiny-lru.min.js # Minified ESM
-├── types/              # TypeScript definitions
-├── docs/               # Documentation
+│   └── tiny-lru.min.js # Minified ESM (repo only, not shipped)
+├── types/              # TypeScript definitions (lru.d.ts)
+├── docs/               # API.md, CODE_STYLE_GUIDE.md, TECHNICAL_DOCUMENTATION.md
+├── .github/            # CI workflow, PR template, dependabot
+├── .husky/             # Pre-commit hook
 ├── rollup.config.js    # Build configuration
+├── coverage.txt        # Coverage report output
 └── package.json        # Project configuration
 ```
+
+Misc details: Source lives in `src/lru.js`. The build produces ESM, CommonJS, and minified ESM outputs via Rollup. The minified build (`dist/tiny-lru.min.js`) is available in the repo for local testing but is not shipped via npm.
 
 ### 2.1 Quick Commands
 
@@ -73,15 +89,17 @@ Follow the [OWASP Top 10](https://owasp.org/www-project-top-10/) for every piece
 
 ---
 
-## 3. Code Conventions
+## 3. JavaScript Conventions
 
 ### 3.1 Language & Tooling
 
-- **JavaScript/TypeScript**: CommonJS, ESM, and minified ESM outputs via Rollup
+- **JavaScript**: CommonJS, ESM, and minified ESM outputs via Rollup
 - **Package manager**: `npm`
+- **Type checking**: TypeScript definitions in `types/lru.d.ts`
+- **Formatting**: `oxfmt` (via `npm run fix`)
 - **Linting**: `oxlint`
-- **Formatting**: (via `npm run fix`)
 - **Testing**: Node.js built-in test runner (`node --test`)
+- **Git hooks**: `pre-commit` via Husky (manages oxfmt, oxlint, tests)
 
 ### 3.2 Style
 
@@ -89,16 +107,23 @@ Follow the [OWASP Top 10](https://owasp.org/www-project-top-10/) for every piece
 - Quotes: Double quotes
 - Semicolons: Required
 - Array constructor: Avoid `new Array()` (oxlint will warn)
+- Use `Object.create(null)` for hash maps to avoid prototype pollution
+- Use `===` and `!==` for comparisons
+- Every exported function and class method must have JSDoc with `@param` and `@returns`
 
 ### 3.3 Error Handling
 
-Not applicable — internal LRU operations should not surface errors; handle gracefully.
+Not applicable — internal LRU operations should not surface errors; handle gracefully. Constructor validation throws `TypeError` for invalid parameters (negative numbers or wrong types).
 
-### 3.4 Testing
+### 3.4 Async
+
+Not applicable — the library is synchronous. No async operations or blocking I/O.
+
+### 3.5 Testing
 
 - Framework: Node.js built-in test runner (`node --test`)
-- Tests: 149 tests across 26 suites
-- Coverage: 100% lines, 99.28% branches, 100% functions
+- Tests: 173 tests across 27 suites
+- Coverage: 100% lines, 99.40% branches, 100% functions
 - Test pattern: `tests/**/*.js`
 - All tests must pass with 100% line coverage before merging
 - Run: `npm test` (lint + tests) or `npm run coverage` for coverage report
@@ -135,14 +160,23 @@ chore: update rollup configuration
 
 ### 5.2 Branching
 
-- Main branch is `main`.
+- Main branch is `master`.
 - Feature branches: `feat/<short-desc>` or `fix/<short-desc>`.
-- Never commit directly to `main`. Always create a feature branch first, then open a PR targeting `main`.
+- Never commit directly to `master`. Always create a feature branch first, then open a PR targeting `master`.
+
+### 5.2.1 Agent Workflow
+
+When auditing or modifying AGENTS.md (or any file):
+1. Create a feature branch: `git checkout -b docs/<short-desc>` (or `feat/`, `fix/`).
+2. Make changes and commit on the feature branch.
+3. Push the feature branch and open a PR with `gh pr create --base master`.
+4. Never commit or push directly to `master`.
 
 ### 5.3 Code Review
 
-- All changes require tests to pass and maintain coverage requirements.
-- 100% line coverage is required before merging.
+- All changes require at least one other reviewer (automated checks are mandatory but not sufficient).
+- No merging without passing CI (lint → test).
+- PR descriptions must reference related items from design documents.
 
 ### 5.4 Pull Request Templates
 
@@ -152,6 +186,8 @@ If a `.github/PULL_REQUEST_TEMPLATE.md` file exists, it MUST be used when creati
 
 ## 6. Operational Rules
 
+Session learnings — critical gotchas that affect how code must be written and tested.
+
 ### 6.1 Coverage
 
 Tests must maintain **100% line coverage**. Every new function or class needs test coverage. No exceptions.
@@ -160,29 +196,37 @@ Tests must maintain **100% line coverage**. Every new function or class needs te
 npm run coverage
 ```
 
-### 6.2 Common Issues to Avoid
+Generates `coverage.txt` via `node --test --experimental-test-coverage`.
 
-- **Memory leaks**: When removing items from the linked list, always clear `prev`/`next` pointers to allow garbage collection.
-- **LRU order pollution**: Methods like `entries()` and `values()` should access items directly rather than calling `get()`, which moves items and can delete expired items mid-iteration.
-- **TTL edge cases**: Direct property access (`this.items[key]`) should be used instead of `has()` when you need to inspect expired-but-not-yet-deleted items.
-- **Dead code**: Always verify edge case code is actually reachable before adding special handling.
-- **Constructor assignment**: Use `let` not `const` for variables that may be reassigned (e.g., in `setWithEvicted`).
+### 6.2 Pre-commit Hook and coverage.txt
 
-### 6.3 Development Workflow
+The hook is `.husky/pre-commit`, installed by husky via the `prepare` npm script (`core.hooksPath` = `.husky/_`). Its body is:
 
-Source code is in `src/`.
+```
+npm run fix && npm run coverage && git add -A
+```
 
-- **install**: `npm install` — Install dependencies
-- **lint**: `npm run lint` — Check and fix linting issues with oxlint
-- **fix**: `npm run fix` — Fix linting and formatting issues
-- **build**: `npm run build` — Lint + rollup build
-- **rollup**: `npm run rollup` — Build with rollup
-- **test**: `npm run test` — Run lint and tests
-- **coverage**: `npm run coverage` — Run test suite with coverage reporting
+Because the final step is `git add -A`, files the hook regenerates — `coverage.txt`, plus anything `oxlint --fix` or `oxfmt --write` rewrote — are staged automatically, so the commit proceeds and includes them. The commit does **not** fail merely because the hook modified a file.
+
+Do not "fix" a hook-modified file by amending: §1.3 forbids amending outright. If a commit lands with content you did not intend to stage, add a follow-up commit instead.
+
+**Gotcha:** `git add -A` stages the *entire* working tree, not just what you staged before committing. Anything untracked and not gitignored gets swept into the commit. Stage selectively and check `git status` before committing, or expect unrelated files to ride along.
+
+### 6.3 Pre-commit Runs Tests
+
+The hook gates on tests indirectly: `npm run coverage` runs `node --test` across the whole suite, and `set -o pipefail` propagates a test failure through the `grep`/redirect pipeline so the commit fails. Lint failures fail the commit via `npm run fix` (oxlint exits non-zero on errors it cannot auto-fix). A commit can therefore fail on lint errors or test failures.
+
+There is no coverage *threshold* gate — the report is regenerated and committed, but no minimum is enforced. "Maintained coverage" is a review convention, not an automated check.
+
+### 6.4 Unreachable Code
+
+Code that can never execute is a smell. Remove dead code to avoid coverage gaps and confusion. Always verify edge case code is actually reachable before adding special handling.
 
 ---
 
 ## 7. Session Learnings
+
+Discovery notes about the codebase.
 
 ### 7.1 Implementation Notes
 
@@ -190,6 +234,9 @@ Source code is in `src/`.
 - TTL is stored per-item as an `expiry` timestamp; `0` means no expiration
 - `moveToEnd()` is the core method for maintaining LRU order - item is always moved to the `last` position
 - `setWithEvicted()` optimizes updates by avoiding the full `set()` path for existing keys
+- When removing items from the linked list, always clear `prev`/`next` pointers to allow garbage collection
+- Methods like `entries()` and `values()` should access items directly rather than calling `get()`, which moves items and can delete expired items mid-iteration
+- Direct property access (`this.items[key]`) should be used instead of `has()` when you need to inspect expired-but-not-yet-deleted items
 
 ---
 
