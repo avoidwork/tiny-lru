@@ -105,7 +105,11 @@ class LRU {
 	entries(keys) {
 		if (keys === undefined) {
 			const result = [];
-			this.#forEachLive((x) => result.push([x.key, x.value]));
+			for (let x = this.first; x !== null; x = x.next) {
+				if (!this.#isExpired(x)) {
+					result.push([x.key, x.value]);
+				}
+			}
 
 			return result;
 		}
@@ -295,51 +299,6 @@ class LRU {
 	}
 
 	/**
-	 * Creates and links a new item at the most recently used position.
-	 * Wires the first/last pointers and returns the created item.
-	 *
-	 * @param {string} key - The key to store.
-	 * @param {*} value - The value to store.
-	 * @returns {Object} The created and linked item.
-	 * @private
-	 */
-	#insertItem(key, value) {
-		const item = (this.items[key] = {
-			expiry: this.ttl > 0 ? Date.now() + this.ttl : this.ttl,
-			key: key,
-			prev: this.last,
-			next: null,
-			value,
-		});
-
-		if (++this.size === 1) {
-			this.first = item;
-		} else {
-			this.last.next = item;
-		}
-
-		this.last = item;
-
-		return item;
-	}
-
-	/**
-	 * Invokes a callback for each live (non-expired) item in LRU order.
-	 * Accesses items directly without calling get(), so LRU order is not
-	 * mutated and expired items are not deleted mid-iteration.
-	 *
-	 * @param {function(Object): void} callback - Function to call for each live item.
-	 * @private
-	 */
-	#forEachLive(callback) {
-		for (let x = this.first; x !== null; x = x.next) {
-			if (!this.#isExpired(x)) {
-				callback(x);
-			}
-		}
-	}
-
-	/**
 	 * Efficiently moves an item to the end of the LRU list (most recently used position).
 	 * This is an internal optimization method that avoids the overhead of the full set() operation
 	 * when only LRU position needs to be updated.
@@ -368,7 +327,11 @@ class LRU {
 	 */
 	keys() {
 		const result = [];
-		this.#forEachLive((x) => result.push(x.key));
+		for (let x = this.first; x !== null; x = x.next) {
+			if (!this.#isExpired(x)) {
+				result.push(x.key);
+			}
+		}
 
 		return result;
 	}
@@ -405,7 +368,21 @@ class LRU {
 				};
 			}
 
-			item = this.#insertItem(key, value);
+			item = this.items[key] = {
+				expiry: this.ttl > 0 ? Date.now() + this.ttl : this.ttl,
+				key: key,
+				prev: this.last,
+				next: null,
+				value,
+			};
+
+			if (++this.size === 1) {
+				this.first = item;
+			} else {
+				this.last.next = item;
+			}
+
+			this.last = item;
 		}
 
 		this.#stats.sets++;
@@ -439,7 +416,21 @@ class LRU {
 				this.evict();
 			}
 
-			item = this.#insertItem(key, value);
+			item = this.items[key] = {
+				expiry: this.ttl > 0 ? Date.now() + this.ttl : this.ttl,
+				key: key,
+				prev: this.last,
+				next: null,
+				value,
+			};
+
+			if (++this.size === 1) {
+				this.first = item;
+			} else {
+				this.last.next = item;
+			}
+
+			this.last = item;
 		}
 
 		this.#stats.sets++;
